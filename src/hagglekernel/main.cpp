@@ -45,6 +45,9 @@
 #include "XMLMetadata.h"
 #endif
 #include "SecurityManager.h"
+#ifdef ENABLE_VENDETTA_MANAGER
+#include "VendettaManager.h"
+#endif
 
 #ifdef OS_WINDOWS_MOBILE
 #include <TrayNotifier.h>
@@ -406,6 +409,9 @@ int run_haggle()
 	BenchmarkManager *bm = NULL;
 	//recreateDataStore = true;
 #endif
+#ifdef ENABLE_VENDETTA_MANAGER
+	VendettaManager *vm = NULL;
+#endif
 	ResourceManager *rm = NULL;
 #ifdef OS_WINDOWS_MOBILE
 
@@ -505,6 +511,9 @@ int run_haggle()
 		// somehow
 		db = new DebugManager(kernel, runAsInteractive);
 #endif
+#if defined(ENABLE_VENDETTA_MANAGER)
+		vm = new VendettaManager(kernel);
+#endif
 	}
 #if HAVE_EXCEPTION
 	catch(ProtocolSocket::SocketException & e) {
@@ -549,6 +558,9 @@ int run_haggle()
 		HAGGLE_ERR("Unknown exception...\n");
 	}
       fail_exception:
+#endif
+#ifdef ENABLE_VENDETTA_MANAGER
+	delete vm;
 #endif
 #ifdef BENCHMARK
 	if (!isBenchmarking) {

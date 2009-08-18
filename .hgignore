@@ -6,7 +6,6 @@ syntax: glob
 *.Plo
 *\#*
 *.DS_Store
-Makefile
 Makefile.in
 *.class
 *.so*
