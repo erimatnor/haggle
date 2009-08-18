@@ -1,0 +1,26 @@
+# Format:
+# nodename			hostname	port	mote_id	rime_address	x		y			z
+#
+# This file could have entries like this:
+#telosb_M4A7J5LZ		neon		7014	5		14:ce			-1.07	0.37	-0.0	
+#telosb_M4A7J5M7		krypton		7011	3		15:a4			-0.4	0.4		-0.0	
+#telosb_M4A7J5LY		xenon		7011	4		54:b9			-1.8	0.07	-0.0	
+
+#telosb_XBQZATXV		cooper	7014	2	43:35		0.0	0.0	0.0
+#telosb_M4A7J5M7		cooper	7016	1	15:a4		0.0	0.0	0.0
+#telosb_M4A7J5M7		10.11.1.10 5001	1	15:a4		0.0	0.0	0.0
+#telosb_M4A7J5LY		bond	7011	3	54:b9		0.0 0.0 0.0
+#telosb_M4A7J5MB		donnie	7011	4	6d:d6		0.0 0.0 0.0
+#telosb_M4A7J5M6		tyler	7014	5	2a:00		0.0 0.0 0.0
+#telosb_XBR02Z3V		hawkeye	7013	6	87:27		0.0 0.0 0.0
+#telosb_M4A7J5LZ		hawkeye	7011	7	14:ce		0.0 0.0 0.0
+#telosb_XBQZAO30		neo		7014	8	b8:3e		0.0 0.0 0.0
+#telosb_M4A7J5MC		neo		7011	9	05:a5		0.0 0.0 0.0
+
+telosb_M4A7J5M6		tyler-wifi	7011	1	2a:00	0.0 0.0 0.0
+telosb_XBQZAO3M		tyler-wifi	7014	2	89:cc	0.0	0.0	0.0
+telosb_XBQZATXV		cooper-wifi	7014	3	43:35	0.0	0.0	0.0
+telosb_M4A7J5M7		cooper-wifi	7011	4	15:a4	0.0	0.0	0.0
+telosb_XBR02YQ8		vincent-wifi	7013	5	aa:d5	0.0 0.0 0.0
+telosb_XBR02ZMJ		falken-wifi	7013	6	e9:5e	0.0 0.0 0.0
+telosb_XBR02ZO3		trogdor-wifi	7011	7	2d:26	0.0 0.0 0.0
