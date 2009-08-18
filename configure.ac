@@ -176,6 +176,14 @@ else
 
 fi
 
+AC_ARG_ENABLE([filedrop],
+AS_HELP_STRING([--disable-filedrop],[Turn off making of filedrop application]),
+[case "${enableval}" in
+  yes) filedrop=yes ;;
+  no)  filedrop=no ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --disable-filedrop]) ;;
+esac],[filedrop=yes])
+
 AC_ARG_ENABLE([media],
 AS_HELP_STRING([--enable-media],[Turn on USB media support]),
 [case "${enableval}" in
@@ -199,6 +207,14 @@ AS_HELP_STRING([--enable-ipv6],[Turn on IPv6 support]),
   no)  ipv6=no ;;
   *) AC_MSG_ERROR([bad value ${enableval} for --disable-ethernet]) ;;
 esac],[ipv6=no])
+
+AC_ARG_ENABLE([vendetta],
+AS_HELP_STRING([--disable-vendetta],[Turn off vendetta support]),
+[case "${enableval}" in
+  yes) vendettamanager=yes ;;
+  no)  vendettamanager=no ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --disable-vendetta]) ;;
+esac],[vendettamanager=yes])
 
 AC_ARG_ENABLE([bluetooth],
 AS_HELP_STRING([--disable-bluetooth],[Turn off bluetooth support]),
@@ -344,6 +360,15 @@ then
     	CPPFLAGS="${CPPFLAGS} -DENABLE_IPv6"
 fi
 
+# Check for Vendetta stuff:
+AM_CONDITIONAL(ENABLE_VENDETTA_MANAGER, [test x$vendettamanager = xyes])
+
+if test x$vendettamanager = xyes
+then
+	AC_DEFINE([ENABLE_VENDETTA_MANAGER], 1, [Vendetta support])
+    	CPPFLAGS="${CPPFLAGS} -DENABLE_VENDETTA_MANAGER"
+fi
+
 # Check for media stuff:
 AM_CONDITIONAL(ENABLE_MEDIA, [test x$have_media = xyes])
 
@@ -351,6 +376,14 @@ if test x$have_media = xyes
 then
 	AC_DEFINE([ENABLE_MEDIA], 1, [USB media support])
    	CPPFLAGS="${CPPFLAGS} -DENABLE_MEDIA"
+fi
+
+# Check for filedrop stuff:
+AM_CONDITIONAL(ENABLE_FILEDROP, [test x$have_filedrop = xyes])
+
+if test x$have_filedrop = xyes
+then
+	AC_DEFINE([ENABLE_FILEDROP], 1, [Filedrop compilation])
 fi
 
 # Setup conditionals
@@ -589,6 +622,7 @@ AC_CONFIG_FILES([Makefile
                  src/clitool/Makefile
                  src/tests/test01/Makefile
                  src/webserver/Makefile
+		 src/luckyMe/Makefile
                  src/hagglekernel/Makefile
 		 testsuite/Makefile 
 		 testsuite/test_thread/Makefile 
@@ -624,6 +658,7 @@ echo Bluetooth support.......... : $have_bluetooth
 echo Ethernet support........... : $have_ethernet
 echo IPv6 support............... : $ipv6
 echo USB media support.......... : $have_media
+echo Vendetta support........... : $vendettamanager
 
 echo
 echo "Now type make to compile"
