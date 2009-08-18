@@ -55,7 +55,6 @@ void ForwarderAsynchronous::addMetricDO(DataObjectRef &metricDO)
 #ifdef DEBUG
         //actionQueue.insert(new FP_Action(FP_print_table,NULL,NULL,NULL, NULL));
 #endif
-
 }
 
 void ForwarderAsynchronous::newNeighbor(NodeRef &neighbor)

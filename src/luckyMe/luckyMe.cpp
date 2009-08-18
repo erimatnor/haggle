@@ -82,9 +82,9 @@
 
 #define APP_NAME "LuckyMe"
 
-#define RANDOM_ORDER 30			// attribute set
-#define LUCK_INTERESTS 2		// variance of interests
-#define LUCK_ATTRS 3			// number of attributes in data objects
+#define RANDOM_ORDER 1			// attribute set
+#define LUCK_INTERESTS 0		// variance of interests
+#define LUCK_ATTRS 1			// number of attributes in data objects
 #define SEND_INTERVAL 2
 
 // ---
@@ -167,6 +167,7 @@ double fac(int n)
     return t;
 }
 
+char hostname[128];
 
 
 /* 
@@ -175,7 +176,7 @@ double fac(int n)
  */
 void createInterest() 
 {
-	int i = 0;
+	unsigned int i = 0;
 	char luckAttrValue[32];
 	struct attributelist *attrList = haggle_attributelist_new();
 	struct attribute *attr = 0;
@@ -195,28 +196,28 @@ void createInterest()
 	// use binomial distribution to approximate normal distribution (sum of weights = 100)
 	// mean = np = luck, variance = np(1-p) = LUCK_INTERESTS
 	double p = 0.5;
-	unsigned int n = 4 * sqrt((double)LUCK_INTERESTS);
-	unsigned int u = n * p;
+	unsigned int n = 0; // (unsigned int)(4 * sqrt((double)LUCK_INTERESTS));
+	unsigned int u = 0; // (unsigned int)(n * p);
 	
 	printf("luck=%ld \n", luck);
-	printf("binomial distribution  n=%ld, p=%f\n", n, p);
+	printf("binomial distribution  n=%d, p=%f\n", n, p);
 	
 	unsigned int sum_weight = 0;
 	unsigned int interest = 0;
 	for (i = 0; i <= n; i++) {
 		interest = (luck + i - u + RANDOM_ORDER) % RANDOM_ORDER;
-		weight = 100 * fac(n)/(fac(n-i)*fac(i))*pow(p,i)*pow(1-p,n-i);
+		weight = (unsigned int)(100 * fac(n)/(fac(n-i)*fac(i))*pow(p,i)*pow(1-p,n-i));
 		sum_weight += weight;
 		if (weight > 0) {
-			printf("interest: %ld, %d\n", interest, weight);
+			printf("interest: %d, %d\n", interest, weight);
 			interests[interest] = weight;
-			sprintf(luckAttrValue, "%ld", interest);
+			sprintf(luckAttrValue, "%d", interest);
 			attr = haggle_attribute_new_weighted(APP_NAME, luckAttrValue, weight);
 			haggle_attributelist_add_attribute(attrList, attr);
 		}
 	}
 	
-	printf("sum weights %ld\n", sum_weight);
+	printf("sum weights %d\n", sum_weight);
 	
 	haggle_ipc_add_application_interests(haggleHandle, attrList);
 }
@@ -232,8 +233,12 @@ void createDataobject()
 {
 	int i = 0;
 	char luckAttrValue[32];
+	char objectId[256];
 	struct dataobject *dObj = haggle_dataobject_new();
-	
+	static int count = 0;
+
+	haggle_dataobject_add_attribute(dObj, "Picture", "lancaster");
+
 	haggle_dataobject_add_attribute(dObj, "Picture", "lancaster");
 
 	// todo: get three unique attributes
@@ -241,7 +246,9 @@ void createDataobject()
 		sprintf(luckAttrValue, "%ld", random() % RANDOM_ORDER);
 //		haggle_dataobject_add_attribute(dObj, APP_NAME, luckAttrValue);
 	}
-	
+	// add attribute to have unique dataobjects
+	sprintf(objectId, "%s-%d", hostname, count++);
+ 	haggle_dataobject_add_attribute(dObj, "objectId", objectId);
 	haggle_ipc_publish_dataobject(haggleHandle, dObj);
 }
 
@@ -268,7 +275,7 @@ void onDataobject(struct dataobject *dObj, void* nix)
 		if (!strcmp(attr_name, APP_NAME)) {
 			attr_value = atoi(haggle_attribute_get_value(attr));
 			ResultString << attr_value << " ";
-			printf("%ld[%ld] ", attr_value, interests[attr_value]);
+			printf("%d[%d] ", attr_value, interests[attr_value]);
 		
 			sum += interests[attr_value];
 		}
@@ -276,7 +283,7 @@ void onDataobject(struct dataobject *dObj, void* nix)
 	ResultString << " - " << sum;
 	ResultString << "<br/>";
 	
-	printf("luck: %ld\n", sum);
+	printf("luck: %d\n", sum);
 	
 	mutex_unlock(&mutex);
 	
@@ -553,6 +560,9 @@ int wmain()
 #endif
 		mutex_init(&mutex);
 		
+
+		gethostname(hostname, 128);
+
 		// libhaggle will initialize winsock for us
 		if(haggle_handle_get(APP_NAME, &haggleHandle) != HAGGLE_NO_ERROR) {
 			goto done;
