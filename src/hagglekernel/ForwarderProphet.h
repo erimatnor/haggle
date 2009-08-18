@@ -42,10 +42,10 @@ typedef Map<prophet_forwarding_id, double> prophet_metric_table;
 */
 class ForwarderProphet : public ForwarderAsynchronous {
 // Age every 10 minutes:
-#define PROPHET_TIME_BETWEEN_AGING	(10*60)
+#define PROPHET_TIME_BETWEEN_AGING	(10*60*60)
 
 // Aging constant:
-#define PROPHET_AGING_CONSTANT	(0.1)
+#define PROPHET_AGING_CONSTANT	(0.95)
 
 // Initialization constant:
 #define PROPHET_INITIALIZATION_CONSTANT	(0.5)
