@@ -1,0 +1,2 @@
+#!/bin/bash
+make && java -classpath classes Forwarding.Main

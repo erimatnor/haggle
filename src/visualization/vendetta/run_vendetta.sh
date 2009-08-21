@@ -1,3 +1,2 @@
 #!/bin/bash
-
-java -cp classes vendetta.Vendetta $*
+make && java -cp classes vendetta.Vendetta $*
