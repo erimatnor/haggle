@@ -380,25 +380,14 @@ void NodeManager::onReceiveNodeDescription(Event *e)
 	DataObjectRef dObj = e->getDataObject();
 
 	NodeRef node = NodeRef(new Node(NODE_TYPE_PEER, dObj), "NodeFromNodeDescription");
-
-	/* FIXME:
-		Here we should ideally check if the received node description comes from 
-		a neighbor by checking the receive interface against the interfaces
-		listed in the node description. If the interface is not in the node
-		description, we must have received the node description via a third party.
-
-		However, a problem is that receive interfaces are currently not properly 
-		reported for Ethernet and WiFi.
-
-	*/
+	
 	if (!node) {
 		HAGGLE_DBG("Could not create node from metadata!\n");
 		return;
 	}
-
+	
 	HAGGLE_DBG("Node description data object %s, refcount=%d\n", dObj.getName(), dObj.refcount());
 	HAGGLE_DBG("Node description from node with id=%s\n", node->getIdStr());
-	HAGGLE_DBG("My id is %s\n", kernel->getThisNode()->getIdStr());
 	
 	if (node == kernel->getThisNode()) {
 		HAGGLE_ERR("Node description is my own. Ignoring and deleting from data store\n");
@@ -406,12 +395,27 @@ void NodeManager::onReceiveNodeDescription(Event *e)
 		kernel->getDataStore()->deleteDataObject(dObj);
 		return;
 	}
-	// Retrieve any existing node description data objects for the node described
-	// by the received node description
+	
+	// Make sure at least the interface of the remote node is set to up
+	// this 
+	if (dObj->getRemoteInterface()) {
+		// Mark the interface as up in the node.
+		node->setInterfaceUp(dObj->getRemoteInterface());
+		
+		if (node->hasInterface(dObj->getRemoteInterface())) {			
+		} else {
+			// Node description was received from a third party
+		}
+	} else {
+		HAGGLE_DBG("Node description data object has no remote interface\n");
+	}
+	
+	// The received node description may be older than one that we already have stored. Therefore, we
+	// need to retrieve any stored node descriptions before we accept this one.
 	char filterString[255];
 	sprintf(filterString, "%s=%s", NODE_DESC_ATTR, node->getIdStr());
-	Filter *f = new Filter(filterString, 0); 
-	kernel->getDataStore()->doFilterQuery(f, onRetrieveNodeDescriptionCallback);
+	
+	kernel->getDataStore()->doFilterQuery(new Filter(filterString, 0), onRetrieveNodeDescriptionCallback);
 }
 
 /* 
@@ -490,11 +494,14 @@ void NodeManager::onRetrieveNodeDescription(Event *e)
 		delete qr;
 		return;
 	} 
-	HAGGLE_DBG("Received fresh node description -- creating node: createTime %s receiveTime %s\n", 
-		   dObj->getCreateTime().getAsString().c_str(), receiveTime.getAsString().c_str());
-
+	
 	NodeRef node = NodeRef(new Node(NODE_TYPE_PEER, dObj));
-
+	
+	HAGGLE_DBG("New node description from node %s -- creating node: createTime %s receiveTime %s\n", 
+		   node->getName().c_str(), 
+		   dObj->getCreateTime().getAsString().c_str(), 
+		   receiveTime.getAsString().c_str());
+		
 	// insert node into DataStore
 	kernel->getDataStore()->insertNode(node);
 	
@@ -502,23 +509,57 @@ void NodeManager::onRetrieveNodeDescription(Event *e)
 	
 	// See if this node is already an active neighbor but in an uninitialized state
 	if (kernel->getNodeStore()->update(node, &nl)) {
-		HAGGLE_DBG("Node was updated in neighbor list\n", node->getIdStr());
+		HAGGLE_DBG("Neighbor node %s - %s was updated in node store\n", 
+			   node->getName().c_str(), node->getIdStr());
+		kernel->addEvent(new Event(EVENT_TYPE_NODE_UPDATED, node, nl));
 	} else {
-		HAGGLE_DBG("Node %s not previously neighbor... Adding to neighbor list\n", node->getIdStr());
-
+		// This is the path for node descriptions received via a third party, i.e.,
+		// the node description does not belong to the neighbor node we received it
+		// from.
+		
+		// NOTE: in reality, we should never get here for node descriptions belonging to neighbor nodes. 
+		// This is because a node (probably marked as 'undefined') should have been 
+		// added to the node store when we got an interface up event just before the node description
+		// was received (the interface should have been discovered or 'snooped').
+		// Thus, the getNodeStore()->update() above should have succeeded. However,
+		// in case the interface discovery somehow failed, there might not be a
+		// neighbor node in the node store that matches the received node description.
+		// Therefore, we might get here for neighbor nodes as well, but in that case
+		// there is not much more to do until we discover the node properly
+		
+		HAGGLE_DBG("Got a node description for node %s - %s, which is not a previously discovered neighbor.\n", 
+			   node->getName().c_str(), node->getIdStr());
+		
+		// Sync the node's interfaces with those in the interface store. This
+		// makes sure all active interfaces are marked as 'up'.
+		node.lock();
+		const InterfaceRefList *ifl = node->getInterfaces();
+		
+		for (InterfaceRefList::const_iterator it = ifl->begin(); it != ifl->end(); it++) {
+			if (kernel->getInterfaceStore()->stored(*it)) {
+				node->setInterfaceUp(*it);
+			}
+		}
+		node.unlock();
+		
 		if (node->isAvailable()) {
 			// Add node to node store
+			HAGGLE_DBG("Node %s - %s was a neighbor -- adding to node store\n", 
+				   node->getName().c_str(), node->getIdStr());
+			
 			kernel->getNodeStore()->add(node);
 		
-			// Tell anyone that may wish to know:
-			// FIXME: Is this really necessary here since NODE_CONTACT_NEW is
-			// also generated by onRetrieveNode whenever a new neigbhor interface goes
-			// up?
+			// We generate both a new contact event and an updated event because we
+			// both 'discovered' the node and updated its node description at once.
+			// In most cases, this should never really happen (see not above).
 			kernel->addEvent(new Event(EVENT_TYPE_NODE_CONTACT_NEW, node));
+			kernel->addEvent(new Event(EVENT_TYPE_NODE_UPDATED, node, nl));
+
+		} else {
+			HAGGLE_DBG("Node %s - %s had no active interfaces, not adding to store\n", 
+				   node->getName().c_str(), node->getIdStr());
 		}
 	}
-	
-	kernel->addEvent(new Event(EVENT_TYPE_NODE_UPDATED, node, nl));
 	
 	delete qr;
 }
