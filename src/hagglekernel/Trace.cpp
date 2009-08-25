@@ -25,7 +25,8 @@ Trace Trace::trace;
 Trace::Trace(TraceType_t _type, bool _enabled) :
 	type(_type), traceFile(NULL), startTime(Timeval::now()), enabled(_enabled)
 {
-       	set_trace_timestamp_base(startTime.getTimevalStruct());
+        printf("Trace constructor\n");
+	set_trace_timestamp_base(startTime.getTimevalStruct());
 }
 
 Trace::~Trace()
@@ -174,7 +175,7 @@ LogTrace::LogTrace(void)
 	traceFile = fopen(filename.c_str(), "a");
 
 	if (traceFile) {
-		addToLog("\n\n%s: Log started, fd=%d\n", Timeval::now().getAsString().c_str(), fileno(traceFile));
+		addToLog("\n\n%s: Log started\n", Timeval::now().getAsString().c_str());
 	} else {
 		fprintf(stderr,"Unable to open log file!\n");
 	}

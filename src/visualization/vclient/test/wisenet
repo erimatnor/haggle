@@ -1,0 +1,20 @@
+<PING_INTERVALL>
+	1000
+</PING_INTERVALL>
+
+<UDP_TIMEOUT>
+	6666
+</UDP_TIMEOUT>
+
+<LOGPARSER>
+	vclient.overlays.wisenet.WisenetParser
+</LOGPARSER>
+
+<LOGEVENT>
+	type=LE_ALL
+	method=send_plain
+	regexp=.*
+	net=tcp
+</LOGEVENT>
+
+

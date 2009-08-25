@@ -1,0 +1,77 @@
+# Parser for logevents from monitor nodes
+<MONITORED_NETWORK>
+	vendetta.monitored_network.tutorial.PingNetwork
+</MONITORED_NETWORK>
+
+<PORT>
+	4444
+</PORT>
+
+<BUFFERSIZE>
+	0
+</BUFFERSIZE>
+
+<BGCOLOR>
+	255
+</BGCOLOR>
+
+
+#<PROXY>
+#	address=10.11.1.6
+#	port_up=5000
+#	port_down=5051
+#</PROXY>
+
+<TABLECOLUMN>
+	Alive
+    Node IP
+	Node port
+</TABLECOLUMN>
+
+<CANVAS>
+	vendetta.visualization.canvases.FloorCanvas
+</CANVAS>
+
+<NODECMD>
+    label=Reboot
+    type=EXEC
+    msg=ssh <NODE_HOSTNAME> reboot
+</NODECMD>
+
+<TESTBEDCMD>
+	label=Start broadcast PING (.6)
+	type=TCP
+	msg=CTRL_NET_UP_REQ args=-i args=0.8 args=10.11.1.6
+</TESTBEDCMD>
+
+<TESTBEDCMD>
+	label=Start broadcast PING (.10)
+	type=TCP
+	msg=CTRL_NET_UP_REQ args=-i args=0.8 args=10.11.1.10
+</TESTBEDCMD>
+
+<TESTBEDCMD>
+	label=Stop broadcast PING
+	type=TCP
+	msg=CTRL_NET_DOWN_REQ
+</TESTBEDCMD>
+
+<LOGFILTER>
+    Received messages:LE_RECVD
+</LOGFILTER>
+
+<SCPCOMMAND>
+	scp -r frederik@<NODE_HOSTNAME>:/home/uppsala_kademlia/vclient/logs ./nodelogs/<NODE_HOSTNAME>
+</SCPCOMMAND>
+
+<SSHCOMMAND>
+	xterm -e 'ssh -t -l root <NODE_HOSTNAME>'
+</SSHCOMMAND>
+
+#<SSHCOMMAND_SHOWLOG>
+#	xterm -T 'vclient output on <NODE_HOSTNAME>' -e 'ssh -t -l root <NODE_HOSTNAME> tail -f /var/log/vclient.log'
+#</SSHCOMMAND_SHOWLOG>
+
+<NODEFILE>
+	nodes.txt
+</NODEFILE>
