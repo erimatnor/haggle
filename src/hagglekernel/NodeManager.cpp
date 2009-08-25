@@ -187,13 +187,6 @@ int NodeManager::sendNodeDescription(NodeRef neigh)
 	if (thumbnail != NULL)
 		dObj->setThumbnail(thumbnail, thumbnail_size);
 	
-#ifdef CHANGE_NODEDESCRIPTION_CREATETIME_WHEN_SENDING
-	/*
-		For testing purposes. To test the difference when setting the create 
-		time whenever the data object is sent and whenever it actually changes.
-	*/
-	dObj->setCreateTime();
-#endif
 	HAGGLE_DBG("Sending node description to \'%s\'\n", neigh->getName().c_str());
 	kernel->addEvent(new Event(EVENT_TYPE_DATAOBJECT_SEND, dObj, neigh));
 	
