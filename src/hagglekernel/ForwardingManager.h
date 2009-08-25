@@ -48,6 +48,7 @@ class ForwardingManager : public Manager
 	
 	forwardingList forwardedObjects;
 	Forwarder *forwardingModule;
+	EventType forwardingObjectEType;
 	List<NodeRef> nodeQueryList;
         // See comment in ForwardingManager.cpp about isNeighbor()
         bool isNeighbor(NodeRef& node);
@@ -65,6 +66,7 @@ public:
 	void onNodeQueryResult(Event *e);
 	void onNodeUpdated(Event *e);
 	void onNewDataObject(Event *e);
+	void onForwardingDataObject(Event * e);
 	void onNewNeighbor(Event *e);
 	void onEndNeighbor(Event *e);
 	void onForwardDobjsCallback(Event *e);
