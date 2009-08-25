@@ -16,6 +16,7 @@
 #include <libcpphaggle/Platform.h>
 #include "ForwardingManager.h"
 #include "ForwarderEmpty.h"
+#include "ForwarderEpidemic.h"
 #include "ForwarderProphet.h"
 
 ForwardingManager::ForwardingManager(HaggleKernel * _kernel) :
@@ -47,7 +48,11 @@ ForwardingManager::ForwardingManager(HaggleKernel * _kernel) :
 	forwardDobjCallback = newEventCallback(onForwardDobjsCallback);
 	forwardRepositoryCallback = newEventCallback(onForwardRepositoryCallback);
 
+#ifdef FORCE_FORWARDER_EMPTY
+	forwardingModule = new ForwarderEmpty(this);
+#else
 	forwardingModule = new ForwarderProphet(this);
+#endif
 	kernel->getDataStore()->readRepository(new RepositoryEntry("ForwardingManager", "Forwarder state"), forwardRepositoryCallback);
 	
 	kernel->getDataStore()->doFilterQuery(new Filter("Forward=*"), forwardDobjCallback);
@@ -60,6 +65,10 @@ ForwardingManager::ForwardingManager(HaggleKernel * _kernel) :
 #endif
 
 	sendMetricCallback = newEventCallback(onSendMetric);
+
+	// HACK: Register filter for forwarding data objects
+	registerEventTypeForFilter(forwardingObjectEType,
+		"ForwardingManager Filter Event", onForwardingDataObject, "Forward=*");
 }
 
 ForwardingManager::~ForwardingManager()
@@ -96,6 +105,8 @@ ForwardingManager::~ForwardingManager()
 
 void ForwardingManager::onShutdown()
 {
+	// Remove the forwarding data objects filter from the data store:
+	unregisterEventTypeForFilter(forwardingObjectEType);
 	// Store the forwarding module's state in the data store:
 	RepositoryEntryRef insertState(new RepositoryEntry("ForwardingManager", "Forwarder state",
 				forwardingModule->getEncodedState().c_str()), "Forwarder state insertion entry");
@@ -594,6 +605,10 @@ void ForwardingManager::findMatchingDataObjectsAndTargets(NodeRef& node)
 	kernel->getDataStore()->doDataObjectQuery(node, 1, dataObjectQueryCallback);
 }
 
+void ForwardingManager::onForwardingDataObject(Event * e)
+{
+	
+}
 
 void ForwardingManager::onNewDataObject(Event * e)
 {

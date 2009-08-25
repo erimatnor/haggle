@@ -3170,21 +3170,25 @@ int SQLDataStore::_dump(const EventCallback<EventHandler> *callback)
         char *dump;
         int xmlLen;
         
-        if (!callback)
+        if (!callback) {
+                HAGGLE_ERR("Invalid callback\n");
                 return -1;
-        
+        }
         doc = dumpToXML();
         
-        if (!doc)
+        if (!doc) {
+                HAGGLE_ERR("ERROR: Dump to XML failed\n");
                 return -2;
-
+        }
 	xmlDocDumpFormatMemory(doc, (xmlChar **)&dump, &xmlLen, 1);
 
         xmlFreeDoc(doc);
 
-	if (xmlLen < 0)
+	if (xmlLen < 0) {
+                HAGGLE_ERR("ERROR: xmlLen is less than zero...\n");
                 return -3;
-        
+        }
+
         kernel->addEvent(new Event(callback, new DataStoreDump(dump, xmlLen)));
 	
 	return xmlLen;
