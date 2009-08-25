@@ -1,0 +1,11 @@
+#!/bin/sh
+
+HOST=radon-wifi
+
+DEST=`ssh root@$HOST mktemp /tmp/capture.XXXXXX`
+scp /tmp/Capture.jpg root@$HOST:$DEST
+ssh root@$HOST "rm -f /tmp/wisenet.jpg ; ln -s $DEST /tmp/wisenet.jpg"
+OLD=`ssh root@$HOST cat /tmp/old`
+ssh root@$HOST rm -f $OLD
+ssh root@$HOST "echo \"$DEST\" > /tmp/old"
+#ssh root@$HOST mv /tmp/capture.jpg /opt/picpush/wisenet.jpg
