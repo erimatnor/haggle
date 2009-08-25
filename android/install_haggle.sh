@@ -54,7 +54,7 @@ if [ -f $DEVICE_FILES_DIR/adhoc.sh ]; then
 	$ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
 	$ADB -s $dev shell chmod 775 $DATA_DIR/adhoc.sh
 	$ADB -s $dev shell su -c mkdir /data/haggle
-	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
     done
 fi
 
