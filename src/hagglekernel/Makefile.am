@@ -90,6 +90,7 @@ EXTRA_DIST= Attribute.h \
 	ConnectivityMedia.h \
 	Forwarder.h \
 	ForwarderEmpty.h \
+	ForwarderEpidemic.h \
 	ForwarderProphet.h \
 	ForwarderAsynchronous.h \
 	DataManager.h \
@@ -144,6 +145,17 @@ EXTRA_DIST= Attribute.h \
 
 
 LDFLAGS:=-L../utils/ -L../libcpphaggle -lhaggleutils -lcpphaggle -lm -lxml2 -lcrypto
+
+if ENABLE_VENDETTA_MANAGER
+libhagglekernel_a_SOURCES +=  \
+	VendettaManager.cpp \
+	VendettaAsynchronous.cpp \
+	VendettaClient.cpp
+EXTRA_DIST +=  \
+	VendettaManager.h \
+	VendettaAsynchronous.h \
+	VendettaClient.h
+endif
 
 if HAVE_EXCEPTION
 CXXFLAGS +=-DHAVE_EXCEPTION=1
