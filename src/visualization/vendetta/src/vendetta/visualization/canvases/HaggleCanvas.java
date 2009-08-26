@@ -12,8 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-import javax.media.j3d.J3DGraphics2D;
-import java.awt.Rectangle;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
@@ -24,13 +22,9 @@ import vendetta.Vendetta;
 import vendetta.vconfig.VConfigReader;
 import vendetta.vconfig.VSettings;
 
-import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
-import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
-import com.sun.j3d.utils.behaviors.mouse.MouseWheelZoom;
-import com.sun.j3d.utils.image.TextureLoader;
 import vendetta.monitored_network.haggle.*;
 
-public class HaggleCanvas extends Vendetta3DCanvas implements MouseWheelListener {
+public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
     
 	public static final double default_line_width = 0.005;
 	public static final boolean showOutline = true;
@@ -241,7 +235,7 @@ public class HaggleCanvas extends Vendetta3DCanvas implements MouseWheelListener
 		rootWindow = null;
 		
 		clear();
-		setDoubleBufferEnable(true);
+		//setDoubleBufferEnable(true);
 		mouseNode = null;
 		mousePoint = null;
 		mouseAction = 0;
@@ -1240,9 +1234,10 @@ public class HaggleCanvas extends Vendetta3DCanvas implements MouseWheelListener
 		ds.popBounds();
 	}
 	
-    public synchronized void postRender()
+	// FIXME: RENAME!
+    public synchronized void paint(Graphics g)
     {
-		super.postRender();
+		//super.postRender();
 		
 		if(try_report_nodes)
 		{
@@ -1256,7 +1251,7 @@ public class HaggleCanvas extends Vendetta3DCanvas implements MouseWheelListener
 		}
 		
 		// Create drawing surface:
-		DrawingSurface ds = new DrawingSurface(getGraphics2D(),getBounds());
+		DrawingSurface ds = new DrawingSurface((Graphics2D) g,getBounds());
 		
 		// Get an array with all the nodes:
 		SensorNode[] node = getNodes();

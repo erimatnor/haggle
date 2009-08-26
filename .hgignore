@@ -99,3 +99,4 @@ src/visualization/siteManager/classnoinst.stamp
 src/visualization/vclient/fake_monitor
 src/visualization/vclient/vclient
 src/visualization/vendetta/classnoinst.stamp
+src/visualization/vendetta/log/logfile.txt

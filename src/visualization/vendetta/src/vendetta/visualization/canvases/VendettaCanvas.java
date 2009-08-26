@@ -25,23 +25,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.GraphicsEnvironment;
-import javax.media.j3d.GraphicsConfigTemplate3D;
+import java.awt.GraphicsConfigTemplate;
+
+import java.awt.Canvas;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import javax.media.j3d.Background;
-import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Canvas3D;
-import javax.media.j3d.GraphicsContext3D;
-import javax.media.j3d.ImageComponent;
-import javax.media.j3d.ImageComponent2D;
-import javax.media.j3d.PickRay;
-import javax.media.j3d.Raster;
-import javax.media.j3d.SceneGraphPath;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
 import javax.swing.Timer;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
@@ -56,7 +46,6 @@ import vendetta.visualization.shapes.NodeSphere;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
-import com.sun.j3d.utils.universe.SimpleUniverse;
 
 /**
  * The base class for visualization canvases.
@@ -67,18 +56,13 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
  * 
  * @version $Id$
  */
-public abstract class Vendetta3DCanvas extends Canvas3D {
+public abstract class VendettaCanvas extends Canvas {
 	protected static final Log LOG = Log.getInstance("Canvas");
-	protected final static BoundingSphere INF =
-		new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 1000.0f);
 	
 	public static String SCREENSHOT_FILE = "/tmp/Capture.jpg";
 	public static String SCREENSHOT_CMD = "scripts/wisenet/copy_screenshot";
 	public static int SCREENSHOT_TIME = 60 * 1000;
 
-	protected SimpleUniverse su;
-	protected BranchGroup branchRoot = null;
-	protected TransformGroup objTrans;
 	protected String name = "noname";
 	protected int id;
 
@@ -93,19 +77,17 @@ public abstract class Vendetta3DCanvas extends Canvas3D {
 	private boolean doScreenshotNow = false;
 
 	/**
-	 * Create a new Vendetta3DCanvas.
+	 * Create a new VendettaCanvas.
 	 * 
 	 * @param config Configuration for the Canvas3D
 	 * @param w Width of the canvas
 	 * @param h Height of the canvas
 	 */
-	public Vendetta3DCanvas() {
-		super(GraphicsEnvironment.getLocalGraphicsEnvironment().
-		      getDefaultScreenDevice().getBestConfiguration(new GraphicsConfigTemplate3D()));
+	public VendettaCanvas() {
 		
 		addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
-				Vendetta3DCanvas.this.mousePressed(e);
+				VendettaCanvas.this.mousePressed(e);
 			}
 		});
 	}
@@ -167,53 +149,10 @@ public abstract class Vendetta3DCanvas extends Canvas3D {
 	public void toggleSleepMode(boolean state) { }
 
 	/**
-	 * Create the scene graph and root for this canvas.
-	 *  
-	 * @param id
-	 */
-	protected void createSceneGraph(int id) {
-		if (branchRoot != null) {
-			LOG.error("BranchRoot already exists");
-			return;
-		}
-		this.id = id;
-
-		branchRoot = new BranchGroup();
-
-		Background vBackground = new Background(new Color3f(Vendetta.bgColor));
-		vBackground.setApplicationBounds(INF);
-		branchRoot.addChild(vBackground);
-	}
-
-	/**
-	 * Create and initiate the universe and scenegraph.
-	 */
-	public void createUniverse(int id) {
-		su = new SimpleUniverse(this);
-		LOG.info("Creating SceneGraph: " + name);
-		createSceneGraph(id);
-	}
-
-	/**
 	 * Get the name of this canvas.
 	 */
 	public String getName() {
 		return name;
-	}
-
-	/**
-	 * Adds a BranchGroup to the scenegraph, eg a line representing a lookup.
-	 */
-	public void addBranchGroup(BranchGroup bg) {
-		objTrans.addChild(bg);
-	}
-
-	/**
-	 * Remove a BranchGroup from the scenegraph.
-	 * @param bg
-	 */
-	public void removeBranchGroup(BranchGroup bg) {
-		objTrans.removeChild(bg);
 	}
 
 	/**
@@ -224,33 +163,6 @@ public abstract class Vendetta3DCanvas extends Canvas3D {
 	 * @param e
 	 */
 	protected void mousePressed(MouseEvent e) {
-		Point3d eyePos = new Point3d();
-		Point3d mousePos = new Point3d();
-
-		getCenterEyeInImagePlate(eyePos);
-		getPixelLocationInImagePlate(e.getX(), e.getY(), mousePos);
-
-		Transform3D motion = new Transform3D();
-		getImagePlateToVworld(motion);
-		motion.transform(eyePos);
-		motion.transform(mousePos);
-
-		Vector3d direction = new Vector3d(mousePos);
-		direction.sub(eyePos);
-
-		SceneGraphPath[] paths = branchRoot.pickAll(new PickRay(eyePos,
-				direction));
-
-		if (paths != null) {
-			/*
-			 * Only select one to avoid problems with dragging spheres that lie
-			 * ontop of each other.
-			 */
-			MonitorNode[] selected = new MonitorNode[1];
-			NodeSphere picked = (NodeSphere) paths[0].getNode(0);
-			selected[0] = picked.getOwner();
-			Vendetta.selectNodes(selected, true);
-		}
 	}
 	
 	/**
@@ -267,7 +179,7 @@ public abstract class Vendetta3DCanvas extends Canvas3D {
 			screenshotTimer = new Timer(SCREENSHOT_TIME, new ActionListener() {
 				public void actionPerformed(ActionEvent ae) {
 					doScreenshotNow = true;
-					Vendetta3DCanvas.this.repaint();
+					VendettaCanvas.this.repaint();
 				}
 			});
 			screenshotTimer.start();
@@ -276,52 +188,13 @@ public abstract class Vendetta3DCanvas extends Canvas3D {
 			 * Trigger the first screenshot now ...
 			 */
 			doScreenshotNow = true;
-			Vendetta3DCanvas.this.repaint();
+			VendettaCanvas.this.repaint();
 		} else {
 			if (screenshotTimer != null)
 				screenshotTimer.stop();
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.media.j3d.Canvas3D#postSwap()
-	 */
-	public void postSwap() {
-		if (doScreenshotNow && SCREENSHOT_FILE != null) {
-			int width = this.getWidth();
-			int height = this.getHeight();
-
-			GraphicsContext3D ctx = getGraphicsContext3D();
-			// The raster components need all be set!
-			Raster ras = new Raster(new Point3f(-1.0f, -1.0f, -1.0f),
-					Raster.RASTER_COLOR, 0, 0, width, height,
-					new ImageComponent2D(ImageComponent.FORMAT_RGB,
-							new BufferedImage(width, height,
-									BufferedImage.TYPE_INT_RGB)), null);
-
-			ctx.readRaster(ras);
-
-			// Now strip out the image info
-			BufferedImage img = ras.getImage().getImage();
-
-			// write that to disk....
-			try {
-				FileOutputStream out = new FileOutputStream(SCREENSHOT_FILE);
-				JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-				JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(img);
-				param.setQuality(0.5f, false); // 70% quality JPEG
-				encoder.setJPEGEncodeParam(param);
-				encoder.encode(img);
-				doScreenshotNow = false;
-				out.close();
-
-				Runtime.getRuntime().exec(SCREENSHOT_CMD);
-			} catch (IOException e) {
-				LOG.error("I/O exception: ", e);
-			}
-		}
-	}
-	
 	public void setShowDODOLinks(boolean yes)
 	{
 	

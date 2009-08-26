@@ -10,9 +10,6 @@ package vendetta.monitored_network.haggle;
 
 import vendetta.util.log.Log;
 
-import javax.media.j3d.J3DGraphics2D;
-import java.awt.Rectangle;
-import java.awt.Polygon;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;
@@ -22,7 +19,7 @@ import java.awt.image.*;
 public class DrawingSurface {
 	private static Log LOG = Log.getInstance("Attribute");
 	
-	private J3DGraphics2D g;
+	private Graphics2D g;
 	private Font baseFont;
 	private FontMetrics baseFontMetrics;
 	private AffineTransform baseTransform;
@@ -139,7 +136,7 @@ public class DrawingSurface {
 		return null;
 	}
 	
-	public DrawingSurface(J3DGraphics2D g, Rectangle r)
+	public DrawingSurface(Graphics2D g, Rectangle r)
 	{
 		this.g = g;
 		baseFont = g.getFont();
@@ -160,19 +157,6 @@ public class DrawingSurface {
 	
 	public void flush()
 	{
-		g.flush(true);
-		/*
-			On Mac OS X, the graphics context _should_ be disposed, or drawing
-			will become slower and slower...
-			
-			On (one or more) Linuxes, the graphics context _should_not_ be 
-			disposed, or the Java VM will CRASH!
-		*/
-		if(System.getProperty("os.name").equals("Mac OS X"))
-		{
-			g.dispose();
-			g = null;
-		}
 	}
 	
 	public double getHeight()

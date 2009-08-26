@@ -56,7 +56,7 @@ import vendetta.gui.vtable.VTable;
 import vendetta.gui.vtable.VTableModel;
 import vendetta.util.log.Log;
 import vendetta.vconfig.VSettings;
-import vendetta.visualization.canvases.Vendetta3DCanvas;
+import vendetta.visualization.canvases.VendettaCanvas;
 import vendetta.monitored_network.haggle.DataObject;
 
 /**
@@ -75,7 +75,7 @@ public class GUI extends JFrame implements ActionListener,
 	private static final int TEXTAREA_HEIGHT = 75;
 
 	private VTextArea textArea = new VTextArea();
-	private Vendetta3DCanvas[] canvases;
+	private VendettaCanvas[] canvases;
 	private VTable table;
 	private VTableModel tableModel;
 	private JButton button_close = new JButton("Exit");
@@ -130,7 +130,7 @@ public class GUI extends JFrame implements ActionListener,
 		setJMenuBar(menuBar);
 		initWindow(nodes, tableColNames, vsettings, mode);
 		splash.setStep("Loading Canvases");
-		if (!init3DGraphics(vsettings.getSetting("CANVAS"))) {
+		if (!initGraphics(vsettings.getSetting("CANVAS"))) {
 			System.err.println("Unable to init canvases.");
 			System.exit(1);
 		}
@@ -154,7 +154,7 @@ public class GUI extends JFrame implements ActionListener,
 		}
 	}
 
-	public Vendetta3DCanvas getCanvas(int i) {
+	public VendettaCanvas getCanvas(int i) {
 		return canvases[i];
 	}
 	
@@ -360,16 +360,15 @@ public class GUI extends JFrame implements ActionListener,
 	}
 
 	/** Initiate the graphic Canvases */
-	public boolean init3DGraphics(String[] canvasNames) {
+	public boolean initGraphics(String[] canvasNames) {
 		//		int globeWidth, globeHeight;
 		int NR_CANVASES = canvasNames.length;
 		/** ------------------ */
-		canvases = new Vendetta3DCanvas[NR_CANVASES];
+		canvases = new VendettaCanvas[NR_CANVASES];
 		for (int i = 0; i < NR_CANVASES; i++) {
 			try {
-				canvases[i] = (Vendetta3DCanvas) Class.forName(canvasNames[i])
+				canvases[i] = (VendettaCanvas) Class.forName(canvasNames[i])
 						.newInstance();
-				canvases[i].createUniverse(i);
 				getContentPane().add(canvases[i]);
 			} catch (Exception e) {
 				canvases = null;

@@ -21,11 +21,6 @@ noinst_JAVA = \
         ./src/vendetta/monitored_network/haggle/HaggleLogHandler.java \
         ./src/vendetta/monitored_network/haggle/Rect.java \
         ./src/vendetta/monitored_network/haggle/SensorNode.java \
-        ./src/vendetta/monitored_network/tutorial/PingNetwork.java \
-        ./src/vendetta/monitored_network/tutorial/PingNode.java \
-        ./src/vendetta/monitored_network/wisenet/SensorNode.java \
-        ./src/vendetta/monitored_network/wisenet/Wisenet.java \
-        ./src/vendetta/monitored_network/wisenet/WisenetLogHandler.java \
         ./src/vendetta/network/TCPDown.java \
         ./src/vendetta/network/TCPDownDirect.java \
         ./src/vendetta/network/TCPDownStatic.java \
@@ -44,18 +39,8 @@ noinst_JAVA = \
         ./src/vendetta/vbuffer/VBuffer.java \
         ./src/vendetta/vconfig/VConfigReader.java \
         ./src/vendetta/vconfig/VSettings.java \
-        ./src/vendetta/visualization/canvases/FloorCanvas.java \
         ./src/vendetta/visualization/canvases/HaggleCanvas.java \
-        ./src/vendetta/visualization/canvases/Vendetta3DCanvas.java \
-        ./src/vendetta/visualization/other/ConnectionVisualizer.java \
-        ./src/vendetta/visualization/other/PacketVisualizer.java \
-        ./src/vendetta/visualization/shapes/ConnectionLine.java \
-        ./src/vendetta/visualization/shapes/LookUpLines.java \
-        ./src/vendetta/visualization/shapes/MonitorNodeShape.java \
-        ./src/vendetta/visualization/shapes/MovingParticle.java \
-        ./src/vendetta/visualization/shapes/NodeSphere.java \
-        ./src/vendetta/visualization/shapes/RTLines.java \
-        ./src/vendetta/visualization/shapes/SphereLines.java
+        ./src/vendetta/visualization/canvases/VendettaCanvas.java
 
 EXTRA_DIST= $(noinst_JAVA)
 

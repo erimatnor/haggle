@@ -33,7 +33,6 @@ import java.net.*;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 import java.util.*;
-import javax.media.j3d.BranchGroup;
 
 /**
  * A helper class to handle log events.
