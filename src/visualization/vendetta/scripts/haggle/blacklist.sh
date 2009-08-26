@@ -1,12 +1,29 @@
 #!/bin/bash
 
+# Script to blacklist mac addresses on Haggle nodes.
+
+function usage() {
+    echo "Usage: $0 IP ACTION TYPE MAC"
+    echo "   IP is the IP address of the target node," 
+    echo "   ACTION is either 'up' or 'down',"
+    echo "   TYPE is the type of interface (bluetooth, ethernet, wifi)"
+    echo "   MAC is the mac address to blacklist."
+    exit;
+}
+
+if [ ${#@} -lt 4 ]; then
+    usage;
+fi
+
 cd $(dirname $0)
+
 if [ "$2" == "up" ] ; then
 	ONOFF=' action="remove"'
 elif [ "$2" == "down" ] ; then
 	ONOFF=' action="add"'
 else 
 	ONOFF=''
+	usage;
 fi
 
 TIME=$(date +%s)
