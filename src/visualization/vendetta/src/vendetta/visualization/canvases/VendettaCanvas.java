@@ -41,7 +41,6 @@ import javax.vecmath.Vector3d;
 import vendetta.MonitorNode;
 import vendetta.Vendetta;
 import vendetta.util.log.Log;
-import vendetta.visualization.shapes.NodeSphere;
 
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;

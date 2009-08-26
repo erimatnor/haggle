@@ -235,7 +235,8 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 		rootWindow = null;
 		
 		clear();
-		//setDoubleBufferEnable(true);
+		//setIgnoreRepaint(true);
+		//createBufferStrategy(2);
 		mouseNode = null;
 		mousePoint = null;
 		mouseAction = 0;
@@ -300,6 +301,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
      * Prepare the Java 3D-related stuff.
      */
     protected void createSceneGraph(int id) {
+		createBufferStrategy(2);
     }
 	
 	private void addLink(int i, int j)
@@ -1234,11 +1236,8 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 		ds.popBounds();
 	}
 	
-	// FIXME: RENAME!
     public synchronized void paint(Graphics g)
     {
-		//super.postRender();
-		
 		if(try_report_nodes)
 		{
 			try {

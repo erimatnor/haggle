@@ -22,7 +22,6 @@ package vendetta;
 import javax.vecmath.Point3f;
 
 import vendetta.util.log.Log;
-import vendetta.visualization.shapes.MonitorNodeShape;
 
 /**
  * A node to be monitored within the examined network.
@@ -102,14 +101,6 @@ public abstract class MonitorNode {
 	 * canvas.
 	 */
 	protected Point3f position;
-
-	/**
-	 * Graphical representations on the canvases.
-	 * 
-	 * One shape per canvas, shape n goes into canvas n.
-	 * This needs to be initialized and populated by the implementation.
-	 */
-	protected MonitorNodeShape[] nodeShapes = null;
 	
 	/**
 	 * A flag indicating whether the examined node is alive.
@@ -191,21 +182,6 @@ public abstract class MonitorNode {
 		active = false;
 	}
 
-	/**
-	 * Get the MonitorNodeShape that goes into canvas n.
-	 * 
-	 * @param n The id of the canvas.
-	 * @return A monitor shape represting this node.
-	 */
-	public MonitorNodeShape getMonitorNodeShape(int n) {
-		if (nodeShapes == null || n >= nodeShapes.length) {
-			LOG.warn("Tried to access non-existing MonitorShape.");
-			return null;
-		}
-		
-		return nodeShapes[n];
-	}
-
 	public void setCenterThisNode(boolean yes) {}
 	public void setHideForwardingDOs(boolean yes) {}
 	public void setShowDODOLinks(boolean yes) {}
@@ -221,26 +197,12 @@ public abstract class MonitorNode {
 	 * Called by Vendetta when this node has been selected in the GUI.
 	 */
 	public void select() {
-		if (nodeShapes != null) {
-			for (int i = 0; i < nodeShapes.length; i++) {
-				if (nodeShapes[i] != null) {
-					nodeShapes[i].select();
-				}
-			}
-		}
 	}
 
 	/**
 	 * Called by Vendetta when this node was unselected in the GUI.
 	 */
 	public void unselect() {
-		if (nodeShapes != null) {
-			for (int i = 0; i < nodeShapes.length; i++) {
-				if (nodeShapes[i] != null) {
-					nodeShapes[i].unSelect();
-				}
-			}
-		}
 	}
 	
 	/**
@@ -412,10 +374,6 @@ public abstract class MonitorNode {
 		if (report) {
 			Vendetta.tcpNode(this, "CTRL_POSITION_UPDATE " +
 									position.toString());
-		}
-
-		for (MonitorNodeShape s : nodeShapes) {
-			s.ownerPositionChanged(newPosition);
 		}
 	}
 

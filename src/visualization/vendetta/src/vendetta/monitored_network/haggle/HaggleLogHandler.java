@@ -16,7 +16,6 @@ import javax.vecmath.Point3f;
 import vendetta.Vendetta;
 import vendetta.MonitorNode;
 import vendetta.visualization.canvases.HaggleCanvas;
-import vendetta.visualization.shapes.MonitorNodeShape;
 import vendetta.util.log.Log;
 
 import javax.xml.parsers.DocumentBuilder;
