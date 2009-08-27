@@ -288,6 +288,8 @@ public class SensorNode extends MonitorNode {
 	
 	private boolean show_do_do_links;
 	private static boolean do_xml_dump = true;
+	private static boolean show_poor_metrics = true;
+	private static boolean show_classic_metrics = true;
 	private int ttl;
 	private boolean has_gotten_xml;
 	private boolean centerThisNode;
@@ -587,9 +589,19 @@ public class SensorNode extends MonitorNode {
 		show_do_do_links = yes;
 	}
 	
-	public void setDoXMLDump(boolean yes)
+	public static void setDoXMLDump(boolean yes)
 	{
 		do_xml_dump = yes;
+	}
+	
+	public static void setShowPoorMetrics(boolean yes)
+	{
+		show_poor_metrics = yes;
+	}
+	
+	public static void setShowClassicMetrics(boolean yes)
+	{
+		show_classic_metrics = yes;
 	}
 	
 	public synchronized void setHideForwardingDOs(boolean yes)
@@ -1012,7 +1024,30 @@ public class SensorNode extends MonitorNode {
 		{
 			Object[] entries = 
 				metrics.entrySet().toArray();
-		
+			Color better_metric_color = new Color(0.0f,1.0f,0.0f);
+			Color worse_metric_color = new Color(1.0f,0.0f,0.0f);
+			java.util.TreeMap<java.lang.String,java.lang.Float> internal_metric
+				= null;
+			
+			{
+				DataObject thisNode = DataObjectTable.getThisNodeDO();
+				if(thisNode != null)
+				{
+					for(i = 0;
+						i < entries.length && internal_metric == null;
+						i++)
+					{
+						Map.Entry<String,TreeMap<String,Float>> entry1 = 
+							(Map.Entry<String,TreeMap<String,Float>>) 
+							(entries[i]);
+						if(entry1.getKey().equals(thisNode.getNodeID()))
+						{
+							internal_metric = entry1.getValue();
+						}
+					}
+				}
+			}
+			
 			for(i = 0; i < entries.length; i++)
 			{
 				int j;
@@ -1031,25 +1066,91 @@ public class SensorNode extends MonitorNode {
 					int do2_index = 
 						DataObjectTable.indexByNodeID(entry2.getKey());
 				
-					DataObject dObj1 = 
-						DataObjectTable.getDO(do1_index);
-					DataObject dObj2 = 
-						DataObjectTable.getDO(do2_index);
-				
-					if(	dObj1 != null && 
-						dObj2 != null && 
-						entry2.getValue().floatValue() > 0.0f)
+					if(do1_index != do2_index)
 					{
-						if(dObj1.isVisible() && dObj2.isVisible())
+						DataObject dObj1 = 
+							DataObjectTable.getDO(do1_index);
+						DataObject dObj2 = 
+							DataObjectTable.getDO(do2_index);
+					
+						if(	dObj1 != null && 
+							dObj2 != null)
 						{
-							ds.drawLine(
-								asNodePos(dObj1.getDisplayedPosition()),
-								asNodePos(dObj2.getDisplayedPosition()),
-								line_width/2.0,
-								dObj1.getNodeNodeLinkColor(
-									getMaxMetric(
-										dObj1.getNodeID(),
-										dObj2.getNodeID())));
+							if(dObj1.isVisible() && dObj2.isVisible())
+							{
+								if(show_classic_metrics)
+								{
+									// Old style gray line thingy:
+									
+									ds.drawLine(
+										asNodePos(dObj1.getDisplayedPosition()),
+										asNodePos(dObj2.getDisplayedPosition()),
+										line_width/2.0,
+										dObj1.getNodeNodeLinkColor(
+											getMaxMetric(
+												dObj1.getNodeID(),
+												dObj2.getNodeID())));
+								}else{
+									// New style bent arrows thingy:
+									
+									Coordinate	p1,p2,disp;
+									
+									p1 = 
+										asNodePos(dObj1.getDisplayedPosition());
+									p2 = 
+										asNodePos(dObj2.getDisplayedPosition());
+									disp = p2.clone();
+									disp.sub(p1);
+									disp.normalize();
+									disp = new Coordinate(-disp.y, disp.x);
+									disp.scale(0.025f);
+									p2.sub(p1);
+									p2.scale(0.90f);
+									p2.add(p1);
+									if(internal_metric != null)
+									{
+										Float	im;
+										float	m;
+										
+										im = internal_metric.get(dObj2.getNodeID());
+										if(im == null)
+											m = 0.0f;
+										else
+											m = im.floatValue();
+										
+										if(m <= entry2.getValue().floatValue())
+											ds.drawBentArrow(
+												p1,
+												0.0,
+												p2,
+												arrow_head_size,
+												line_width/2.0,
+												disp,
+												8,
+												better_metric_color);
+										else if(show_poor_metrics)
+											ds.drawBentArrow(
+												p1,
+												0.0,
+												p2,
+												arrow_head_size,
+												line_width/2.0,
+												disp,
+												8,
+												worse_metric_color);
+									}else{
+										ds.drawBentArrow(
+											p1,
+											0.0,
+											p2,
+											arrow_head_size,
+											line_width/2.0,
+											disp,
+											8,
+											better_metric_color);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -2033,7 +2134,42 @@ public class SensorNode extends MonitorNode {
 			
 			{
 				metrics = new TreeMap<String, TreeMap<String, Float>>();
-			
+				
+				NodeList vectors = 
+					getSubTags(
+						getSubTag(root, "routingtable"), 
+						"vector");
+				for(i = 0; i < vectors.getLength(); i++)
+				{	
+					Node		vector;
+					int			j;
+					NodeList	metrics_;
+					String		from_node;
+					
+					vector = vectors.item(i);
+					metrics_ = getSubTags(vector, "metric");
+					from_node = getTagContent(getSubTag(vector, "name"));
+					for(j = 0; j < metrics_.getLength(); j++)
+					{
+						String	to_node;
+						Node	metric = metrics_.item(j);
+						float	value;
+						
+						to_node = 
+							getTagContent(getSubTag(metric, "name"));
+						value = 
+							Float.parseFloat(getTagContent(metric, "value"));
+						
+						addMetric(
+							from_node,
+							to_node,
+							value);
+					}
+				}
+				/*
+				This (older) code goes through the data objects and finds
+				those that are PRoPHET metrics.
+				
 				for(i = 0; i < DataObjectTable.getLength(); i++)
 				{
 					DataObject dObj = DataObjectTable.getDO(i);
@@ -2071,7 +2207,7 @@ public class SensorNode extends MonitorNode {
 							}
 						}
 					}
-				}
+				}*/
 			}
 			
 			if(currentSelectedDONodeID != null)

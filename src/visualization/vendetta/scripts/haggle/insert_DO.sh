@@ -10,10 +10,11 @@ if [ $# -lt 1 ];then
     USAGE
 fi
 
+HERE=$(pwd)
 cd $(dirname $0)
-FILE=$(./get_file.sh)
+FILE=$(./get_file.sh $HERE)
 if [ -z $FILE ] ; then
     echo ""
 elif [ -a $FILE ] ; then
-    cat $FILE | telnet $1 9697
+    cat $FILE | ./do.sh $1 9697
 fi

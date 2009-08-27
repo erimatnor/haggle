@@ -185,7 +185,6 @@ public abstract class MonitorNode {
 	public void setCenterThisNode(boolean yes) {}
 	public void setHideForwardingDOs(boolean yes) {}
 	public void setShowDODOLinks(boolean yes) {}
-	public void setDoXMLDump(boolean yes) {}
 	
 	public void redraw() { }
 	/**

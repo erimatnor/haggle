@@ -58,6 +58,7 @@ import vendetta.util.log.Log;
 import vendetta.vconfig.VSettings;
 import vendetta.visualization.canvases.VendettaCanvas;
 import vendetta.monitored_network.haggle.DataObject;
+import vendetta.monitored_network.haggle.SensorNode;
 
 /**
  * The main GUI window.
@@ -105,6 +106,8 @@ public class GUI extends JFrame implements ActionListener,
 	private JCheckBoxMenuItem miCenterThisNode;
 	private JCheckBoxMenuItem miDoScreenshots;
 	private JCheckBoxMenuItem miDoXMLDump;
+	private JCheckBoxMenuItem miShowPoorMetrics;
+	private JCheckBoxMenuItem miShowClassicMetrics;
 
 	public GUI() {
 		super("Vendetta monitor");
@@ -268,6 +271,18 @@ public class GUI extends JFrame implements ActionListener,
 		miDoXMLDump.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
 		miDoXMLDump.addActionListener(this);
 		menuView.add(miDoXMLDump);
+		
+		miShowPoorMetrics = new JCheckBoxMenuItem("Shop poor metrics", true);
+		miShowPoorMetrics.setMnemonic(KeyEvent.VK_C);
+		miShowPoorMetrics.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0));
+		miShowPoorMetrics.addActionListener(this);
+		menuView.add(miShowPoorMetrics);
+
+		miShowClassicMetrics = new JCheckBoxMenuItem("Shop classic metrics", true);
+		miShowClassicMetrics.setMnemonic(KeyEvent.VK_C);
+		miShowClassicMetrics.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
+		miShowClassicMetrics.addActionListener(this);
+		menuView.add(miShowClassicMetrics);
 
 		miDoScreenshots = new JCheckBoxMenuItem("Do periodic screenshots",
 				false);
@@ -492,12 +507,11 @@ public class GUI extends JFrame implements ActionListener,
 							miShowForwardingDOs.getState());
 			}
 		} else if (e.getSource() == miDoXMLDump) {
-			for (int i = 0; i < Vendetta.getMonitorNodeCount(); i++) {
-				if(Vendetta.getMonitorNode(i) != null)
-					Vendetta.getMonitorNode(i).
-						setDoXMLDump(
-							miDoXMLDump.getState());
-			}
+			SensorNode.setDoXMLDump(miDoXMLDump.getState());
+		} else if (e.getSource() == miShowPoorMetrics) {
+			SensorNode.setShowPoorMetrics(miShowPoorMetrics.getState());
+		} else if (e.getSource() == miShowClassicMetrics) {
+			SensorNode.setShowClassicMetrics(miShowClassicMetrics.getState());
 		} else if (e.getSource() == miDoScreenshots) {
 			/* Start or stop periodic screenshots.
 			 */

@@ -56,7 +56,7 @@ public class Coordinate {
 	
 	public void normalize()
 	{
-		scale(Math.sqrt(x*x + y*y));
+		scale(1.0/Math.sqrt(x*x + y*y));
 	}
 	
 	public double dot(Coordinate other)

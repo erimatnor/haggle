@@ -239,6 +239,28 @@
 	</xsl:element>
 </xsl:template>
 
+<xsl:template match="RoutingTable">
+	<xsl:element name="routingtable"> 
+		<xsl:for-each select="/HaggleInfo/RoutingTable/Vector">
+			<xsl:element name="vector">
+				<xsl:variable name="vec_name" select="@name" />
+				<xsl:element name="name">
+					<xsl:value-of select="@name" />
+				</xsl:element>
+				<xsl:for-each select="./Metric">
+					<xsl:element name="metric">
+						<xsl:element name="name">
+							<xsl:value-of select="@name" />
+						</xsl:element>
+						<xsl:element name="value">
+							<xsl:value-of select="." />
+						</xsl:element>
+					</xsl:element>
+				</xsl:for-each>
+			</xsl:element>
+		</xsl:for-each>
+	</xsl:element>
+</xsl:template>
 
 <xsl:template match="/">
 	<xsl:element name="relationgraph">
@@ -247,6 +269,7 @@
 	<xsl:apply-templates select="/HaggleInfo/ThisNode/Haggle"/> 
 	<xsl:apply-templates select="/HaggleInfo/RoutingData/Haggle"/> 
 	<xsl:apply-templates select="/HaggleInfo/NeighborInfo/Neighbor"/> 
+	<xsl:apply-templates select="/HaggleInfo/RoutingTable"/> 
 	</xsl:element>
 </xsl:template>
 

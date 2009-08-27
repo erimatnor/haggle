@@ -413,6 +413,62 @@ public class DrawingSurface {
 			c);
 	}
 	
+	private Coordinate[] calculateBentLine(
+					Coordinate p1,
+					Coordinate p2,
+					Coordinate displace,
+					int segments)
+	{
+		Coordinate p[] = new Coordinate[segments];
+		int i;
+		double dlen;
+		
+		dlen = p.length-1;
+		for(i = 0; i < p.length; i++)
+		{
+			double	di, tmp;
+			Coordinate a,b,c;
+			
+			di = i;
+			
+			a = p1.clone();
+			b = displace.clone();
+			c = p2.clone();
+			
+			tmp = dlen/2;
+			tmp = (di - tmp)/tmp;
+			tmp = 1.0 - tmp*tmp;
+			
+			a.scale((dlen - di)/dlen);
+			b.scale(tmp);
+			c.scale(di/dlen);
+			
+			p[i] = a;
+			p[i].add(b);
+			p[i].add(c);
+		}
+		
+		return p;
+	}
+	
+	public void drawBentLine(
+					Coordinate p1,
+					Coordinate p2,
+					double width,
+					Coordinate displace,
+					int segments,
+					Color c)
+	{
+		Coordinate p[];
+		
+		p = calculateBentLine(
+				p1, 
+				p2, 
+				displace, 
+				segments);
+		drawLine(p, width, c);
+	}
+	
 	public void drawArrow(
 					double x1,
 					double y1,
@@ -573,6 +629,26 @@ public class DrawingSurface {
 			head_size_2,
 			width,
 			c);
+	}
+	
+	public void drawBentArrow(
+					Coordinate p1,
+					double head_size_1,
+					Coordinate p2,
+					double head_size_2,
+					double width,
+					Coordinate displace,
+					int segments,
+					Color c)
+	{
+		Coordinate p[];
+		
+		p = calculateBentLine(
+				p1, 
+				p2, 
+				displace, 
+				segments);
+		drawArrow(p, head_size_1, head_size_2, width, c);
 	}
 	
 	public Rect drawRect(
