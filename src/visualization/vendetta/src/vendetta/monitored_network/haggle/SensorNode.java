@@ -1093,7 +1093,7 @@ public class SensorNode extends MonitorNode {
 								}else{
 									// New style bent arrows thingy:
 									
-									Coordinate	p1,p2,disp;
+									Coordinate	p1,p2,disp,top_of_arc;
 									
 									p1 = 
 										asNodePos(dObj1.getDisplayedPosition());
@@ -1107,6 +1107,11 @@ public class SensorNode extends MonitorNode {
 									p2.sub(p1);
 									p2.scale(0.90f);
 									p2.add(p1);
+									top_of_arc = p2.clone();
+									top_of_arc.sub(p1);
+									top_of_arc.scale(0.5f);
+									top_of_arc.add(disp);
+									top_of_arc.add(p1);
 									if(internal_metric != null)
 									{
 										Float	im;
@@ -1119,6 +1124,7 @@ public class SensorNode extends MonitorNode {
 											m = im.floatValue();
 										
 										if(m <= entry2.getValue().floatValue())
+										{
 											ds.drawBentArrow(
 												p1,
 												0.0,
@@ -1128,7 +1134,16 @@ public class SensorNode extends MonitorNode {
 												disp,
 												8,
 												better_metric_color);
-										else if(show_poor_metrics)
+											ds.drawStringCentered(
+												String.format(
+													"%.2f",
+													entry2.getValue()),
+												top_of_arc,
+												1.0,
+												Color.black,
+												Color.white);
+										}else if(show_poor_metrics)
+										{
 											ds.drawBentArrow(
 												p1,
 												0.0,
@@ -1138,6 +1153,15 @@ public class SensorNode extends MonitorNode {
 												disp,
 												8,
 												worse_metric_color);
+											ds.drawStringCentered(
+												String.format(
+													"%.2f",
+													entry2.getValue()),
+												top_of_arc,
+												1.0,
+												Color.black,
+												Color.white);
+										}
 									}else{
 										ds.drawBentArrow(
 											p1,
@@ -1148,6 +1172,14 @@ public class SensorNode extends MonitorNode {
 											disp,
 											8,
 											better_metric_color);
+										ds.drawStringCentered(
+											String.format(
+												"%.2f",
+												entry2.getValue()),
+											top_of_arc,
+											1.0,
+											Color.black,
+											Color.white);
 									}
 								}
 							}

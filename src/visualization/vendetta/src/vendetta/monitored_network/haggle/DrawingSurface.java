@@ -279,7 +279,12 @@ public class DrawingSurface {
 		Rect r;
 		r = measureString(str, 0, 0, scale);
 		p = new Coordinate(p.x - r.left, p.y - r.top);
-		r = new Rect(0,0,r.width,r.height);
+		r = 
+			new Rect(
+				p.x - r.left,
+				p.y + r.top,
+				p.x - r.left + r.width,
+				p.y + r.top + r.height);
 		fillRect(r, bgCol);
 		drawString(str, p, scale, textCol);
 	}
@@ -293,6 +298,58 @@ public class DrawingSurface {
 					Color bgCol)
 	{
 		drawStringTopLeft(str, new Coordinate(x,y), scale, textCol, bgCol);
+	}
+	
+	public void drawStringCentered(
+					String str, 
+					Coordinate p, 
+					double scale, 
+					Color c)
+	{
+		Rect r;
+		r = measureString(str, 0, 0, scale);
+		p = 
+			new Coordinate(
+				p.x - (r.right - r.left)/2.0,
+				p.y - (r.bottom - r.top)/2.0);
+		drawStringTopLeft(str, p, scale, c);
+	}
+	
+	public void drawStringCentered(
+					String str, 
+					double x, 
+					double y, 
+					double scale, 
+					Color c)
+	{
+		drawStringCentered(str, new Coordinate(x,y), scale, c);
+	}
+	
+	public void drawStringCentered(
+					String str, 
+					Coordinate p, 
+					double scale, 
+					Color textCol, 
+					Color bgCol)
+	{
+		Rect r;
+		r = measureString(str, 0, 0, scale);
+		p = 
+			new Coordinate(
+				p.x - (r.right - r.left)/2.0,
+				p.y - (r.bottom - r.top)/2.0);
+		drawStringTopLeft(str, p, scale, textCol, bgCol);
+	}
+	
+	public void drawStringCentered(
+					String str, 
+					double x, 
+					double y, 
+					double scale, 
+					Color textCol, 
+					Color bgCol)
+	{
+		drawStringCentered(str, new Coordinate(x,y), scale, textCol, bgCol);
 	}
 	
 	public void drawLine(
