@@ -306,6 +306,23 @@ void DebugManager::dumpTo(SOCKET client_sock, DataStoreDump *dump)
                                 free(buf);
                         }
                 }
+				
+				/*
+					For the vendetta version only: also dump the entire routing
+					table:
+				*/
+				
+				if(!sendString(client_sock, "<RoutingTable>\n"))
+					return;
+				{
+				string	str;
+				str = fmgr->getForwarder()->getRoutingTableAsXML();
+				if(str.length() > 0)
+					if(!sendString(client_sock, str.c_str()))
+						return;
+				}
+				if(!sendString(client_sock, "</RoutingTable>\n"))
+					return;
         }
         NodeRefList nl;
 	
