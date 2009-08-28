@@ -272,13 +272,13 @@ public class GUI extends JFrame implements ActionListener,
 		miDoXMLDump.addActionListener(this);
 		menuView.add(miDoXMLDump);
 		
-		miShowPoorMetrics = new JCheckBoxMenuItem("Shop poor metrics", true);
+		miShowPoorMetrics = new JCheckBoxMenuItem("Show poor metrics", true);
 		miShowPoorMetrics.setMnemonic(KeyEvent.VK_C);
 		miShowPoorMetrics.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0));
 		miShowPoorMetrics.addActionListener(this);
 		menuView.add(miShowPoorMetrics);
 
-		miShowClassicMetrics = new JCheckBoxMenuItem("Shop classic metrics", true);
+		miShowClassicMetrics = new JCheckBoxMenuItem("Show classic metrics", true);
 		miShowClassicMetrics.setMnemonic(KeyEvent.VK_C);
 		miShowClassicMetrics.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
 		miShowClassicMetrics.addActionListener(this);

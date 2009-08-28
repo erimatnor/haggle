@@ -8,8 +8,6 @@
 
 package vendetta.monitored_network.haggle;
 
-import javax.vecmath.Point3f;
-
 import java.lang.Math;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;

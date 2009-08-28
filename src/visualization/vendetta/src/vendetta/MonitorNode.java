@@ -19,8 +19,6 @@
 
 package vendetta;
 
-import javax.vecmath.Point3f;
-
 import vendetta.util.log.Log;
 
 /**
@@ -92,16 +90,6 @@ public abstract class MonitorNode {
 	 */
 	protected String oGUID = "N/A";
 
-	/**
-	 * The global position information for this monitor node.
-	 * 
-	 * This is supposed to reflect the actual physical position
-	 * information of the node. A node shape can use this positioning
-	 * information to create an appropriate placement on an arbitrary
-	 * canvas.
-	 */
-	protected Point3f position;
-	
 	/**
 	 * A flag indicating whether the examined node is alive.
 	 * 
@@ -235,7 +223,6 @@ public abstract class MonitorNode {
 			return;
 		}
 		
-		setPosition(new Point3f(x, y, z), false);		
 	}
 	
 	/**
@@ -345,35 +332,6 @@ public abstract class MonitorNode {
 	 */
 	public String toString() {
 		return hostname + " [" + guid + "]";
-	}
-
-	/**
-	 * Get the node's global position information.
-	 * 
-	 * @return A vector describing the node's position.
-	 */
-	public Point3f getPosition() {
-		return position;
-	}
-
-	/**
-	 * Set the node's global position information.
-	 * 
-	 * @param newPosition The new position.
-	 * @param report If true, the new position will be sent to the
-	 * 					vclient instance.
-	 */
-	public void setPosition(Point3f newPosition, boolean report) {
-		if (position != null && newPosition.distance(position) < EPSILON) {
-			return;
-		}
-
-		position = newPosition;
-
-		if (report) {
-			Vendetta.tcpNode(this, "CTRL_POSITION_UPDATE " +
-									position.toString());
-		}
 	}
 
 ///////////// Currently unused.

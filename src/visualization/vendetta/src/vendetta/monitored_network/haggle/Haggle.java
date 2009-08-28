@@ -20,8 +20,6 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import javax.vecmath.Point3f;
-
 import vendetta.MonitorNode;
 import vendetta.MonitoredNetwork;
 import vendetta.Vendetta;
@@ -113,8 +111,7 @@ public class Haggle extends MonitoredNetwork {
 			retval = 
 				new SensorNode(
 					nextNodeID, 
-					name, 
-					new Point3f(0.0f, 0.0f, 0.0f));
+					name);
 			nodes.put(nextNodeID, retval);
 			
 			Vendetta.addMonitorNode(retval);

@@ -11,9 +11,6 @@ package vendetta.monitored_network.haggle;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
-
 import vendetta.Vendetta;
 import vendetta.MonitorNode;
 
@@ -27,7 +24,6 @@ import java.io.*;
 import java.net.*;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
-import javax.vecmath.Color3f;
 import java.util.*;
 import vendetta.util.log.Log;
 import java.awt.geom.*;
@@ -327,8 +323,7 @@ public class SensorNode extends MonitorNode {
 	
 	public SensorNode(
 		int id, 
-		String nodeName, 
-		Point3f pos) {
+		String nodeName) {
 		super(id, "unknown");
 		Random generator = new Random();
 		
@@ -353,7 +348,6 @@ public class SensorNode extends MonitorNode {
 		this.nodeId = id;
 		this.nodeName = nodeName;
 		this.hostname = null;
-		this.position = pos;
 		ourIP = null;
 		show_do_do_links = false;
 		xmlGetter = new XMLGetter();
@@ -1132,7 +1126,7 @@ public class SensorNode extends MonitorNode {
 												arrow_head_size,
 												line_width/2.0,
 												disp,
-												8,
+												16,
 												better_metric_color);
 											ds.drawStringCentered(
 												String.format(
@@ -1151,7 +1145,7 @@ public class SensorNode extends MonitorNode {
 												arrow_head_size,
 												line_width/2.0,
 												disp,
-												8,
+												16,
 												worse_metric_color);
 											ds.drawStringCentered(
 												String.format(
@@ -1170,7 +1164,7 @@ public class SensorNode extends MonitorNode {
 											arrow_head_size,
 											line_width/2.0,
 											disp,
-											8,
+											16,
 											better_metric_color);
 										ds.drawStringCentered(
 											String.format(
@@ -2199,47 +2193,16 @@ public class SensorNode extends MonitorNode {
 					}
 				}
 				/*
-				This (older) code goes through the data objects and finds
-				those that are PRoPHET metrics.
-				
-				for(i = 0; i < DataObjectTable.getLength(); i++)
-				{
-					DataObject dObj = DataObjectTable.getDO(i);
-					if(dObj != null)
-					{
-						if(dObj.isForwardingInfo())
-						{
-							int j;
-							Attribute[] attrs;
-						
-							attrs = dObj.getAttributes();
-							for(j = 0; j < attrs.length; j++)
-							{
-								if(attrs[j].getName().equals("PRoPHET"))
-								{
-									int k;
-								
-									String[] split = 
-										attrs[j].getValue().split(":");
-									for(k = 0; k + 1 < split.length; k += 2)
-									{
-										parseDebug(
-											"Found Metric: " +
-											dObj.getNodeID() +
-											" -> " +
-											split[k] +
-											" : " + 
-											split[k+1]);
-										addMetric(
-											dObj.getNodeID(),
-											split[k],
-											Float.parseFloat(split[k+1]));
-									}
-								}
-							}
-						}
-					}
-				}*/
+					This is a hack to make the routing data between the local 
+					node and itself the maximum so that all arrows pointing to 
+					it are colored "worse".
+					
+					This will only work as long as the maximum metric is 1.0.
+				*/
+				addMetric(
+					DataObjectTable.getThisNodeDO().getNodeID(),
+					DataObjectTable.getThisNodeDO().getNodeID(),
+					1.0f);
 			}
 			
 			if(currentSelectedDONodeID != null)

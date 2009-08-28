@@ -33,10 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.swing.Timer;
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
 
 import vendetta.MonitorNode;
 import vendetta.Vendetta;

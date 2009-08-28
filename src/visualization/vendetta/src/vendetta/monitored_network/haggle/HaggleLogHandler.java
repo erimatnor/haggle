@@ -11,8 +11,6 @@ package vendetta.monitored_network.haggle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.vecmath.Point3f;
-
 import vendetta.Vendetta;
 import vendetta.MonitorNode;
 import vendetta.visualization.canvases.HaggleCanvas;
