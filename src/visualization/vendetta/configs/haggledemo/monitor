@@ -1,0 +1,87 @@
+# Parser for logevents from monitor nodes
+<MONITORED_NETWORK>
+	vendetta.monitored_network.haggle.Haggle
+</MONITORED_NETWORK>
+
+<PORT>
+	4444
+</PORT>
+
+<BUFFERSIZE>
+	0
+</BUFFERSIZE>
+
+<BGCOLOR>
+	255
+</BGCOLOR>
+
+# The address here is the address for the machine running siteManager.
+<PROXY>
+	address=192.168.1.50
+	port_up=5000
+	port_down=5051
+</PROXY>
+
+<TABLECOLUMN>
+	Alive
+	Node name
+	Node number
+</TABLECOLUMN>
+
+<CANVAS>
+	vendetta.visualization.canvases.HaggleCanvas
+</CANVAS>
+
+<NODECMD>
+	label=Insert data object
+	type=EXEC
+	msg=scripts/haggle/insert_DO.sh <NODE_NAME>
+</NODECMD>
+
+<NODECMD>
+	label=Link up
+	type=EXEC
+	msg=scripts/haggle/blacklist.sh <NODE_HOSTNAME> up <NODE_INTERFACES_NEXT>
+	onlyone=no
+	select=yes
+</NODECMD>
+
+<NODECMD>
+	label=Link down
+	type=EXEC
+	msg=scripts/haggle/blacklist.sh <NODE_HOSTNAME> down <NODE_INTERFACES_NEXT>
+	onlyone=no
+	select=yes
+</NODECMD>
+
+<NODECMD>
+	label=Toggle link
+	type=EXEC
+	msg=scripts/haggle/blacklist.sh <NODE_HOSTNAME> toggle <NODE_INTERFACES_NEXT>
+	onlyone=no
+	select=yes
+</NODECMD>
+
+<TESTBEDCMD>
+	label=Run scenario
+	type=EXEC
+	msg=scripts/haggle/run_scenario.sh
+	select=no
+	onlyone=yes
+</TESTBEDCMD>
+
+<LOGFILTER>
+	Event:LE_EVENT
+</LOGFILTER>
+
+<SSHCOMMAND>
+	xterm -e 'ssh -t -l root <NODE_HOSTNAME>'
+</SSHCOMMAND>
+
+#<SSHCOMMAND_SHOWLOG>
+#	xterm -T 'vclient output on <NODE_HOSTNAME>' -e 'ssh -t -l root <NODE_HOSTNAME> tail -f /var/log/vclient.log'
+#</SSHCOMMAND_SHOWLOG>
+
+<NODEFILE>
+	nodes.txt
+</NODEFILE>

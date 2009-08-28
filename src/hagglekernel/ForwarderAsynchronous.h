@@ -53,6 +53,8 @@ typedef enum {
 	// Print the routing table:
 	FP_print_table,
 #endif
+	// Get the routing table as XML:
+	FP_get_table_as_xml,
 	// Terminate the run loop
 	FP_quit
 } FP_action_type;
@@ -161,6 +163,14 @@ protected:
 	*/
 	virtual void _printRoutingTable(void) {}
 #endif
+	/**
+		Does the actual work or getRoutingTableAsXML().
+		
+		This function only exists in the haggle-demo branch, and should only
+		be there. Changes including this function should not be merged with
+		the default development branch.
+	*/
+	virtual string _getRoutingTableAsXML(void) {return "";}
 	
 	/**
 		Creates a new metric data object.
@@ -192,6 +202,8 @@ public:
 	/** See the parent class function with the same name. */
 	void printRoutingTable(void);
 #endif
+	/** See the parent class function with the same name. */
+	string getRoutingTableAsXML(void);
 };
 
 #endif

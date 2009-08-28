@@ -12,6 +12,7 @@ SUBDIRS = \
 	logcollector \
 	clitool \
 	luckyMe \
+	visualization \
 	tests/test01
 
 clean-local:

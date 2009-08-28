@@ -47,10 +47,16 @@ if [ -f $DEVICE_FILES_DIR/adhoc.sh ]; then
     
     for dev in $DEVICES; do
 	echo "Installing configuration files onto device $dev"
+	
+	# Cleanup data folder if any
+	$ADB -s $dev shell su -c rm /data/haggle/*
 
+	# Install scripts and other configuration files
 	$ADB -s $dev push $DEVICE_FILES_DIR/adhoc.sh $DATA_DIR/
 	$ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
 	$ADB -s $dev shell chmod 775 $DATA_DIR/adhoc.sh
+	$ADB -s $dev shell su -c mkdir /data/haggle
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
     done
 fi
 
@@ -108,9 +114,6 @@ for dev in $DEVICES; do
 
     # Reset /system partition to read-only mode
     $ADB -s $dev shell su -c mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system
-
-    # Cleanup data folder if any
-    $ADB -s $dev shell su -c rm /data/haggle/*
 done
 
 popd
