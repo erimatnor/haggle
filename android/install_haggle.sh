@@ -57,9 +57,21 @@ if [ -f $DEVICE_FILES_DIR/adhoc.sh ]; then
 	$ADB -s $dev shell chmod 775 $DATA_DIR/adhoc.sh
 	$ADB -s $dev shell su -c mkdir /data/haggle
 	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+	
+	if [ "$dev" = "HT93XKF09536" ]; then 
+	    echo "#ffbf2c00" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	fi
+	if [ "$dev" = "HT93XKF03557" ]; then 
+	    echo "#ffa200bf" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	fi
+	if [ "$dev" = "HT93YKF07043" ]; then 
+	    echo "#ff00bf20" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	fi
     done
 fi
-
 
 FRAMEWORK_PATH_PREFIX="system/framework"
 FRAMEWORK_FILES="haggle.jar"

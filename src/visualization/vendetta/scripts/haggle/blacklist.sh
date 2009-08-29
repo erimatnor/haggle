@@ -40,14 +40,16 @@ for i in $@ ; do
 			k=1
 		else
 			k=0
-			(
-			echo "<Haggle persistent=\"no\" create_time=\""$TIME".000000\">";
-			echo "	<Attr name=\"Connectivity\">Blacklist</Attr>";
-			echo "	<Connectivity>";
-			echo "		<Blacklist type=\""$l"\""$ONOFF">"$i"</Blacklist>";
-			echo "	</Connectivity>";
-			echo "</Haggle>"
-			) | ./do.sh $1 9697
+			if [ "$l" = "ethernet" ]; then
+			    (
+				echo "<Haggle persistent=\"no\" create_time=\""$TIME".000000\">";
+				echo "	<Attr name=\"Connectivity\">Blacklist</Attr>";
+				echo "	<Connectivity>";
+				echo "		<Blacklist type=\""$l"\""$ONOFF">"$i"</Blacklist>";
+				echo "	</Connectivity>";
+				echo "</Haggle>"
+				) | ./do.sh $1 9697
+			fi
 		fi
 	fi
 done
