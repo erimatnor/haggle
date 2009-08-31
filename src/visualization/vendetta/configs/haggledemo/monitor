@@ -55,6 +55,38 @@
 </NODECMD>
 
 <NODECMD>
+	label=Link up (ethernet)
+	type=EXEC
+	msg=scripts/haggle/blacklist-eth.sh <NODE_HOSTNAME> up <NODE_INTERFACES_NEXT>
+	onlyone=no
+	select=yes
+</NODECMD>
+
+<NODECMD>
+	label=Link down (ethernet)
+	type=EXEC
+	msg=scripts/haggle/blacklist-eth.sh <NODE_HOSTNAME> down <NODE_INTERFACES_NEXT>
+	onlyone=no
+	select=yes
+</NODECMD>
+
+<NODECMD>
+	label=Link up (bluetooth)
+	type=EXEC
+	msg=scripts/haggle/blacklist-bt.sh <NODE_HOSTNAME> up <NODE_INTERFACES_NEXT>
+	onlyone=no
+	select=yes
+</NODECMD>
+
+<NODECMD>
+	label=Link down (bluetooth)
+	type=EXEC
+	msg=scripts/haggle/blacklist-bt.sh <NODE_HOSTNAME> down <NODE_INTERFACES_NEXT>
+	onlyone=no
+	select=yes
+</NODECMD>
+
+<NODECMD>
 	label=Toggle link
 	type=EXEC
 	msg=scripts/haggle/blacklist.sh <NODE_HOSTNAME> toggle <NODE_INTERFACES_NEXT>
