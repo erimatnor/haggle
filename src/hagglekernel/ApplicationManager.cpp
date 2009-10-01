@@ -210,6 +210,10 @@ void ApplicationManager::onRetrieveAppNodes(Event *e)
 		}
 	}
 	
+#ifdef ADD_EPIDEMIC_NODEDESCRIPTION_ATTRIBUTE
+	kernel->getThisNode()->addAttribute("NodeDescription=*");
+#endif
+	
 	// The node list will not be deleted along with the event, so we have to do it:
 	if (nodes)
 		delete nodes;

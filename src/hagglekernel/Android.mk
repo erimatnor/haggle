@@ -59,6 +59,9 @@ LOCAL_SRC_FILES := \
 	ResourceManager.cpp \
 	ResourceMonitorAndroid.cpp \
 	SecurityManager.cpp \
+	VendettaManager.cpp \
+	VendettaAsynchronous.cpp \
+	VendettaClient.cpp \
 	SQLDataStore.cpp \
 	Trace.cpp \
 	Utility.cpp \
@@ -105,7 +108,7 @@ LOCAL_STATIC_LIBRARIES += libcpphaggle libWifiApi
 endif
 
 LOCAL_CFLAGS:=-O2 -g
-LOCAL_CFLAGS+=-DHAVE_CONFIG -DOS_ANDROID -DHAVE_EXCEPTION=0 -DENABLE_ETHERNET -DENABLE_TI_WIFI -DENABLE_BLUETOOTH -DDEBUG -DDEBUG_LEAKS
+LOCAL_CFLAGS+=-DHAVE_CONFIG -DOS_ANDROID -DHAVE_EXCEPTION=0 -DENABLE_ETHERNET -DENABLE_TI_WIFI -DENABLE_BLUETOOTH -DDEBUG -DDEBUG_LEAKS -DENABLE_VENDETTA_MANAGER
 
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE := haggle
