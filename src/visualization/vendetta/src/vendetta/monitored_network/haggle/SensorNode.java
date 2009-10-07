@@ -10,6 +10,7 @@ package vendetta.monitored_network.haggle;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import vendetta.visualization.canvases.*;
 
 import vendetta.Vendetta;
 import vendetta.MonitorNode;
@@ -649,6 +650,7 @@ public class SensorNode extends MonitorNode {
 		updateTTL();
 	}
 	
+	@SuppressWarnings({"unchecked"})
 	public synchronized void handleEvent(String evt)
 	{
 		//System.out.print(evt);
@@ -913,6 +915,12 @@ public class SensorNode extends MonitorNode {
 											split[4]));
 								if(dO != null)
 									dO.setImportantFor(30);*/
+								
+								// Tell the canvas to animate DO sends, too...
+								((HaggleCanvas)Vendetta.getGUI().getCanvas(0)).
+									addPacketAnimation(
+										node.getNodeID(),
+										getNodeID());
 							}
 						}
 				}else if("LE_SEND_SECURITY_SUCCESS".equals(split[2]))

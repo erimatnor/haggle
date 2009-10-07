@@ -767,6 +767,62 @@ public class DrawingSurface {
 				c);
 	}
 	
+	public void fillRect(
+					double edgeWidth,
+					Color edgeColor,
+					Color col)
+	{
+		Rect b = currentBounds();
+		boolean drawEdge = (edgeWidth > 0.0);
+		
+		if(drawEdge)
+			g.setColor(edgeColor);
+		else
+			g.setColor(col);
+		{
+		double _x1 = convertX(0.0);
+		double _y1 = convertY(0.0);
+		double _x2 = convertX(1.0);
+		double _y2 = convertY(1.0);
+		g.fill(
+			new Rectangle2D.Double(
+				_x1,
+				_y1,
+				_x2 - _x1,
+				_y2 - _y1));
+		}
+		if(drawEdge)
+		{
+			g.setColor(col);
+			double _x1 = convertX(0.0 + edgeWidth);
+			double _y1 = convertY(0.0 + edgeWidth);
+			double _x2 = convertX(1.0 - edgeWidth);
+			double _y2 = convertY(1.0 - edgeWidth);
+			g.fill(
+				new Rectangle2D.Double(
+					_x1,
+					_y1,
+					_x2 - _x1,
+					_y2 - _y1));
+		}
+	}
+	public Rect fillRect(
+					Coordinate p1,
+					Coordinate p2,
+					double edgeWidth,
+					Color edgeColor,
+					Color c)
+	{
+		pushBounds(
+			p1.x,p1.y,
+			p2.x,p2.y);
+		fillRect(
+			edgeWidth,
+			edgeColor,
+			c);
+		return popBounds();
+	}
+	
 	public Rect fillRect(
 					Rect r,
 					Color c)

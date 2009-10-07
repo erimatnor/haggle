@@ -25,6 +25,51 @@ import vendetta.vconfig.VSettings;
 import vendetta.monitored_network.haggle.*;
 
 public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
+	private class Animation {
+		public class EndPoint {
+			public SensorNode node;
+			
+			EndPoint(SensorNode _node)
+			{
+				node = _node;
+			}
+		}
+		public EndPoint startPoint;
+		public EndPoint endPoint;
+		public long length, frame;
+		public Color col;
+		
+		Animation(
+			SensorNode fromNode,
+			SensorNode toNode,
+			long length,
+			Color col)
+		{
+			if(fromNode == null)
+				throw new 
+					RuntimeException("no \"from\" node.");
+			if(toNode == null)
+				throw new 
+					RuntimeException("no \"to\" node.");
+			
+			this.startPoint = new EndPoint(fromNode);
+			this.endPoint = new EndPoint(toNode);
+			this.col = col;
+			
+			this.length = length;
+			this.frame = 0;
+		}
+		
+		void advance()
+		{
+			frame++;
+		}
+		
+		boolean isRunning()
+		{
+			return frame < length;
+		}
+	}
     
 	public static final double default_line_width = 0.005;
 	public static final boolean showOutline = true;
@@ -227,6 +272,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
     private SensorNode mouseNode;
 	private double connectivityScale;
 	private boolean try_report_nodes;
+	private ArrayList<Animation> animations;
 	
 	@SuppressWarnings({"unchecked"})
     public HaggleCanvas() {
@@ -241,6 +287,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 		mousePoint = null;
 		mouseAction = 0;
 		connectivityScale = 0.9;
+		animations = new ArrayList<Animation>();
 		
 		initFromConfigFile(Vendetta.CONFIG_PATH + "HaggleCanvas");
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -255,6 +302,38 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 	    });
 		addMouseWheelListener(this);
     }
+	
+	public void addPacketAnimation(String fromNode, String toNode)
+	{
+		if(fromNode.equals(toNode))
+			return;
+		
+		int i;
+		SensorNode[] entries = getNodes();
+		SensorNode	_fromNode, _toNode;
+		
+		_fromNode = null;
+		_toNode = null;
+		for(i = 0; 
+			i < entries.length && (_fromNode == null || _toNode == null);
+			i++)
+		{
+			SensorNode Node = entries[i];
+			if(Node.getNodeID().equals(fromNode))
+				_fromNode = Node;
+			if(Node.getNodeID().equals(toNode))
+				_toNode = Node;
+		}
+		if(_fromNode != null && _toNode != null)
+		{
+			animations.add(
+				new Animation(
+					_fromNode, 
+					_toNode, 
+					15, 
+					new Color(1.0f,1.0f,1.0f)));
+		}
+	}
 	
     /**
      * Parses the configuration file and constructs the floors.
@@ -594,6 +673,14 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 					node[i].getCalculatedPosition());
 			}
 		}
+		
+		// Advance animations:
+		for(i = 0; i < animations.size(); i++)
+			animations.get(i).advance();
+		// Delete dead animations:
+		for(i = animations.size()-1; i >= 0; i--)
+			if(!animations.get(i).isRunning())
+				animations.remove(i);
 	}
 	
 	Coordinate squareToPos(Coordinate p)
@@ -622,7 +709,6 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 			(1.0 + connectivityScale)/2.0,
 			(win.window_height + connectivityScale)/(2.0*win.window_height));
 		
-		// FIXME: add comment for these lines
 		{
 			Coordinate c = win.toPos(new Coordinate());
 			ds.pushBounds(
@@ -631,6 +717,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 				c.x + win.window_height/2.0,
 				c.y + win.window_height/2.0);
 		}
+		
 		boolean should_move_objects;
 		int i,j;
 		
@@ -864,6 +951,43 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 					}
 				}
 			}
+		}
+		
+		// Draw data objects:
+		for(i = 0; i < animations.size(); i++)
+		{
+			Animation a = animations.get(i);
+			Coordinate p,q,r,c;
+			double s,tmp;
+			
+			p = a.startPoint.node.getDisplayedPosition();
+			q = a.endPoint.node.getDisplayedPosition();
+			c = p.clone();
+			c.sub(q);
+			
+			r = new Coordinate(-c.y, c.x);
+			
+			s = ((double)a.frame)/((double)a.length);
+			c.scale(s);
+			c.add(q);
+			tmp = ((double)a.length)/2;
+			tmp = (((double)a.frame) - tmp)/tmp;
+			tmp = 1.0 - tmp*tmp;
+			r.scale(0.1*tmp);
+			c.add(r);
+			
+			p = squareToPos(c);
+			q = p.clone();
+			s = a.startPoint.node.getCurrentSize()*0.5;
+			p.add(new Coordinate(-s,-s));
+			q.add(new Coordinate(s,s));
+			
+			ds.fillRect(
+				p,
+				q,
+				0.1,
+				Color.black,
+				a.col);
 		}
 		
 		// Draw nodes:
