@@ -1,0 +1,10 @@
+# Format has to include hostname (IP address of vclient machine) and port!
+#
+# Format:
+# nodename	hostname port	node#	x	y	z
+#
+# This file could have entries like this:
+#node-30	192.168.122.40	5001 0	0.0	0.0	0.0
+#node-0	192.168.122.10	5001 0	0.0	0.0	0.0
+#node-1	192.168.122.11	5001 0	0.0	0.0	0.0
+#node-2	192.168.122.12	5001 0	0.0	0.0	0.0

@@ -76,7 +76,7 @@ DebugManager::DebugManager(HaggleKernel * _kernel, bool interactive) :
 #endif
 	}
 
-#if defined(OS_LINUX) || (defined(OS_MACOSX) && !defined(OS_MACOSX_IPHONE))
+#if (defined(OS_LINUX) && !defined(OS_ANDROID)) || (defined(OS_MACOSX) && !defined(OS_MACOSX_IPHONE))
 	if (interactive) {
 		console = open("/dev/stdin", O_RDONLY);
 		
@@ -306,6 +306,23 @@ void DebugManager::dumpTo(SOCKET client_sock, DataStoreDump *dump)
                                 free(buf);
                         }
                 }
+				
+				/*
+					For the vendetta version only: also dump the entire routing
+					table:
+				*/
+				
+				if(!sendString(client_sock, "<RoutingTable>\n"))
+					return;
+				{
+				string	str;
+				str = fmgr->getForwarder()->getRoutingTableAsXML();
+				if(str.length() > 0)
+					if(!sendString(client_sock, str.c_str()))
+						return;
+				}
+				if(!sendString(client_sock, "</RoutingTable>\n"))
+					return;
         }
         NodeRefList nl;
 	
@@ -405,13 +422,20 @@ void DebugManager::onWatchableEvent(const Watchable& wbl)
 	
 		if (client_sock != INVALID_SOCKET) {
 			HAGGLE_DBG("Registering client socket: %ld\n", client_sock);
+
 			if (!kernel->registerWatchable(client_sock, this)) {
+                                HAGGLE_ERR("Could not register watchable\n");
 				CLOSE_SOCKET(client_sock);
 				return;
 			}
-			if(client_sockets.empty())
+                        
+			if (client_sockets.empty()) {
+                                HAGGLE_DBG("No clients previously registered, dumping data store\n");
 				kernel->getDataStore()->dump(onDumpDataStoreCallback);
-			client_sockets.push_back(client_sock);
+                        }
+			HAGGLE_DBG("Data store dump already in progress...\n");
+                        client_sockets.push_back(client_sock);
+                        
 		}else{
 			HAGGLE_DBG("accept failed: %ld\n", client_sock);
 		}
