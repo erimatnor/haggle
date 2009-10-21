@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# Go to the location of this script. It has to be executed there.
+cd $(dirname $0)
+# Save where we are so it is easy to go back and forth:
+HERE=$(pwd)
+
+# Go to the location of the haggle demo branch 
+cd ../../../../../haggle-demo
+# Save where we are so it is easy to go back and forth:
+HAGGLE=$(pwd)
+
+# remove all files, so that the svn update command will succeed:
+rm -rf *
+# update to the latest revision:
+svn update --depth=files >/dev/null
+# figure out which is the HEAD revision AT THE START OF THE TEST. (This should
+# make sure that any changes done while this test is running doesn't affect the
+# test).
+HEAD=$(svn info | grep Revision | awk '{print $2}')
+
+# Just in case...
+cd $HERE
+
+# Used to skip test suites.
+SKIP=0
+# This for loop allows the running of the 
+# Run testsuites for these revisions:
+for i in $HEAD ; do
+
+	echo "Running testsuites for revision "$i
+	# Go to haggle folder:
+	cd $HAGGLE
+	# Remove ALL files before checking out the revision to be tested:
+	rm -rf * >/dev/null
+	# Check out the revision to be tested
+	svn update -r $i >/dev/null
+	# Go back
+	cd $HERE
+	
+	ACPPFLAGS=""
+	APOSTFIX="-rev"$i
+	# Please note the INTENTIONAL non-indentation of these for-loops.
+	for j in 0 1 ; do
+	# Test with and without epidemic node descriptions:
+	if [[ j -eq 1 ]] ; then
+		BCPPFLAGS=$ACPPFLAGS" -DADD_EPIDEMIC_NODEDESCRIPTION_ATTRIBUTE"
+		BPOSTFIX=-epidemic_nd$APOSTFIX
+	else
+		BCPPFLAGS=$ACPPFLAGS
+		BPOSTFIX=$APOSTFIX
+	fi
+	for k in 0 1 ; do
+	# Test with and without forwarding:
+	if [[ k -eq 1 ]] ; then
+		CCPPFLAGS=$BCPPFLAGS" -DFORCE_FORWARDER_EMPTY"
+		CPOSTFIX=-forwarder_empty$BPOSTFIX
+	else
+		CCPPFLAGS=$BCPPFLAGS
+		CPOSTFIX=$BPOSTFIX
+	fi
+	for l in 0 1 ; do
+	# Test with and without changing the create time of the node description 
+	# when sending it:
+	if [[ l -eq 1 ]] ; then
+		DCPPFLAGS=$CCPPFLAGS" -DCHANGE_NODEDESCRIPTION_CREATETIME_WHEN_SENDING"
+		DPOSTFIX=-change_nd_createtime$CPOSTFIX
+	else
+		DCPPFLAGS=$CCPPFLAGS
+		DPOSTFIX=$CPOSTFIX
+	fi
+	POSTFIX=$DPOSTFIX
+	CPPFLAGS=$DCPPFLAGS
+	
+	if [[ SKIP -eq 0 ]] ; then
+		echo "Running testsuite... ("$CPPFLAGS")"
+		
+		# Go to haggle folder:
+		cd $HAGGLE
+		# Clean out old files:
+		make realclean 2>/dev/null >/dev/null
+		# autoreconf:
+		autoreconf --force --install >/dev/null
+		# Configure haggle (no extras)
+		./configure --enable-stl --disable-vendetta CPPFLAGS="$CPPFLAGS" >/dev/null 2>/dev/null
+		# Make haggle:
+		make >/dev/null
+		# Deploy haggle:
+		sudo make install >/dev/null
+		# Go back to this script's folder:
+		cd $HERE
+		# Remove ./report:
+		rm -rf report
+		# Run testsuite:
+		./run_testsuite --postfix $POSTFIX
+	else
+		echo "Skipping testsuite... ("$CFLAGS")"
+	fi
+	SKIP=0
+	
+	done
+	done
+	done
+done
+
+# Go to haggle folder:
+cd $HAGGLE
+# Remove ALL files before checking out the head revision:
+rm -rf * >/dev/null
+# Check out the HEAD revision
+svn update >/dev/null

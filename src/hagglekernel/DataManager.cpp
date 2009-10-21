@@ -328,7 +328,7 @@ void DataManager::onDeletedDataObject(Event * e)
 {
 	if (!e || !e->hasData())
 		return;
-	
+
 	localBF.remove(e->getDataObject());
 	kernel->getThisNode()->setBloomfilter(localBF, setCreateTimeOnBloomfilterUpdate);
 }
@@ -373,10 +373,10 @@ void DataManager::onAging(Event *e)
 			// in and are too old.
 			// FIXME: find a better way to deal with the age parameter. 
 			// Is one day really a good value? 
-			kernel->getDataStore()->ageDataObjects(Timeval(24*60*60,0));
+			kernel->getDataStore()->ageDataObjects(Timeval(10,0));
 		}
 		
 		// FIXME: aging every 10 minutes is definately overkill...
-		kernel->addEvent(new Event(agingEvent, NULL, 10*60));
+		kernel->addEvent(new Event(agingEvent, NULL, 15));
 	}
 }
