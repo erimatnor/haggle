@@ -304,6 +304,7 @@ public class SensorNode extends MonitorNode {
 	private String node_id;
 	private ArrayList<Animation> animations;
 	private String interface_list;
+	private int send_failure_countdown;
 	
 	public synchronized void reset()
 	{
@@ -320,6 +321,7 @@ public class SensorNode extends MonitorNode {
 		node_id = null;
 		animations = new ArrayList<Animation>();
 		interface_list = "";
+		send_failure_countdown = 0;
 	}
 	
 	public SensorNode(
@@ -441,6 +443,8 @@ public class SensorNode extends MonitorNode {
 	
 	public double getCurrentSize()
 	{
+		if(send_failure_countdown > 0)
+			return base_size * 1.5;
 		return base_size;
 	}
 	
@@ -465,6 +469,9 @@ public class SensorNode extends MonitorNode {
 			return
 				new Color(1.0f, 1.0f, 0.0f);
 		}
+		if(send_failure_countdown > 0)
+			return 
+				new Color(1.0f, 0.0f, 0.0f);
 		return
 			// Black is default:
 			new Color(0.0f,0.0f,0.0f);
@@ -923,6 +930,9 @@ public class SensorNode extends MonitorNode {
 										getNodeID());
 							}
 						}
+				}else if("EVENT_TYPE_DATAOBJECT_SEND_FAILURE".equals(split[2]))
+				{
+					send_failure_countdown = 30;
 				}else if("LE_SEND_SECURITY_SUCCESS".equals(split[2]))
 				{
 				
@@ -2518,7 +2528,8 @@ public class SensorNode extends MonitorNode {
 	{
 		int i;
 		Boolean do_redraw = false;
-		
+		if(send_failure_countdown > 0)
+			send_failure_countdown--;
 		if(ttl > 0)
 		{
 			ttl--;
