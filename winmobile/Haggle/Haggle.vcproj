@@ -2617,10 +2617,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\hagglekernel\ForwarderEpidemic.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\hagglekernel\ForwarderProphet.h"
 				>
 			</File>
