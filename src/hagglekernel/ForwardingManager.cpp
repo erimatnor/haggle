@@ -16,7 +16,6 @@
 #include <libcpphaggle/Platform.h>
 #include "ForwardingManager.h"
 #include "ForwarderEmpty.h"
-#include "ForwarderEpidemic.h"
 #include "ForwarderProphet.h"
 #include "ForwarderRank.h"
 
