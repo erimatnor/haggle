@@ -1,10 +1,8 @@
 bin_PROGRAMS=luckyMe
 luckyMe_SOURCES=luckyMe.cpp
 
-CPPFLAGS +=-I$(top_builddir)/src/libhaggle/include 
-CPPFLAGS +=-I$(top_builddir)/src/utils 
-LDFLAGS +=-lhaggle -L$(top_builddir)/src/libhaggle/
-LDFLAGS +=-lhaggleutils -L$(top_builddir)/src/utils/
+CPPFLAGS += -I$(top_builddir)/src/libhaggle/include
+LDFLAGS += -lhaggle -lpthread -L$(top_builddir)/src/libhaggle/
 LDFLAGS +=-lxml2
 
 CFLAGS += -std=gnu99

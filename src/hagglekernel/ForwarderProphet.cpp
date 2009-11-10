@@ -399,3 +399,53 @@ void ForwarderProphet::_printRoutingTable(void)
 }
 #endif
 
+string ForwarderProphet::_getRoutingTableAsXML(void)
+{
+	string retval, tmp;
+	
+	retval = "";
+	
+	stringprintf(
+		tmp, 
+		"  <Vector name=\"%s\">\n", 
+		id_number_to_nodeid[1].c_str());
+	retval += tmp;
+	
+	for(prophet_metric_table::iterator jt = my_metrics.begin();
+		jt != my_metrics.end();
+		jt++) {
+		stringprintf(
+			tmp, 
+			"    <Metric name=\"%s\">%f</Metric>\n", 
+			id_number_to_nodeid[jt->first].c_str(), 
+			jt->second);
+		retval += tmp;
+	}
+	retval += "  </Vector>\n";
+	
+	for (Map<prophet_forwarding_id, prophet_metric_table>::iterator it = 
+			forwarding_table.begin();
+		it != forwarding_table.end();
+		it++) {
+		stringprintf(
+			tmp, 
+			"  <Vector name=\"%s\">\n", 
+			id_number_to_nodeid[it->first].c_str());
+		retval += tmp;
+		
+		for(prophet_metric_table::iterator jt = it->second.begin();
+			jt != it->second.end();
+			jt++) {
+			stringprintf(
+				tmp, 
+				"    <Metric name=\"%s\">%f</Metric>\n", 
+				id_number_to_nodeid[jt->first].c_str(), 
+				jt->second);
+			retval += tmp;
+		}
+		
+		retval += "  </Vector>\n";
+	}
+	
+	return retval;
+}

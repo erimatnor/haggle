@@ -56,7 +56,6 @@ void ForwarderAsynchronous::addMetricDO(DataObjectRef &metricDO)
 #ifdef DEBUG
         //actionQueue.insert(new FP_Action(FP_print_table,NULL,NULL,NULL, NULL));
 #endif
-
 }
 
 void ForwarderAsynchronous::newNeighbor(NodeRef &neighbor)
@@ -147,6 +146,19 @@ void ForwarderAsynchronous::printRoutingTable(void)
 }
 #endif
 
+string ForwarderAsynchronous::getRoutingTableAsXML(void)
+{
+	Mutex theMutex;
+	string str;
+	
+	// Mutexes are unlocked by default:
+	theMutex.lock();
+	actionQueue.insert(
+		new FP_Action(FP_get_table_as_xml,NULL,NULL,&str,&theMutex));
+	theMutex.lock();
+	return str;
+}
+
 bool ForwarderAsynchronous::run(void)
 {
 	/*
@@ -232,6 +244,13 @@ bool ForwarderAsynchronous::run(void)
 						delete action;
 					break;
 #endif
+
+					case FP_get_table_as_xml:
+						*(action->theString) = _getRoutingTableAsXML();
+						if(action->toBeUnlocked)
+							action->toBeUnlocked->unlock();
+						delete action;
+					break;
 					
 					case FP_quit:
 						// Already? Fine.
@@ -334,6 +353,10 @@ bool ForwarderAsynchronous::run(void)
 						_printRoutingTable();
 					break;
 #endif
+					
+					case FP_get_table_as_xml:
+						*(action->theString) = _getRoutingTableAsXML();
+					break;
 					
 					case FP_quit:
 						cancel();

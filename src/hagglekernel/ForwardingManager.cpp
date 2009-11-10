@@ -16,6 +16,7 @@
 #include <libcpphaggle/Platform.h>
 #include "ForwardingManager.h"
 #include "ForwarderEmpty.h"
+#include "ForwarderEpidemic.h"
 #include "ForwarderProphet.h"
 #include "ForwarderRank.h"
 
@@ -48,7 +49,11 @@ ForwardingManager::ForwardingManager(HaggleKernel * _kernel) :
 	forwardDobjCallback = newEventCallback(onForwardDobjsCallback);
 	forwardRepositoryCallback = newEventCallback(onForwardRepositoryCallback);
 
+#ifdef FORCE_FORWARDER_EMPTY
+	setForwardingModule(new ForwarderEmpty(this));
+#else
 	setForwardingModule(new ForwarderProphet(this));
+#endif
 	
 	forwardQueryCallback = newEventCallback(onForwardQueryResult);
 
@@ -58,6 +63,10 @@ ForwardingManager::ForwardingManager(HaggleKernel * _kernel) :
 #endif
 
 	sendMetricCallback = newEventCallback(onSendMetric);
+
+	// HACK: Register filter for forwarding data objects
+	registerEventTypeForFilter(forwardingObjectEType,
+		"ForwardingManager Filter Event", onForwardingDataObject, "Forward=*");
 }
 
 ForwardingManager::~ForwardingManager()
@@ -139,6 +148,8 @@ void ForwardingManager::setForwardingModule(Forwarder *forw)
 
 void ForwardingManager::onShutdown()
 {
+	// Remove the forwarding data objects filter from the data store:
+	unregisterEventTypeForFilter(forwardingObjectEType);
 	// Set the current forwarding module to none. See setForwardingModule().
 	setForwardingModule(NULL);
 	unregisterWithKernel();
@@ -683,6 +694,10 @@ void ForwardingManager::findMatchingDataObjectsAndTargets(NodeRef& node)
 	kernel->getDataStore()->doDataObjectQuery(node, 1, dataObjectQueryCallback);
 }
 
+void ForwardingManager::onForwardingDataObject(Event * e)
+{
+	
+}
 
 void ForwardingManager::onNewDataObject(Event * e)
 {
