@@ -1,3 +1,0 @@
-[08/04/28 10:28:59, INFO] (main.c, 333) This is vclient svn
-[08/04/28 10:28:59, INFO] (configparser.c, 561) Opening config file vclient.config.
-[08/04/28 10:29:27, INFO] (main.c, 181) Stopping due to signal.
