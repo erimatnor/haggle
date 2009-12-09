@@ -16,6 +16,7 @@
 #include <libcpphaggle/Platform.h>
 #include "ForwardingManager.h"
 #include "ForwarderEmpty.h"
+#include "ForwarderEpidemic.h"
 #include "ForwarderProphet.h"
 #include "ForwarderRank.h"
 
@@ -138,6 +139,9 @@ void ForwardingManager::setForwardingModule(Forwarder *forw)
 
 void ForwardingManager::onShutdown()
 {
+	// Remove the forwarding data objects filter from the data store:
+	unregisterEventTypeForFilter(forwardingObjectEType);
+
 	// Set the current forwarding module to none. See setForwardingModule().
 	unregisterWithKernel();
 }
@@ -178,6 +182,11 @@ void ForwardingManager::onForwardingTaskComplete(Event *e)
 			}
 		}
 			break;
+                case FWD_TASK_GET_XML_ROUTING_INFORMATION:
+                        if (task->getXML() != "") {
+                               
+
+                        }
 		case FWD_TASK_GENERATE_ROUTING_INFO_DATA_OBJECT:
 			if (isNeighbor(task->getNode())) {
 				if (forwardingModule) {					
@@ -644,6 +653,10 @@ void ForwardingManager::findMatchingDataObjectsAndTargets(NodeRef& node)
 	kernel->getDataStore()->doDataObjectQuery(node, 1, dataObjectQueryCallback);
 }
 
+void ForwardingManager::onForwardingDataObject(Event * e)
+{
+	
+}
 
 void ForwardingManager::onRoutingInformation(Event *e)
 {

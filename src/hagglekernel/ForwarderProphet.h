@@ -126,7 +126,15 @@ class ForwarderProphet : public ForwarderAsynchronous {
 	*/
 	void _printRoutingTable(void);
 #endif
-		
+
+	/**
+		Does the actual work or getRoutingTableAsXML().
+
+		This function only exists in the haggle-demo branch, and should only
+		be there. Changes including this function should not be merged with
+		the default development branch.
+	*/
+	const string _getRoutingTableAsXML(void);
 public:
 	ForwarderProphet(ForwardingManager *m = NULL, const EventType type = -1);
 	~ForwarderProphet();

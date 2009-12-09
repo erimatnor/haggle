@@ -50,6 +50,8 @@ typedef enum {
 	// Print the routing table:
 	FWD_TASK_PRINT_RIB,
 #endif
+	// Get the routing table as XML:
+	FWD_TASK_GET_XML_ROUTING_INFORMATION,
 	// Terminate the run loop
 	FWD_TASK_QUIT
 } ForwardingTaskType_t;
@@ -64,6 +66,7 @@ private:
 	DataObjectRef dObj;
 	NodeRef	node;
 	RepositoryEntryList *rel;
+        string xml;
 public:
 	ForwardingTask(ForwardingTaskType_t _type, DataObjectRef _dObj = NULL, NodeRef _node = NULL) :
 		type(_type), dObj(_dObj), node(_node), rel(NULL) {}
@@ -75,6 +78,8 @@ public:
 	RepositoryEntryList *getRepositoryEntryList() { return rel; }
 	void setRepositoryEntryList(RepositoryEntryList *_rel) { if (!rel) {rel = _rel;} }
 	const ForwardingTaskType_t getType() const { return type; }
+        void setXML(const string& _xml) { xml = _xml; }
+        const string& getXML() const { return xml; }
 	~ForwardingTask() { if (rel) delete rel; }
 };
 
@@ -122,6 +127,15 @@ protected:
 	*/
 	virtual void _printRoutingTable(void) {}
 #endif
+	/**
+		Does the actual work or getRoutingTableAsXML().
+		
+		This function only exists in the haggle-demo branch, and should only
+		be there. Changes including this function should not be merged with
+		the default development branch.
+	*/
+	virtual const string _getRoutingTableAsXML(void) { return ""; }
+
 public:
 	ForwarderAsynchronous(ForwardingManager *m = NULL, const EventType type = -1, const string name = "Asynchronous forwarding module");
 	~ForwarderAsynchronous();
@@ -143,6 +157,8 @@ public:
 	/** See the parent class function with the same name. */
 	void printRoutingTable(void);
 #endif
+	/** See the parent class function with the same name. */
+	void getRoutingTableAsXML(void);
 };
 
 #endif

@@ -90,6 +90,12 @@ void ForwarderAsynchronous::printRoutingTable(void)
 }
 #endif
 
+void ForwarderAsynchronous::getRoutingTableAsXML(void)
+{
+	// Mutexes are unlocked by default:
+	taskQ.insert(new ForwardingTask(FWD_TASK_GET_XML_ROUTING_INFORMATION));
+}
+
 bool ForwarderAsynchronous::run(void)
 {
 	while (!shouldExit()) {
@@ -137,6 +143,11 @@ bool ForwarderAsynchronous::run(void)
 						_printRoutingTable();
 						break;
 #endif
+					case FWD_TASK_GET_XML_ROUTING_INFORMATION:
+						task->setXML(_getRoutingTableAsXML());
+						addEvent(new Event(eventType, task));
+                                                task = NULL;
+                                                break;
 					case FWD_TASK_QUIT:
 						/*
 							When the forwarding module is asked to quit,
@@ -162,6 +173,7 @@ bool ForwarderAsynchronous::run(void)
 				}
 				break;
 		}
+                
 		if (task)
 			delete task;
 	}

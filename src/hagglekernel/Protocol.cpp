@@ -809,7 +809,7 @@ ProtocolEvent Protocol::sendDataObjectNow(const DataObjectRef& dObj)
 	unsigned long totBytesSent = 0;
 	ProtocolEvent pEvent = PROT_EVENT_SUCCESS;
 	Timeval t_start = Timeval::now();
-	Timeval waitTimeout;
+	Timeval waitTimeout = PROTOCOL_RECVSEND_TIMEOUT; // FIXME: Set suitable timeout
 	bool hasSentHeader = false;
 	ssize_t len;
         struct ctrlmsg m;
