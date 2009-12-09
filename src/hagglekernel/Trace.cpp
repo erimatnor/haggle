@@ -116,6 +116,11 @@ bool Trace::enableFileTrace(const string path)
 	if (traceFile)
 		return false;
 	
+	if (!create_path(path.c_str())) {
+		HAGGLE_ERR("Could not create directory path \'%s\'\n", path.c_str());
+		return false;
+	}
+
 	string fpath = path + PLATFORM_PATH_DELIMITER + "haggle.log";
 	
 	traceFile = fopen(fpath.c_str(), "w");
@@ -163,12 +168,12 @@ LogTrace::LogTrace(void)
         if (traceFile)
                 return;
 
-	if (!create_path(HAGGLE_DEFAULT_STORAGE_PATH)) {
+	if (!create_path(DEFAULT_LOG_STORAGE_PATH)) {
 		fprintf(stderr, "Unable to ensure that the haggle storage path (%s) exists\n",
 			HAGGLE_DEFAULT_STORAGE_PATH);
 	}
 	
-	filename = string(HAGGLE_DEFAULT_STORAGE_PATH) + 
+	filename = string(DEFAULT_LOG_STORAGE_PATH) + 
 		string(PLATFORM_PATH_DELIMITER) + 
 		string("trace.log");
 

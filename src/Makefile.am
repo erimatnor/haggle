@@ -8,7 +8,6 @@ SUBDIRS = \
 	bbs \
 	webserver \
 	proxy \
-	logcollector \
 	clitool \
 	luckyMe \
 	visualization \

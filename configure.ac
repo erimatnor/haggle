@@ -627,7 +627,6 @@ AC_CONFIG_FILES([Makefile
                  src/experimental/Makefile
                  src/bbs/Makefile
                  src/proxy/Makefile
-                 src/logcollector/Makefile
                  src/clitool/Makefile
                  src/tests/test01/Makefile
                  src/webserver/Makefile

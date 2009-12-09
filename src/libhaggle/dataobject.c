@@ -33,6 +33,7 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 #endif
 
@@ -117,10 +118,22 @@ unsigned short haggle_dataobject_unset_flags(struct dataobject *dobj, unsigned s
 
 int haggle_dataobject_set_createtime(struct dataobject *dobj, const struct timeval *createtime)
 {
-	if(dobj == NULL || createtime == NULL)
+	if(dobj == NULL)
 		return HAGGLE_PARAM_ERROR;
+
+	if (createtime == NULL) {
+#if defined(OS_LINUX) || defined(OS_MACOSX)
+		struct timeval now;
+		gettimeofday(&now, NULL);
+		createtime = &now;
+#else
+		return HAGGLE_PARAM_ERROR;
+#endif
+	}
+	
 	dobj->createtime.tv_sec = createtime->tv_sec;
 	dobj->createtime.tv_usec = createtime->tv_usec;
+
 	return HAGGLE_NO_ERROR;
 }
 
@@ -574,8 +587,13 @@ metadata_t *haggle_dataobject_to_metadata(struct dataobject *dobj)
                 metadata_t *am = metadata_new(DATAOBJECT_METADATA_ATTRIBUTE, haggle_attribute_get_value(a), dobj->m);
 
                 if (am) {
-                        metadata_set_parameter(am, DATAOBJECT_METADATA_ATTRIBUTE_NAME_PARAM, haggle_attribute_get_name(a));
-                        metadata_add(dobj->m, am);
+					metadata_set_parameter(am, DATAOBJECT_METADATA_ATTRIBUTE_NAME_PARAM, haggle_attribute_get_name(a));
+					if (haggle_attribute_get_weight(a)) {
+						char str_weight[8];
+						sprintf(str_weight, "%ld", haggle_attribute_get_weight(a));
+						metadata_set_parameter(am, DATAOBJECT_METADATA_ATTRIBUTE_WEIGHT_PARAM, str_weight);
+					}
+					metadata_add(dobj->m, am);
                 }
         }
 
