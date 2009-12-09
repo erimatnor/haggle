@@ -111,7 +111,7 @@ void VendettaClient::determine_ip(void)
 	our_ip_address = "127.0.0.1";
 	
 	getLocalInterfaceList(ifr, false);
-	for(InterfaceRefList::const_iterator it = ifr.begin();
+	for (InterfaceRefList::const_iterator it = ifr.begin();
             it != ifr.end(); 
             it++)
 	{

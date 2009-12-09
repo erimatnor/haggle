@@ -31,7 +31,7 @@ private:
         string our_name;
         string our_ip_address;
         string our_port;
-#define SITE_MANAGER_ADDRESS "192.168.1.50"
+#define SITE_MANAGER_ADDRESS "192.168.2.50"
 #define SITE_MANAGER_TCP_PORT "4444"
 #define SITE_MANAGER_UDP_PORT "4445"
         SOCKET tcp_socket;
