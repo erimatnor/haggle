@@ -241,6 +241,7 @@ void ForwarderProphet::_endNeighbor(NodeRef &neighbor)
 	 
 	 NOTE: This is an out of draft addition to Prophet.
 	 */
+        double old = P_ab;
         P_ab = P_ab * PROPHET_GAMMA;
         
         // Is this metric close to 0?
@@ -248,6 +249,9 @@ void ForwarderProphet::_endNeighbor(NodeRef &neighbor)
                 // Let's say it's 0:
                 P_ab = 0.0;
         }
+
+        printf("Aging neighbor metric old=%lf new=%lf\n", old, P_ab);
+
 	metric.second = Timeval::now();
 	rib_timestamp = metric.second;
 }

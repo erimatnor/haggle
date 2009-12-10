@@ -1148,10 +1148,10 @@ public class SensorNode extends MonitorNode {
 												better_metric_color);
 											ds.drawStringCentered(
 												String.format(
-													"%.2f",
+													"%.4f",
 													entry2.getValue()),
 												top_of_arc,
-												1.0,
+												0.6,
 												Color.black,
 												Color.white);
 										}else if(show_poor_metrics)
@@ -1167,10 +1167,10 @@ public class SensorNode extends MonitorNode {
 												worse_metric_color);
 											ds.drawStringCentered(
 												String.format(
-													"%.2f",
+													"%.4f",
 													entry2.getValue()),
 												top_of_arc,
-												1.0,
+												0.6,
 												Color.black,
 												Color.white);
 										}
@@ -1186,10 +1186,10 @@ public class SensorNode extends MonitorNode {
 											better_metric_color);
 										ds.drawStringCentered(
 											String.format(
-												"%.2f",
+												"%.4f",
 												entry2.getValue()),
 											top_of_arc,
-											1.0,
+											0.6,
 											Color.black,
 											Color.white);
 									}

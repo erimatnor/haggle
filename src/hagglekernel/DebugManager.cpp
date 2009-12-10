@@ -146,6 +146,9 @@ DebugManager::~DebugManager()
 
         if (onDumpDataStoreCallback)
                 delete onDumpDataStoreCallback;
+
+        if (dsDump)
+                delete dsDump;
 }
 
 void DebugManager::onFindRepositoryKey(Event *e)
@@ -360,8 +363,6 @@ void DebugManager::dumpTo(SOCKET client_sock, const DataStoreDump *dump, const s
                         }
 		
 	*/		
-        
-send_end:
 	// Send the end of the root tag:
 	sendString(client_sock, "</HaggleInfo>");
 }
@@ -372,9 +373,11 @@ void DebugManager::onDumpDataStore(Event *e)
 	if (!e || !e->hasData())
 		return;
 	
-	// Just save the dump for now. We need to request further information
-	// from managers before we send it to the clients
-	dsDump = static_cast <DataStoreDump *>(e->getData());
+        if (!dsDump) {
+                // Just save the dump for now. We need to request further information
+                // from managers before we send it to the clients
+                dsDump = static_cast <DataStoreDump *>(e->getData());
+        }
 	
 	// Send out a general request for XML dumps from managers.
 	DebugCmdRef dbgCmdRef = new DebugCmd(DBG_CMD_GET_XML_DUMP, getName());
@@ -390,13 +393,22 @@ void DebugManager::onDebugCmd(Event *e)
                 return;
         
         DebugCmdRef& cmd = e->getDebugCmd();
-        HAGGLE_DBG("Got debug command from %s\n", cmd->getAuthority().c_str());
 	
         if (cmd->getType() == DBG_CMD_XML_DUMP) {
-                printf("Got XML dump from %s\ndump:\n%s\n", 
-                       cmd->getAuthority().c_str(), 
-                       cmd->getMessage().c_str());
-		
+                /*
+                  This is not a very nice solution for dumping to a
+                  client because it assumes that only one manager
+                  (currently the Forwarding manager) has stuff to dump
+                  to the clients. If we have information from many
+                  managers in the future, then this function will be
+                  called each time one of them reports and XML dump
+                  (they may do so asynchronously). This will obviously
+                  cause a problem since we do not know when we have
+                  all the information from all managers, and hence
+                  when to send to the clients and close the sockets.
+
+                  However, this solution works for now.
+                */
 		for (List<SOCKET>::iterator it = client_sockets.begin(); it != client_sockets.end(); it++) {
 			if (dsDump)
 				dumpTo(*it, dsDump, cmd->getMessage());
@@ -406,7 +418,10 @@ void DebugManager::onDebugCmd(Event *e)
 		}
 		client_sockets.clear();
 		
-		delete dsDump;
+                if (dsDump) {
+                        delete dsDump;
+                        dsDump = NULL;
+                }
 		
         }
 }
