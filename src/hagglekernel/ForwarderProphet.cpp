@@ -375,3 +375,37 @@ void ForwarderProphet::_printRoutingTable(void)
 }
 #endif
 
+const string ForwarderProphet::_getInternalStateAsXML(void)
+{
+	string retval, tmp;
+	
+	retval = "";
+	stringprintf(tmp, "  <Vector name=\"%s\">\n", id_number_to_nodeid[1].c_str());
+	retval += tmp;
+	
+	for (prophet_rib_t::iterator jt = rib.begin(); jt != rib.end(); jt++) {
+		stringprintf(tmp, "    <Metric name=\"%s\">%f</Metric>\n", 
+			id_number_to_nodeid[jt->first].c_str(), 
+			jt->second.first);
+		retval += tmp;
+	}
+	retval += "  </Vector>\n";
+	
+	for (Map<prophet_node_id_t, prophet_rib_t>::iterator it = 
+			neighbor_ribs.begin(); it != neighbor_ribs.end(); it++) {
+		stringprintf(tmp, "  <Vector name=\"%s\">\n", 
+			id_number_to_nodeid[it->first].c_str());
+		retval += tmp;
+		
+		for (prophet_rib_t::iterator jt = it->second.begin();
+			jt != it->second.end(); jt++) {
+			stringprintf(tmp, "    <Metric name=\"%s\">%f</Metric>\n", 
+				id_number_to_nodeid[jt->first].c_str(), jt->second.first);
+			retval += tmp;
+		}
+		
+		retval += "  </Vector>\n";
+	}
+	
+	return retval;
+}

@@ -52,6 +52,8 @@ typedef enum {
 	// Print the routing table:
 	FWD_TASK_PRINT_RIB,
 #endif
+	// Get the internal state as XML:
+	FWD_TASK_GET_XML_STATE,
 	// Terminate the run loop
 	FWD_TASK_QUIT
 } ForwardingTaskType_t;
@@ -66,6 +68,7 @@ private:
 	DataObjectRef dObj;
 	NodeRef	node;
 	RepositoryEntryList *rel;
+        string xml;
 public:
 	ForwardingTask(ForwardingTaskType_t _type, DataObjectRef _dObj = NULL, NodeRef _node = NULL) :
 		type(_type), dObj(_dObj), node(_node), rel(NULL) {}
@@ -77,6 +80,8 @@ public:
 	RepositoryEntryList *getRepositoryEntryList() { return rel; }
 	void setRepositoryEntryList(RepositoryEntryList *_rel) { if (!rel) {rel = _rel;} }
 	const ForwardingTaskType_t getType() const { return type; }
+        void setXML(const string& _xml) { xml = _xml; }
+        const string& getXML() const { return xml; }
 	~ForwardingTask() { if (rel) delete rel; }
 };
 
@@ -94,7 +99,7 @@ class ForwarderAsynchronous : public Forwarder {
 	bool run(void);
 protected:
 	/**
-		Does the actual work of newForwardingDataObject.
+		Does the actual work of newRoutingInformation
 	*/
 	virtual bool newRoutingInformation(const Metadata *m) { return false; }
 	
@@ -124,6 +129,15 @@ protected:
 	*/
 	virtual void _printRoutingTable(void) {}
 #endif
+	/**
+		Does the actual work or getInternatlStateAsXML().
+		
+		This function only exists in the haggle-demo branch, and should only
+		be there. Changes including this function should not be merged with
+		the default development branch.
+	*/
+	virtual const string _getInternalStateAsXML(void) { return ""; }
+
 public:
 	ForwarderAsynchronous(ForwardingManager *m = NULL, const EventType type = -1, const string name = "Asynchronous forwarding module");
 
@@ -154,11 +168,14 @@ public:
 	void generateTargetsFor(NodeRef &neighbor);
 	/** See the parent class function with the same name. */
 	void generateDelegatesFor(DataObjectRef &dObj, NodeRef &target);
+	/** See the parent class function with the same name. */
 	void generateRoutingInformationDataObject(NodeRef &neighbor);
 #ifdef DEBUG
 	/** See the parent class function with the same name. */
 	void printRoutingTable(void);
 #endif
+	/** See the parent class function with the same name. */
+	void getInternalStateAsXML(void);
 };
 
 #endif
