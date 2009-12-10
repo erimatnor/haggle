@@ -152,7 +152,7 @@ public:
 		be there. Changes including this function should not be merged with
 		the default development branch.
 	*/
-	virtual void getRoutingTableAsXML(void) {}
+	virtual void getInternalStateAsXML(void) {}
 	
 };
 

@@ -134,7 +134,7 @@ class ForwarderProphet : public ForwarderAsynchronous {
 		be there. Changes including this function should not be merged with
 		the default development branch.
 	*/
-	const string _getRoutingTableAsXML(void);
+	const string _getInternalStateAsXML(void);
 public:
 	ForwarderProphet(ForwardingManager *m = NULL, const EventType type = -1);
 	~ForwarderProphet();

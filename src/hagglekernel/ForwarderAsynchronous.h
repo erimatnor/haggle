@@ -50,8 +50,8 @@ typedef enum {
 	// Print the routing table:
 	FWD_TASK_PRINT_RIB,
 #endif
-	// Get the routing table as XML:
-	FWD_TASK_GET_XML_ROUTING_INFORMATION,
+	// Get the internal state as XML:
+	FWD_TASK_GET_XML_STATE,
 	// Terminate the run loop
 	FWD_TASK_QUIT
 } ForwardingTaskType_t;
@@ -97,7 +97,7 @@ class ForwarderAsynchronous : public Forwarder {
 	bool run(void);
 protected:
 	/**
-		Does the actual work of newForwardingDataObject.
+		Does the actual work of newRoutingInformation
 	*/
 	virtual bool newRoutingInformation(const Metadata *m) { return false; }
 	
@@ -128,18 +128,31 @@ protected:
 	virtual void _printRoutingTable(void) {}
 #endif
 	/**
-		Does the actual work or getRoutingTableAsXML().
+		Does the actual work or getInternatlStateAsXML().
 		
 		This function only exists in the haggle-demo branch, and should only
 		be there. Changes including this function should not be merged with
 		the default development branch.
 	*/
-	virtual const string _getRoutingTableAsXML(void) { return ""; }
+	virtual const string _getInternalStateAsXML(void) { return ""; }
 
 public:
 	ForwarderAsynchronous(ForwardingManager *m = NULL, const EventType type = -1, const string name = "Asynchronous forwarding module");
+	/**
+	 Generally, the thread should not be stopped by doing a delete 
+	 on the forwarding module object. This is because, once in the destructor,
+	 the state of the object might already have been deleted, and then it
+	 is too late to save it. Use the quit() function instead, because it will
+	 stop the thread and allow it to save its state before the destructor is
+	 called. The stop() in the destructor is only a safeguard in case the thread 
+	 is for some reason already running
+	 */
 	~ForwarderAsynchronous();
 	
+	/**
+	  Call quit() when the forwarding module thread should exit. After calling quit, 
+	  the forwarding module will save its state to the data store and then exit. 
+	 */ 
 	void quit();
 	
 	/** See the parent class function with the same name. */
@@ -152,13 +165,14 @@ public:
 	void generateTargetsFor(NodeRef &neighbor);
 	/** See the parent class function with the same name. */
 	void generateDelegatesFor(DataObjectRef &dObj, NodeRef &target);
+	/** See the parent class function with the same name. */
 	void generateRoutingInformationDataObject(NodeRef &neighbor);
 #ifdef DEBUG
 	/** See the parent class function with the same name. */
 	void printRoutingTable(void);
 #endif
 	/** See the parent class function with the same name. */
-	void getRoutingTableAsXML(void);
+	void getInternalStateAsXML(void);
 };
 
 #endif

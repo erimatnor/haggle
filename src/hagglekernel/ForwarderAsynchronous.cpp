@@ -22,6 +22,10 @@ ForwarderAsynchronous::ForwarderAsynchronous(ForwardingManager *m, const EventTy
 
 ForwarderAsynchronous::~ForwarderAsynchronous()
 {
+	if (isRunning()) {
+		HAGGLE_ERR("WARNING: Forwarding module %s is still running when destructor was called."
+			   " Use quit() first to stop the thread so that it can save its state.\n", getName());
+	}
 	stop();
 }
 
@@ -90,10 +94,10 @@ void ForwarderAsynchronous::printRoutingTable(void)
 }
 #endif
 
-void ForwarderAsynchronous::getRoutingTableAsXML(void)
+void ForwarderAsynchronous::getInternalStateAsXML(void)
 {
 	// Mutexes are unlocked by default:
-	taskQ.insert(new ForwardingTask(FWD_TASK_GET_XML_ROUTING_INFORMATION));
+	taskQ.insert(new ForwardingTask(FWD_TASK_GET_XML_STATE));
 }
 
 bool ForwarderAsynchronous::run(void)
@@ -143,8 +147,8 @@ bool ForwarderAsynchronous::run(void)
 						_printRoutingTable();
 						break;
 #endif
-					case FWD_TASK_GET_XML_ROUTING_INFORMATION:
-						task->setXML(_getRoutingTableAsXML());
+					case FWD_TASK_GET_XML_STATE:
+						task->setXML(_getInternalStateAsXML());
 						addEvent(new Event(eventType, task));
                                                 task = NULL;
                                                 break;

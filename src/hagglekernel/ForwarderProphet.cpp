@@ -60,7 +60,7 @@ bool ForwarderProphet::setSaveState(RepositoryEntryRef& e)
 	// The second part is the timeval string
 	metric.second = Timeval(value.substr(pos + 1));
 	
-	//printf("metric2=%lf, timeval2=%s\n", metric.first, metric.second.getAsString().c_str());
+	printf("metric2=%lf, timeval2=%s\n", metric.first, metric.second.getAsString().c_str());
 	rib_timestamp = Timeval::now();
 	
 	return true;
@@ -345,7 +345,7 @@ void ForwarderProphet::_printRoutingTable(void)
 }
 #endif
 
-const string ForwarderProphet::_getRoutingTableAsXML(void)
+const string ForwarderProphet::_getInternalStateAsXML(void)
 {
 	string retval, tmp;
 	
