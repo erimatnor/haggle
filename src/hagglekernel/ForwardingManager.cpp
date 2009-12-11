@@ -39,7 +39,7 @@ ForwardingManager::ForwardingManager(HaggleKernel * _kernel) :
 	setEventHandler(EVENT_TYPE_NODE_CONTACT_END, onEndNeighbor);
 	setEventHandler(EVENT_TYPE_TARGET_NODES, onTargetNodes);
 	setEventHandler(EVENT_TYPE_DELEGATE_NODES, onDelegateNodes);
-#ifdef DEBUG
+#if defined(DEBUG)
 	setEventHandler(EVENT_TYPE_DEBUG_CMD, onDebugCmd);
 #endif
 	moduleEventType = registerEventType(getName(), onForwardingTaskComplete);
@@ -139,9 +139,6 @@ void ForwardingManager::setForwardingModule(Forwarder *forw)
 
 void ForwardingManager::onShutdown()
 {
-	// Remove the forwarding data objects filter from the data store:
-	unregisterEventTypeForFilter(forwardingObjectEType);
-
 	// Set the current forwarding module to none. See setForwardingModule().
 	unregisterWithKernel();
 }
@@ -671,10 +668,6 @@ void ForwardingManager::findMatchingDataObjectsAndTargets(NodeRef& node)
 	kernel->getDataStore()->doDataObjectQuery(node, 1, dataObjectQueryCallback);
 }
 
-void ForwardingManager::onForwardingDataObject(Event * e)
-{
-	
-}
 
 void ForwardingManager::onRoutingInformation(Event *e)
 {
