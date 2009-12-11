@@ -293,7 +293,6 @@ bool VendettaClient::sendEvent(string event, string params)
                 tcp_socket = open_tcp_socket();
         } else {
                 //Not that we know...test it for exceptional
-        state:
                 tv.tv_sec = 0;
 		tv.tv_usec = 0;
 		FD_ZERO(&exceptfds);
