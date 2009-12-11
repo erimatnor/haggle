@@ -16,6 +16,7 @@
 #include <libcpphaggle/Platform.h>
 #include "ForwardingManager.h"
 #include "ForwarderEmpty.h"
+#include "ForwarderEpidemic.h"
 #include "ForwarderProphet.h"
 #include "ForwarderRank.h"
 
@@ -38,9 +39,9 @@ ForwardingManager::ForwardingManager(HaggleKernel * _kernel) :
 	setEventHandler(EVENT_TYPE_NODE_CONTACT_END, onEndNeighbor);
 	setEventHandler(EVENT_TYPE_TARGET_NODES, onTargetNodes);
 	setEventHandler(EVENT_TYPE_DELEGATE_NODES, onDelegateNodes);
-
+#ifdef DEBUG
 	setEventHandler(EVENT_TYPE_DEBUG_CMD, onDebugCmd);
-
+#endif
 	moduleEventType = registerEventType(getName(), onForwardingTaskComplete);
 	
 #if HAVE_EXCEPTION
@@ -138,6 +139,9 @@ void ForwardingManager::setForwardingModule(Forwarder *forw)
 
 void ForwardingManager::onShutdown()
 {
+	// Remove the forwarding data objects filter from the data store:
+	unregisterEventTypeForFilter(forwardingObjectEType);
+
 	// Set the current forwarding module to none. See setForwardingModule().
 	unregisterWithKernel();
 }
@@ -178,6 +182,13 @@ void ForwardingManager::onForwardingTaskComplete(Event *e)
 			}
 		}
 			break;
+                case FWD_TASK_GET_XML_STATE:
+                {
+                        HAGGLE_DBG("Got XML dump from forwarding module\n");
+                        DebugCmdRef cmd = new DebugCmd(DBG_CMD_XML_DUMP, getName(), task->getXML());
+                        kernel->addEvent(new Event(cmd));
+                }
+                        break;
 		case FWD_TASK_GENERATE_ROUTING_INFO_DATA_OBJECT:
 			if (isNeighbor(task->getNode())) {
 				if (forwardingModule) {					
@@ -250,14 +261,22 @@ out:
 #ifdef DEBUG
 void ForwardingManager::onDebugCmd(Event *e)
 {
-	if (e) {
-		if (e->getDebugCmd()->getType() == DBG_CMD_PRINT_ROUTING_TABLE) {
-			if (forwardingModule)
-				forwardingModule->printRoutingTable();
-			else
-				printf("No forwarding module");
-		}
-	}
+	if (!e)
+                return;
+
+        if (e->getDebugCmd()->getType() == DBG_CMD_PRINT_ROUTING_TABLE) {
+                if (forwardingModule)
+                        forwardingModule->printRoutingTable();
+                else
+                        printf("No forwarding module");
+        }
+        if (e->getDebugCmd()->getType() == DBG_CMD_GET_XML_DUMP) {
+                if (forwardingModule) {
+                        HAGGLE_DBG("Requesting dump from forwarding module %s\n", 
+                                   forwardingModule->getName());
+                        forwardingModule->getInternalStateAsXML();
+                }
+        }
 }
 #endif
 
@@ -652,6 +671,10 @@ void ForwardingManager::findMatchingDataObjectsAndTargets(NodeRef& node)
 	kernel->getDataStore()->doDataObjectQuery(node, 1, dataObjectQueryCallback);
 }
 
+void ForwardingManager::onForwardingDataObject(Event * e)
+{
+	
+}
 
 void ForwardingManager::onRoutingInformation(Event *e)
 {

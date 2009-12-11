@@ -51,7 +51,8 @@ SOCKET openSocket(int port);
 
 DebugManager::DebugManager(HaggleKernel * _kernel, bool interactive) : 
                 Manager("DebugManager", _kernel), onFindRepositoryKeyCallback(NULL), 
-                onDumpDataStoreCallback(NULL),server_sock(-1), console(INVALID_STDIN)
+                onDumpDataStoreCallback(NULL), server_sock(-1), console(INVALID_STDIN),
+		dsDump(NULL)
 {
 #define __CLASS__ DebugManager
 #if defined(DEBUG)
@@ -76,7 +77,7 @@ DebugManager::DebugManager(HaggleKernel * _kernel, bool interactive) :
 #endif
 	}
 
-#if defined(OS_LINUX) || (defined(OS_MACOSX) && !defined(OS_MACOSX_IPHONE))
+#if (defined(OS_LINUX) && !defined(OS_ANDROID)) || (defined(OS_MACOSX) && !defined(OS_MACOSX_IPHONE))
 	if (interactive) {
 		console = open("/dev/stdin", O_RDONLY);
 		
@@ -145,6 +146,9 @@ DebugManager::~DebugManager()
 
         if (onDumpDataStoreCallback)
                 delete onDumpDataStoreCallback;
+
+        if (dsDump)
+                delete dsDump;
 }
 
 void DebugManager::onFindRepositoryKey(Event *e)
@@ -235,13 +239,13 @@ static size_t skipXMLTag(const char *data, size_t len)
 	size_t i = 0;
 	
 	// Skip over the <?xml version="1.0"?> tag:
-	while(strncmp(&(data[i]), "?>", 2) != 0)
+	while (strncmp(&(data[i]), "?>", 2) != 0)
 		i++;
 	i += 2;
 	return i;
 }
 
-void DebugManager::dumpTo(SOCKET client_sock, DataStoreDump *dump)
+void DebugManager::dumpTo(SOCKET client_sock, const DataStoreDump *dump, const string& routingInfo)
 {
 	size_t toSend = dump->getLen();
 	const char *data = dump->getData();
@@ -262,6 +266,7 @@ void DebugManager::dumpTo(SOCKET client_sock, DataStoreDump *dump)
         DataObjectRef dObj = kernel->getThisNode()->getDataObject(false);
         char *buf;
         size_t len;
+
         if (dObj->getMetadata()->getRawAlloc(&buf, &len)) {
                 i = skipXMLTag(buf, len);
                 len -= i;
@@ -280,7 +285,52 @@ void DebugManager::dumpTo(SOCKET client_sock, DataStoreDump *dump)
                 free(buf);
         }
 	
+        NodeRefList nl;
+	
+        kernel->getNodeStore()->retrieveNeighbors(nl);
+
+        if (!nl.empty()) {
+                if (!sendString(client_sock, "<NeighborInfo>\n"))
+                        return;
+                for (NodeRefList::iterator it = nl.begin(); it != nl.end(); it++) {
+                        if (!sendString(client_sock, "<Neighbor>"))
+                                return;
+                        if (!sendString(client_sock, (*it)->getIdStr()))
+                                return;
+                        if (!sendString(client_sock, "</Neighbor>\n"))
+                                return;
+                }
+                if (!sendString(client_sock, "</NeighborInfo>\n"))
+                        return;
+        }
+	
 	/*
+	  Send the routing information 
+	 */
+	if (!sendString(client_sock, "<RoutingTable>\n"))
+		return;
+	
+	if (routingInfo.length() > 0)
+		if (!sendString(client_sock, routingInfo.c_str()))
+			return;
+	
+	if (!sendString(client_sock, "</RoutingTable>\n"))
+		return;
+	
+	/*
+	 
+	 Update by Erik, 2009-12-10:
+	 
+	 DO we really need the information below?
+	 
+	 What is in the routing information data object sent to a neighbor
+	 that is not in the routing table?
+	 
+	 I guess when Prophet was implemented differently in the older version
+	 there might have been a difference?
+	 
+	 --------------------------------------------
+	 
 	 
 	 FIXME: With the new forwarding this thing is broken.
 	 
@@ -310,46 +360,70 @@ void DebugManager::dumpTo(SOCKET client_sock, DataStoreDump *dump)
 				}
                                 free(buf);
                         }
-                }
-        }
-	*/
-        NodeRefList nl;
-	
-        kernel->getNodeStore()->retrieveNeighbors(nl);
-        if (!nl.empty()) {
-                if (!sendString(client_sock, "<NeighborInfo>\n"))
-                        return;
-                for (NodeRefList::iterator it = nl.begin(); it != nl.end(); it++) {
-                        if (!sendString(client_sock, "<Neighbor>"))
-                                return;
-                        if (!sendString(client_sock, (*it)->getIdStr()))
-                                return;
-                        if (!sendString(client_sock, "</Neighbor>\n"))
-                                return;
-                }
-                if (!sendString(client_sock, "</NeighborInfo>\n"))
-                        return;
-        }
-	
+                        }
+		
+	*/		
 	// Send the end of the root tag:
 	sendString(client_sock, "</HaggleInfo>");
 }
+
 
 void DebugManager::onDumpDataStore(Event *e)
 {
 	if (!e || !e->hasData())
 		return;
 	
-	DataStoreDump *dump = static_cast <DataStoreDump *>(e->getData());
+        if (!dsDump) {
+                // Just save the dump for now. We need to request further information
+                // from managers before we send it to the clients
+                dsDump = static_cast <DataStoreDump *>(e->getData());
+        }
 	
-	for (List<SOCKET>::iterator it = client_sockets.begin(); it != client_sockets.end(); it++) {
-		dumpTo(*it, dump);
-		kernel->unregisterWatchable(*it);
-		CLOSE_SOCKET(*it);
-	}
-	client_sockets.clear();
+	// Send out a general request for XML dumps from managers.
+	DebugCmdRef dbgCmdRef = new DebugCmd(DBG_CMD_GET_XML_DUMP, getName());
+	kernel->addEvent(new Event(dbgCmdRef));
 	
-	delete dump;
+	// The actual sending of the dump to clients is done in onDebugCmd()
+	// (see below).
+}
+
+void DebugManager::onDebugCmd(Event *e)
+{
+	if (!e) 
+                return;
+        
+        DebugCmdRef& cmd = e->getDebugCmd();
+	
+        if (cmd->getType() == DBG_CMD_XML_DUMP) {
+                /*
+                  This is not a very nice solution for dumping to a
+                  client because it assumes that only one manager
+                  (currently the Forwarding manager) has stuff to dump
+                  to the clients. If we have information from many
+                  managers in the future, then this function will be
+                  called each time one of them reports and XML dump
+                  (they may do so asynchronously). This will obviously
+                  cause a problem since we do not know when we have
+                  all the information from all managers, and hence
+                  when to send to the clients and close the sockets.
+
+                  However, this solution works for now.
+                */
+		for (List<SOCKET>::iterator it = client_sockets.begin(); it != client_sockets.end(); it++) {
+			if (dsDump)
+				dumpTo(*it, dsDump, cmd->getMessage());
+			
+			kernel->unregisterWatchable(*it);
+			CLOSE_SOCKET(*it);
+		}
+		client_sockets.clear();
+		
+                if (dsDump) {
+                        delete dsDump;
+                        dsDump = NULL;
+                }
+		
+        }
 }
 
 void DebugManager::onShutdown()
@@ -411,13 +485,20 @@ void DebugManager::onWatchableEvent(const Watchable& wbl)
 	
 		if (client_sock != INVALID_SOCKET) {
 			HAGGLE_DBG("Registering client socket: %ld\n", client_sock);
+
 			if (!kernel->registerWatchable(client_sock, this)) {
+                                HAGGLE_ERR("Could not register watchable\n");
 				CLOSE_SOCKET(client_sock);
 				return;
 			}
-			if(client_sockets.empty())
+                        
+			if (client_sockets.empty()) {
+                                HAGGLE_DBG("No clients previously registered, dumping data store\n");
 				kernel->getDataStore()->dump(onDumpDataStoreCallback);
-			client_sockets.push_back(client_sock);
+                        }
+			HAGGLE_DBG("Data store dump already in progress...\n");
+                        client_sockets.push_back(client_sock);
+                        
 		}else{
 			HAGGLE_DBG("accept failed: %ld\n", client_sock);
 		}
@@ -444,7 +525,7 @@ void DebugManager::onWatchableEvent(const Watchable& wbl)
 
 		switch (c) {
 			case 'c':
-				dbgCmdRef = DebugCmdRef(new DebugCmd(DBG_CMD_PRINT_CERTIFICATES), "PrintCertificatesDebugCmd");
+				dbgCmdRef = new DebugCmd(DBG_CMD_PRINT_CERTIFICATES, getName());
 				kernel->addEvent(new Event(dbgCmdRef));
 				break;
 #ifdef DEBUG_DATASTORE
@@ -470,17 +551,21 @@ void DebugManager::onWatchableEvent(const Watchable& wbl)
 				kernel->getNodeStore()->print();
 				break;
 			case 'p':
-				dbgCmdRef = DebugCmdRef(new DebugCmd(DBG_CMD_PRINT_PROTOCOLS), "PrintPotocolsDebugCmd");
+				dbgCmdRef = new DebugCmd(DBG_CMD_PRINT_PROTOCOLS, getName());
 				kernel->addEvent(new Event(dbgCmdRef));
 				break;
 			case 'r':
-				dbgCmdRef = DebugCmdRef(new DebugCmd(DBG_CMD_PRINT_ROUTING_TABLE), "PrintRoutingTableDebugCmd");
+				dbgCmdRef = new DebugCmd(DBG_CMD_PRINT_ROUTING_TABLE, getName());
 				kernel->addEvent(new Event(dbgCmdRef));
 				break;
 			case 's':
 				kernel->shutdown();
 				break;		
-#ifdef DEBUG
+#ifdef DEBUG	
+                        case 'x':
+				dbgCmdRef = new DebugCmd(DBG_CMD_GET_XML_DUMP, getName());
+				kernel->addEvent(new Event(dbgCmdRef));
+				break;
 			case 't':				
 				printf("===============================\n");
 				Thread::registryPrint();
@@ -491,7 +576,7 @@ void DebugManager::onWatchableEvent(const Watchable& wbl)
 				kernel->getThisNode()->getDataObject()->getMetadata()->getRawAlloc(&raw, &rawLen);
 				if (raw) {
 					printf("======= Node description =======\n");
-						printf("%s\n", raw);
+                                        printf("%s\n", raw);
 					printf("================================\n");
 					free(raw);
 				}
@@ -541,7 +626,9 @@ void DebugManager::publicEvent(Event *e)
                                            (iface ? "yes" : "no"));
                         }
                         break;
-                        
+                case EVENT_TYPE_DEBUG_CMD:
+                        // Reroute to separate handler
+                        onDebugCmd(e);
                 default:
                         HAGGLE_DBG("%s data=%s\n", e->getName(), e->hasData()? "Yes" : "No");
                         break;
