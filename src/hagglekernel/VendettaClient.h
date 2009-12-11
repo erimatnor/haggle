@@ -49,9 +49,8 @@ private:
         virtual void _sendPING(void);
     public:
 	string getOurName(void) { return our_name; }
-        VendettaClient(
-                        VendettaManager *m = NULL,
-                        const string name = "Vendetta client module");
+        VendettaClient(VendettaManager *m = NULL,
+                       const string name = "Vendetta client module");
         ~VendettaClient();
 };
 
