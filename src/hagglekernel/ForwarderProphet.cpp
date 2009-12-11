@@ -395,7 +395,7 @@ const string ForwarderProphet::_getInternalStateAsXML(void)
 	retval += tmp;
 	
 	for (prophet_rib_t::iterator jt = rib.begin(); jt != rib.end(); jt++) {
-		stringprintf(tmp, "    <Metric name=\"%s\">%f</Metric>\n", 
+		stringprintf(tmp, "    <Metric name=\"%s\">%lf</Metric>\n", 
 			id_number_to_nodeid[jt->first].c_str(), 
 			jt->second.first);
 		retval += tmp;
@@ -410,7 +410,7 @@ const string ForwarderProphet::_getInternalStateAsXML(void)
 		
 		for (prophet_rib_t::iterator jt = it->second.begin();
 			jt != it->second.end(); jt++) {
-			stringprintf(tmp, "    <Metric name=\"%s\">%f</Metric>\n", 
+			stringprintf(tmp, "    <Metric name=\"%s\">%lf</Metric>\n", 
 				id_number_to_nodeid[jt->first].c_str(), jt->second.first);
 			retval += tmp;
 		}
