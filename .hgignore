@@ -96,6 +96,13 @@ testsuite/test_utils/bloom
 testsuite/test_utils/bloom_count
 testsuite/test_utils/shatest
 testsuite/test_utils/test64
+src/luckyMe/luckyMe
+src/visualization/do_telnet/do_telnet
+src/visualization/siteManager/classnoinst.stamp
+src/visualization/vclient/fake_monitor
+src/visualization/vclient/vclient
+src/visualization/vendetta/classnoinst.stamp
+src/visualization/vendetta/log/logfile.txt
 *.ncb
 *.suo
 *.vcproj.*
