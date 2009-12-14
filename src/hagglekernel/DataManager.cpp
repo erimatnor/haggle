@@ -143,8 +143,9 @@ DataManager::DataManager(HaggleKernel * _kernel, const bool _setCreateTimeOnBloo
 	RepositoryEntryRef timestamp = RepositoryEntryRef(new RepositoryEntry("DataManager", "Startup timestamp", Timeval::now().getAsString().c_str()));
 	kernel->getDataStore()->insertRepository(timestamp);
 
-	agingMaxAge = DEFAULT_AGING_MAX_AGE;
-	agingPeriod = DEFAULT_AGING_PERIOD;
+	// Special demo-branch values:
+	agingMaxAge = 10;//DEFAULT_AGING_MAX_AGE;
+	agingPeriod = 15;//DEFAULT_AGING_PERIOD;
 
 	agingEvent = registerEventType("Aging Event", onAging);
 	// Start aging:
@@ -331,9 +332,22 @@ void DataManager::onDeletedDataObject(Event * e)
 {
 	if (!e || !e->hasData())
 		return;
-
-	localBF.remove(e->getDataObject());
-	kernel->getThisNode()->setBloomfilter(localBF, setCreateTimeOnBloomfilterUpdate);
+	
+	DataObjectRefList dObjs = e->getDataObjectList();
+	
+	for (DataObjectRefList::iterator it = dObjs.begin(); it != dObjs.end(); it++)
+		localBF.remove(*it);
+	
+	if(dObjs.size() > 0)
+		kernel->getThisNode()->setBloomfilter(localBF, setCreateTimeOnBloomfilterUpdate);
+	// FIXME: THIS SHOULD NOT BE HARD-CODED!
+	if(dObjs.size() > 4)
+	{
+		// Call onAging() do do another aging step, in case there are more data
+		// objects to delete. Use this event, so that onAging() doesn't post 
+		// another aging event into the event queue.
+		onAging(e);
+	}
 }
 
 /*
@@ -355,10 +369,10 @@ void DataManager::onInsertedDataObject(Event * e)
 		query it through the data store task queue (since the query will be 
 		processed after the insertion task).
 	*/
-        if (dObj->isDuplicate()) {
-                HAGGLE_DBG("Data object %s is a duplicate, but adding to bloomfilter to be sure\n", dObj->getIdStr());
-        } else {
-                kernel->addEvent(new Event(EVENT_TYPE_DATAOBJECT_NEW, dObj));
+	if (dObj->isDuplicate()) {
+		HAGGLE_DBG("Data object %s is a duplicate, but adding to bloomfilter to be sure\n", dObj->getIdStr());
+	} else {
+		kernel->addEvent(new Event(EVENT_TYPE_DATAOBJECT_NEW, dObj));
 	}
 
 	if (dObj->isPersistent() && !localBF.has(dObj)) {
@@ -375,12 +389,14 @@ void DataManager::onAging(Event *e)
 			// Delete from the data store any data objects we're not interested
 			// in and are too old.
 			// FIXME: find a better way to deal with the age parameter. 
-			// Is one day really a good value? 
-			kernel->getDataStore()->ageDataObjects(Timeval(10,0));
+			kernel->getDataStore()->ageDataObjects(Timeval(agingMaxAge,0));
 		}
 		
-		// FIXME: aging every 10 minutes is definately overkill...
-		kernel->addEvent(new Event(agingEvent, NULL, 15));
+		// Should we post another aging event?
+		if(e == NULL || e->getType() == agingEvent)
+		{
+			kernel->addEvent(new Event(agingEvent, NULL, agingPeriod));
+		}
 	}
 }
 
