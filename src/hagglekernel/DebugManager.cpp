@@ -316,53 +316,7 @@ void DebugManager::dumpTo(SOCKET client_sock, const DataStoreDump *dump, const s
 	
 	if (!sendString(client_sock, "</RoutingTable>\n"))
 		return;
-	
-	/*
-	 
-	 Update by Erik, 2009-12-10:
-	 
-	 DO we really need the information below?
-	 
-	 What is in the routing information data object sent to a neighbor
-	 that is not in the routing table?
-	 
-	 I guess when Prophet was implemented differently in the older version
-	 there might have been a difference?
-	 
-	 --------------------------------------------
-	 
-	 
-	 FIXME: With the new forwarding this thing is broken.
-	 
-        Manager *mgr = kernel->getManager((char *)"ForwardingManager");
-	
-        if (mgr) {
-                ForwardingManager *fmgr = (ForwardingManager *) mgr;
-		
-                DataObjectRef dObj = fmgr->getForwarder()->myMetricDO;
-                if (dObj) {
-                        char *buf;
-                        size_t len;
-                        if (dObj->getMetadata()->getRawAlloc(&buf, &len)) {
-                                i = skipXMLTag(buf, len);
-                                len -= i;
-                                if (!sendString(client_sock, "<RoutingData>\n")) {
-					free(buf);
-					return;
-				}
-                                if (!sendBuffer(client_sock, &(buf[i]), len)) {
-					free(buf);
-					return;
-				}
-                                if (!sendString(client_sock, "</RoutingData>\n")) {
-					free(buf);
-					return;
-				}
-                                free(buf);
-                        }
-                        }
-		
-	*/		
+			
 	// Send the end of the root tag:
 	sendString(client_sock, "</HaggleInfo>");
 }
