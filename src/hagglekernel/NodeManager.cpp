@@ -175,6 +175,14 @@ int NodeManager::sendNodeDescription(NodeRef neigh)
 {
 	DataObjectRef dObj = kernel->getThisNode()->getDataObject();
 
+#ifdef CHANGE_NODEDESCRIPTION_CREATETIME_WHEN_SENDING
+	/*
+		For testing purposes. To test the difference when setting the create 
+		time whenever the data object is sent and whenever it actually changes.
+	*/
+	dObj->setCreateTime();
+#endif
+	
 	if (neigh->getBloomfilter()->has(dObj)) {
 		HAGGLE_DBG("Neighbor %s already has our most recent node description\n", neigh->getName().c_str());
 		return 0;

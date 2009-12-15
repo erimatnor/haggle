@@ -145,8 +145,9 @@ DataManager::DataManager(HaggleKernel * _kernel, const bool _setCreateTimeOnBloo
 	RepositoryEntryRef timestamp = RepositoryEntryRef(new RepositoryEntry("DataManager", "Startup timestamp", Timeval::now().getAsString().c_str()));
 	kernel->getDataStore()->insertRepository(timestamp);
 
-	agingMaxAge = DEFAULT_AGING_MAX_AGE;
-	agingPeriod = DEFAULT_AGING_PERIOD;
+	// Special demo-branch values:
+	agingMaxAge = 10;//DEFAULT_AGING_MAX_AGE;
+	agingPeriod = 15;//DEFAULT_AGING_PERIOD;
 
 	agingEvent = registerEventType("Aging Event", onAging);
 

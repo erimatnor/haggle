@@ -96,6 +96,8 @@ typedef enum {
 	DBG_CMD_PRINT_PROTOCOLS,
 	DBG_CMD_PRINT_ROUTING_TABLE,
 	DBG_CMD_PRINT_CERTIFICATES,
+	DBG_CMD_GET_XML_DUMP,
+	DBG_CMD_XML_DUMP,
 	_DBG_CMD_MAX,
 } DebugCmdType_t;
 
@@ -113,12 +115,14 @@ class DebugCmd
 #endif
 {
 	const DebugCmdType_t type;
-	string msg;
+        const string authority;
+	const string msg;
 public:
-	DebugCmd(DebugCmdType_t _type, string _msg = "No message");
+	DebugCmd(const DebugCmdType_t _type, const string _authority = "Unknown", const string _msg = "No message");
 	virtual ~DebugCmd();
-	const char *getMsg() const { return msg.c_str(); } 
-	const DebugCmdType_t getType() const { return type; }
+	const string& getMessage() const { return msg; } 
+        const string& getAuthority() const { return authority; }
+	const DebugCmdType_t& getType() const { return type; }
 };
 
 typedef haggle::Reference<DebugCmd> DebugCmdRef;

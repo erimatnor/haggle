@@ -50,11 +50,12 @@ class ForwardingManager : public Manager
 	
 	forwardingList forwardedObjects;
 	Forwarder *forwardingModule;
+	EventType forwardingObjectEType;
 	List<NodeRef> pendingQueryList;
-	
+
 	void onPrepareStartup();
 	void onPrepareShutdown();
-	
+
         // See comment in ForwardingManager.cpp about isNeighbor()
         bool isNeighbor(NodeRef& node);
         bool addToSendList(DataObjectRef& dObj, NodeRef& node, int repeatCount = 0);
@@ -88,6 +89,7 @@ public:
 	void onNodeUpdated(Event *e);
 	void onRoutingInformation(Event *e);
 	void onNewDataObject(Event *e);
+	void onForwardingDataObject(Event * e);
 	void onNewNeighbor(Event *e);
 	void onEndNeighbor(Event *e);
 	void onRepositoryData(Event *e);
