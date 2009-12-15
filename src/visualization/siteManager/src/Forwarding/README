@@ -1,0 +1,4 @@
+The site manager is run from the directory ABOVE this one, using the command:
+
+> java Forwarding.Main
+

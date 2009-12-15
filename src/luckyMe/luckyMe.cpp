@@ -120,6 +120,7 @@ void createInterestBinomial()
 	// use binomial distribution to approximate normal distribution (sum of weights = 100)
 	// mean = np = luck, variance = np(1-p) = LUCK_INTERESTS
 	double p = 0.5;
+
 	unsigned int n = 4 * sqrt((double)varianceInterestAttributes);
 	unsigned int u = n * p;
 
@@ -132,6 +133,7 @@ void createInterestBinomial()
 		weight = 100 * fac(n)/(fac(n-i)*fac(i))*pow(p,i)*pow(1-p,n-i);
 		if (weight > 0) {
 			sprintf(luckAttrValue, "%u", interest);
+
 			attr = haggle_attribute_new_weighted(APP_NAME, luckAttrValue, weight);
 			haggle_attributelist_add_attribute(attrList, attr);
 			printf("   %s=%s [%d]\n", APP_NAME, luckAttrValue, weight);
@@ -197,7 +199,7 @@ void createDataobjectRandom()
 		haggle_dataobject_add_attribute(dObj, APP_NAME, luckAttrValue);
 		printf("   %s=%s\n", APP_NAME, luckAttrValue);
 	}
-	
+
 	haggle_dataobject_set_createtime(dObj, NULL);
 	haggle_ipc_publish_dataobject(haggleHandle, dObj);
 	haggle_dataobject_free(dObj);
@@ -394,11 +396,9 @@ void onInterests(struct dataobject *dObj, void* nix)
 
 #ifdef OS_WINDOWS_MOBILE
 int wmain()
-{	
 #else
 	int main (int argc, char *argv[]) 
-	{
-		
+	{	
 		signal(SIGINT,  shutdown);      // SIGINT is what you get for a Ctrl-C
 #endif
 		ParseArguments(argc, argv);
@@ -438,7 +438,3 @@ int wmain()
 		
 		return 1;
 	}
-	
-	
-	
-	
