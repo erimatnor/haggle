@@ -152,7 +152,7 @@ DataManager::DataManager(HaggleKernel * _kernel, const bool _setCreateTimeOnBloo
 	agingEvent = registerEventType("Aging Event", onAging);
 
 	// Start aging:
-	onAging(NULL);
+	onAgedDataObjects(NULL);
 	
 	dataTaskEvent = registerEventType("DataTaskEvent", onDataTaskComplete);
 
