@@ -1414,8 +1414,568 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug(UUExperimentWIDCOMM)|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			Name="Debug(Vendetta)|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;"
+				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
+				MinimalRebuild="true"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES)"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.01"
+				AdditionalDependencies="haggleutils.lib libxml2.lib libeay32.lib sqlite.lib ws2.lib aygshell.lib bthutil.lib iphlpapi.lib"
+				OutputFile="$(OutDir)/Haggle.exe"
+				Version=""
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(OutDir)"
+				DelayLoadDLLs="$(NOINHERIT)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/Haggle.pdb"
+				SubSystem="0"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				EntryPointSymbol=""
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug(Vendetta)|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;"
+				PreprocessorDefinitions="ENABLE_VENDETTA_MANAGER;DEBUG;DEBUG_LEAKS;OS_WINDOWS_MOBILE_PROFESSIONAL;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_)"
+				MinimalRebuild="true"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES)"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.02"
+				AdditionalDependencies="haggleutils.lib libxml2.lib libeay32.lib sqlite.lib ws2.lib aygshell.lib bthutil.lib iphlpapi.lib"
+				OutputFile="$(OutDir)/Haggle.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(OutDir)"
+				DelayLoadDLLs="$(NOINHERIT)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/Haggle.pdb"
+				SubSystem="0"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				EntryPointSymbol=""
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug(Vendetta)|Windows Mobile 6 Standard SDK (ARMV4I)"
+			OutputDirectory="$(SolutionDir)Windows Mobile 6 Standard SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Standard SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;"
+				PreprocessorDefinitions="DEBUG;DEBUG_LEAKS;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
+				MinimalRebuild="true"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES)"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.02"
+				AdditionalDependencies="haggleutils.lib libxml2.lib libeay32.lib sqlite.lib ws2.lib aygshell.lib bthutil.lib iphlpapi.lib"
+				OutputFile="$(OutDir)/Haggle.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(OutDir)"
+				DelayLoadDLLs="$(NOINHERIT)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/Haggle.pdb"
+				SubSystem="0"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				EntryPointSymbol=""
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release(Vendetta)|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 			OutputDirectory="$(SolutionDir)Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="2"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES)"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.01"
+				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib aygshell.lib bthutil.lib iphlpapi.lib"
+				OutputFile="$(OutDir)/Haggle.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(OutDir)"
+				DelayLoadDLLs="$(NOINHERIT)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/Haggle.pdb"
+				SubSystem="0"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				EntryPointSymbol=""
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release(Vendetta)|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="$(SolutionDir)Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="2"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4101"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES)"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.02"
+				AdditionalDependencies="haggleutils.lib libcpphaggle.lib libxml2.lib sqlite.lib ws2.lib bthutil.lib Iphlpapi.lib aygshell.lib"
+				OutputFile="$(OutDir)/Haggle.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(OutDir)"
+				DelayLoadDLLs="$(NOINHERIT)"
+				GenerateDebugInformation="false"
+				ProgramDatabaseFile="$(OutDir)/Haggle.pdb"
+				SubSystem="0"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				EntryPointSymbol=""
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release(Vendetta)|Windows Mobile 6 Standard SDK (ARMV4I)"
+			OutputDirectory="$(SolutionDir)Windows Mobile 6 Standard SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Standard SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="2"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES)"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /subsystem:windowsce,5.02"
+				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib aygshell.lib bthutil.lib iphlpapi.lib"
+				OutputFile="$(OutDir)/Haggle.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(OutDir)"
+				DelayLoadDLLs="$(NOINHERIT)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/Haggle.pdb"
+				SubSystem="0"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				EntryPointSymbol=""
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug(WIDCOMMVendetta)|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
 			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -1441,7 +2001,7 @@
 				ExecutionBucket="7"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;;&quot;$(VSInstallDir)..\WIDCOMM\WIDCOMM BTW-CE SDK\Sdk\Inc&quot;"
-				PreprocessorDefinitions="UU_EXPERIMENT;DEBUG;DEBUG_LEAKS;HAVE_EXCEPTION;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;WIDCOMM_BLUETOOTH"
+				PreprocessorDefinitions="DEBUG;DEBUG_LEAKS;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;WIDCOMM_BLUETOOTH;ENABLE_VENDETTA_MANAGER"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -1463,7 +2023,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
-				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib libeay32.lib aygshell.lib BtSdkCE50.lib iphlpapi.lib cellcore.lib"
+				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib libeay32.lib aygshell.lib BtSdkCE50.lib iphlpapi.lib"
 				OutputFile="$(OutDir)/Haggle.exe"
 				Version=""
 				LinkIncremental="2"
@@ -1507,8 +2067,8 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug(UUExperimentWIDCOMM)|Windows Mobile 6 Professional SDK (ARMV4I)"
-			OutputDirectory="$(SolutionDir)Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			Name="Debug(WIDCOMMVendetta)|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -1534,7 +2094,7 @@
 				ExecutionBucket="7"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;;&quot;$(VSInstallDir)..\WIDCOMM\WIDCOMM BTW-CE SDK\Sdk\Inc&quot;"
-				PreprocessorDefinitions="UU_EXPERIMENT;DEBUG;DEBUG_LEAKS;HAVE_EXCEPTION;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;WIDCOMM_BLUETOOTH"
+				PreprocessorDefinitions="ENABLE_VENDETTA_MANAGER;DEBUG;DEBUG_LEAKS;OS_WINDOWS_MOBILE_PROFESSIONAL;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);WIDCOMM_BLUETOOTH"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -1556,7 +2116,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.02"
-				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib libeay32.lib aygshell.lib BtSdkCE50.lib iphlpapi.lib cellcore.lib"
+				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib libeay32.lib aygshell.lib BtSdkCE50.lib iphlpapi.lib"
 				OutputFile="$(OutDir)/Haggle.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;;&quot;$(VSInstallDir)..\WIDCOMM\WIDCOMM BTW-CE SDK\Sdk\Lib\Smartphone&quot;"
@@ -1599,7 +2159,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug(UUExperimentWIDCOMM)|Windows Mobile 6 Standard SDK (ARMV4I)"
+			Name="Debug(WIDCOMMVendetta)|Windows Mobile 6 Standard SDK (ARMV4I)"
 			OutputDirectory="$(SolutionDir)Windows Mobile 6 Standard SDK (ARMV4I)\$(ConfigurationName)"
 			IntermediateDirectory="Windows Mobile 6 Standard SDK (ARMV4I)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -1626,7 +2186,7 @@
 				ExecutionBucket="7"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)..\..\src\hagglekernel&quot;;&quot;$(ProjectDir)..\..\src\utils&quot;;&quot;$(ProjectDir)..\..\src\libcpphaggle\include&quot;;&quot;$(ProjectDir)..\..\src\libhaggle\include&quot;;&quot;$(ProjectDir)..\..\extlibs\libxml2-2.6.31\include&quot;;&quot;$(ProjectDir)..\OpenSSL\Compat&quot;;&quot;$(ProjectDir)..\..\extlibs\openssl-0.9.8j\inc32&quot;;&quot;$(ProjectDir)..\..\extlibs\sqlite-3.6.6.2&quot;;&quot;$(VSInstallDir)..\WIDCOMM\WIDCOMM BTW-CE SDK\Sdk\Inc&quot;"
-				PreprocessorDefinitions="UU_EXPERIMENT;DEBUG;DEBUG_LEAKS;HAVE_EXCEPTION;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;WIDCOMM_BLUETOOTH"
+				PreprocessorDefinitions="DEBUG;DEBUG_LEAKS;_WIN32_WCE=$(CEVER);UNDER_CE;$(PLATFORMDEFINES);WINCE;_DEBUG;_CONSOLE;$(ARCHFAM);$(_ARCHFAM_);_UNICODE;UNICODE;WIDCOMM_BLUETOOTH;ENABLE_VENDETTA_MANAGER"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -1648,7 +2208,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.02"
-				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib libeay32.lib aygshell.lib BtSdkCE50.lib iphlpapi.lib cellcore.lib"
+				AdditionalDependencies="haggleutils.lib libxml2.lib sqlite.lib ws2.lib libeay32.lib aygshell.lib BtSdkCE50.lib iphlpapi.lib"
 				OutputFile="$(OutDir)/Haggle.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;;&quot;$(VSInstallDir)..\WIDCOMM\WIDCOMM BTW-CE SDK\Sdk\Lib\Smartphone&quot;"
@@ -1920,7 +2480,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UUExperimentSetup.cpp"
+				RelativePath="..\..\src\hagglekernel\VendettaAsynchronous.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hagglekernel\VendettaClient.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hagglekernel\VendettaManager.cpp"
 				>
 			</File>
 			<File
@@ -2047,6 +2615,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\hagglekernel\ForwarderEmpty.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hagglekernel\ForwarderEpidemic.h"
 				>
 			</File>
 			<File
@@ -2183,6 +2755,18 @@
 			</File>
 			<File
 				RelativePath="..\..\src\hagglekernel\Utility.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hagglekernel\VendettaAsynchronous.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hagglekernel\VendettaClient.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hagglekernel\VendettaManager.h"
 				>
 			</File>
 			<File

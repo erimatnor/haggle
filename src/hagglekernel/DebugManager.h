@@ -71,7 +71,9 @@ private:
 #ifdef DEBUG
         EventType debugEType;
 #endif
-	void dumpTo(SOCKET client_sock, DataStoreDump *dump);
+	DataStoreDump *dsDump;
+	void dumpTo(SOCKET client_sock, const DataStoreDump *dump, const string& routingInfo);
+
 	bool init_derived();
 public:
         DebugManager(HaggleKernel *_kernel = haggleKernel, bool interactive = true);
@@ -83,6 +85,7 @@ public:
 #endif
 	void onFindRepositoryKey(Event *e);
         void onDumpDataStore(Event *e);
+        void onDebugCmd(Event *e);
 	
 	void onShutdown();
 };
