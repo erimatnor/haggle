@@ -2058,6 +2058,7 @@ int SQLDataStore::_insertNode(NodeRef& node, const EventCallback<EventHandler> *
 	if (ret == SQLITE_CONSTRAINT) {
 		HAGGLE_DBG("Node %s already in datastore -> replacing...\n", node->getName().c_str());
 
+#if 0
 		if (mergeBloomfilter) {
 			sqlite_int64 node_rowid = getNodeRowId(node);
 
@@ -2070,6 +2071,7 @@ int SQLDataStore::_insertNode(NodeRef& node, const EventCallback<EventHandler> *
 				}
 			}
 		}
+#endif
 		ret = _deleteNode(node);
 		
 		if (ret < 0) {
