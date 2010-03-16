@@ -88,6 +88,7 @@ public:
         void onDebugCmd(Event *e);
 	
 	void onShutdown();
+	void onConfig(Metadata *m);
 };
 
 #endif

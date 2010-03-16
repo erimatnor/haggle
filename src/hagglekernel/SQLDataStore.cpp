@@ -151,7 +151,7 @@ using namespace haggle;
 
 // Create tables for Dataobjects, Nodes, Attributes, Filters, Interfaces
 //------------------------------------------
-#define SQL_CREATE_TABLE_DATAOBJECTS_CMD "CREATE TABLE IF NOT EXISTS " TABLE_DATAOBJECTS " (ROWID INTEGER PRIMARY KEY AUTOINCREMENT, id BLOB UNIQUE ON CONFLICT ROLLBACK, xmlhdr TEXT, filepath TEXT, filename TEXT, datalen INTEGER, datastate INTEGER, datahash BLOB, num_attributes INTEGER DEFAULT 0, signaturestatus INTEGER, signee TEXT, signature BLOB, siglen INTEGER, createtime INTEGER, receivetime INTEGER, rxtime INTEGER, source_iface_rowid INTEGER, timestamp DATE);"
+#define SQL_CREATE_TABLE_DATAOBJECTS_CMD "CREATE TABLE IF NOT EXISTS " TABLE_DATAOBJECTS " (ROWID INTEGER PRIMARY KEY AUTOINCREMENT, id BLOB UNIQUE ON CONFLICT ROLLBACK, xmlhdr TEXT, filepath TEXT, filename TEXT, datalen INTEGER, datastate INTEGER, datahash BLOB, num_attributes INTEGER DEFAULT 0, signaturestatus INTEGER, signee TEXT, signature BLOB, siglen INTEGER, createtime INTEGER, receivetime INTEGER, rxtime INTEGER, source_iface_rowid INTEGER, node_id TEXT, timestamp DATE);"
 enum {
 	table_dataobjects_rowid	= 0,
 	table_dataobjects_id,
@@ -170,11 +170,12 @@ enum {
 	table_dataobjects_receivetime, // The receive time in milliseconds (local time)
 	table_dataobjects_rxtime, // The transfer time in milliseconds 
 	table_dataobjects_source_iface_rowid,
+	table_dataobjects_node_id, // node_id if node description
 	table_dataobjects_timestamp
 };
 
 //------------------------------------------
-#define SQL_CREATE_TABLE_NODES_CMD "CREATE TABLE IF NOT EXISTS " TABLE_NODES " (ROWID INTEGER PRIMARY KEY AUTOINCREMENT, type INTEGER, id BLOB UNIQUE ON CONFLICT ROLLBACK, id_str TEXT, name TEXT, bloomfilter BLOB, num_attributes INTEGER DEFAULT 0, sum_weights INTEGER DEFAULT 0, resolution_max_matching_dataobjects INTEGER, resolution_threshold INTEGER, timestamp DATE);"
+#define SQL_CREATE_TABLE_NODES_CMD "CREATE TABLE IF NOT EXISTS " TABLE_NODES " (ROWID INTEGER PRIMARY KEY AUTOINCREMENT, type INTEGER, id BLOB UNIQUE ON CONFLICT ROLLBACK, id_str TEXT, name TEXT, bloomfilter BLOB, nodedescription_createtime INTEGER DEFAULT -1, num_attributes INTEGER DEFAULT 0, sum_weights INTEGER DEFAULT 0, resolution_max_matching_dataobjects INTEGER, resolution_threshold INTEGER, timestamp DATE);"
 enum {
 	table_nodes_rowid = 0,
 	table_nodes_type,
@@ -182,10 +183,11 @@ enum {
 	table_nodes_id_str,
 	table_nodes_name,
 	table_nodes_bloomfilter,
+	table_nodes_nodedescription_createtime,
 	table_nodes_num_attributes,
 	table_nodes_sum_weights,
-	table_nodes_resolution_max_matching_dataobjects,	// resolution: max number of data object that a node is willing to recieve
-	table_nodes_resolution_threshold,					// resolution: relation threshold (only relations with a higher ratio will be considered)
+	table_nodes_resolution_max_matching_dataobjects, // resolution: max number of data object that a node is willing to recieve
+	table_nodes_resolution_threshold, // resolution: relation threshold (only relations with a higher ratio will be considered)
 	table_nodes_timestamp
 };
 
@@ -226,6 +228,7 @@ enum {
 #define SQL_CREATE_TRIGGER_FILTER_TABLE_CMD "CREATE TRIGGER insert_" TABLE_FILTERS "_timestamp AFTER INSERT ON " TABLE_FILTERS " BEGIN UPDATE " TABLE_FILTERS " SET timestamp = STRFTIME('%s', 'NOW') WHERE ROWID = NEW.ROWID; END;"
 //------------------------------------------
 #define SQL_CREATE_TRIGGER_TABLE_INTERFACES_CMD "CREATE TRIGGER insert_" TABLE_INTERFACES "_timestamp AFTER INSERT ON " TABLE_INTERFACES " BEGIN UPDATE " TABLE_INTERFACES " SET timestamp = STRFTIME('%s', 'NOW') WHERE ROWID = NEW.ROWID; END;"
+
 
 /*
 	Link Tables
@@ -560,7 +563,7 @@ static const char *tbl_cmds[] = {
 
 static char sqlcmd[SQL_MAX_CMD_SIZE];
 
-static inline string SQL_INSERT_DATAOBJECT_CMD(const char *metadata, const sqlite_int64 ifaceRowId, const DataObjectRef dObj)
+static inline string SQL_INSERT_DATAOBJECT_CMD(const char *metadata, const sqlite_int64 ifaceRowId, const DataObjectRef dObj, const string node_id)
 {
 	string cmd;
 	
@@ -571,11 +574,11 @@ static inline string SQL_INSERT_DATAOBJECT_CMD(const char *metadata, const sqlit
 		query suffers from a risk of SQL injection. See the haggle trac page,
 		ticket #139.
 	*/
-	int ret = stringprintf(cmd, "INSERT INTO %s (id,xmlhdr,filepath,filename,datalen,datastate,datahash,signaturestatus,signee,signature,siglen,createtime,receivetime,rxtime,source_iface_rowid) VALUES(?,\'%s\',\'%s\',\'%s\',%lu,%lu,?,%lu,\'%s\',?,%lu," INT64_FORMAT "," INT64_FORMAT ",%lu," INT64_FORMAT ");", 
+	int ret = stringprintf(cmd, "INSERT INTO %s (id,xmlhdr,filepath,filename,datalen,datastate,datahash,signaturestatus,signee,signature,siglen,createtime,receivetime,rxtime,source_iface_rowid,node_id) VALUES(?,\'%s\',\'%s\',\'%s\',%lu,%lu,?,%lu,\'%s\',?,%lu," INT64_FORMAT "," INT64_FORMAT ",%lu," INT64_FORMAT ",'%s');", 
                            TABLE_DATAOBJECTS, metadata, dObj->getFilePath().c_str(), dObj->getFileName().c_str(), 
                            (unsigned long)dObj->getDataLen(), dObj->getDataState(), dObj->getSignatureStatus(), dObj->getSignee().c_str(),
 			   dObj->getSignatureLength(), dObj->getCreateTime().getTimeAsMilliSeconds(), 
-			   dObj->getReceiveTime().getTimeAsMilliSeconds(), dObj->getRxTime(), ifaceRowId);
+			   dObj->getReceiveTime().getTimeAsMilliSeconds(), dObj->getRxTime(), ifaceRowId, node_id.c_str());
 
         if (ret < 0) {
                 HAGGLE_ERR("SQL_INSERT_DATAOBJECT_CMD: stringprintf failed\n");
@@ -684,9 +687,9 @@ static inline char *SQL_IFACE_FROM_ROWID_CMD(const sqlite_int64 iface_rowid)
 
 // -- NODE
 
-static inline char *SQL_INSERT_NODE_CMD(const int type, const char *idStr, const char *name, const unsigned int maxmatchingdos, const unsigned int threshold)
+static inline char *SQL_INSERT_NODE_CMD(const NodeRef& node)
 {
-	snprintf(sqlcmd, SQL_MAX_CMD_SIZE, "INSERT INTO " TABLE_NODES " (type,id,id_str,name,bloomfilter,resolution_max_matching_dataobjects,resolution_threshold) VALUES (%d,?,\'%s\',\'%s\',?,%d,%d);", type, idStr, name, maxmatchingdos, threshold);
+	snprintf(sqlcmd, SQL_MAX_CMD_SIZE, "INSERT INTO " TABLE_NODES " (type,id,id_str,name,bloomfilter,nodedescription_createtime,resolution_max_matching_dataobjects,resolution_threshold) VALUES (%d,?,\'%s\',\'%s\',?," INT64_FORMAT ",%lu,%lu);", node->getType(), node->getIdStr(), node->getName().c_str(), node->getNodeDescriptionCreateTime().getTimeAsMilliSeconds(), node->getMaxDataObjectsInMatch(), node->getMatchingThreshold());
 
 	return sqlcmd;
 }
@@ -838,18 +841,24 @@ NodeRef SQLDataStore::createNode(sqlite3_stmt * in_stmt)
 	NodeRef node = NULL;
 	int num_match = 0;
 	NodeId_t node_id;
+	Timeval nodedescription_createtime = -1;
 
 	if (!in_stmt)
 		return node;
 
 	memcpy(node_id, sqlite3_column_blob(in_stmt, table_nodes_id), sizeof(NodeId_t));
 
+	sqlite_int64 nodedescription_createtime_millisecs = sqlite3_column_int64(in_stmt, table_nodes_nodedescription_createtime);
+	
+	if (nodedescription_createtime_millisecs != -1 && nodedescription_createtime_millisecs != 0)
+		nodedescription_createtime = Timeval((long)(nodedescription_createtime_millisecs / 1000), (long)((nodedescription_createtime_millisecs - (nodedescription_createtime_millisecs / 1000)*1000) * 1000));
+
 	// First try to retrieve the node from the node store
 	node = kernel->getNodeStore()->retrieve(node_id);
 
 	if (!node) {
 		node = Node::create_with_id((NodeType_t)sqlite3_column_int(in_stmt, table_nodes_type), 
-			node_id, (char *)sqlite3_column_text(in_stmt, table_nodes_name));
+			node_id, (char *)sqlite3_column_text(in_stmt, table_nodes_name), nodedescription_createtime);
 
 		if (!node) {
 			HAGGLE_ERR("Could not create node from data store information\n");
@@ -859,7 +868,11 @@ NodeRef SQLDataStore::createNode(sqlite3_stmt * in_stmt)
 		node->setMaxDataObjectsInMatch((unsigned int)sqlite3_column_int(in_stmt, table_nodes_resolution_max_matching_dataobjects));
 		node->setMatchingThreshold((unsigned int)sqlite3_column_int(in_stmt, table_nodes_resolution_threshold));
 		// set bloomfilter
-		node->getBloomfilter()->setRaw((unsigned char *)sqlite3_column_blob(in_stmt, table_nodes_bloomfilter));
+		if (!node->getBloomfilter()->setRaw((unsigned char *)sqlite3_column_blob(in_stmt, table_nodes_bloomfilter), 
+			(size_t)sqlite3_column_bytes(in_stmt, table_nodes_bloomfilter))) {
+			HAGGLE_ERR("Could not set bloomfilter from information in data store.\n");
+			return NULL;
+		}
 	}
 
 	node_rowid = sqlite3_column_int64(in_stmt, table_nodes_rowid);
@@ -914,7 +927,6 @@ NodeRef SQLDataStore::createNode(sqlite3_stmt * in_stmt)
 			const unsigned char *identifier = (const unsigned char *)sqlite3_column_blob(stmt, table_interfaces_mac);
 			InterfaceType_t type = (InterfaceType_t) sqlite3_column_int(stmt, table_interfaces_type);
 
-			
 			// Try to find the interface from the interface store:
 			InterfaceRef iface = kernel->getInterfaceStore()->retrieve(type, identifier);
 			
@@ -1264,7 +1276,8 @@ SQLDataStore::SQLDataStore(const bool _recreate, const string _filepath, const s
 
 SQLDataStore::~SQLDataStore()
 {
-	sqlite3_close(db);
+	if (db)
+		sqlite3_close(db);
 }
 
 bool SQLDataStore::init()
@@ -1378,6 +1391,7 @@ int SQLDataStore::createTables()
 
 		if (ret == SQLITE_ERROR) {
 			HAGGLE_ERR("Could not create table error: %s\n", sqlite3_errmsg(db));
+			fprintf(stderr, "SQL command: %s\n", tbl_cmds[i]);
 			sqlite3_close(db);
                         return -1;
 		}
@@ -1426,55 +1440,6 @@ int SQLDataStore::sqlQuery(const char *sql_cmd)
 	return ret;
 }
 
-
-
-
-/* ========================================================= */
-/* get rowid for different objects                           */
-/* ========================================================= */
-
-sqlite_int64 SQLDataStore::getDataObjectRowId(const DataObjectRef& dObj)
-{
-	int ret;
-	sqlite3_stmt *stmt;
-	const char *tail;
-	sqlite_int64 rowid = -1;
-
-	if (!dObj)
-		return -1;
-
-	ret = sqlite3_prepare_v2(db, SQL_FIND_DATAOBJECT_CMD, (int) strlen(SQL_FIND_DATAOBJECT_CMD), &stmt, &tail);
-
-
-	if (ret != SQLITE_OK) {
-		HAGGLE_DBG("SQLite command compilation failed! %s\n", SQL_FIND_DATAOBJECT_CMD);
-		return -1;
-	}
-
-	ret = sqlite3_bind_blob(stmt, 1, dObj->getId(), DATAOBJECT_ID_LEN, SQLITE_TRANSIENT);
-
-	if (ret != SQLITE_OK) {
-		HAGGLE_DBG("SQLite could not bind blob!\n");
-		sqlite3_finalize(stmt);
-		return -1;
-	}
-
-	ret = sqlite3_step(stmt);
-
-	if (ret == SQLITE_ROW) {
-		rowid = sqlite3_column_int64(stmt, table_dataobjects_rowid);
-	}
-
-	if (ret == SQLITE_ERROR) {
-		HAGGLE_DBG("Could not insert DO Error: %s\n", sqlite3_errmsg(db));
-		sqlite3_finalize(stmt);
-		return -1;
-	}
-
-	sqlite3_finalize(stmt);
-
-	return rowid;
-}
 
 sqlite_int64 SQLDataStore::getDataObjectRowId(const DataObjectId_t& id)
 {
@@ -1740,8 +1705,11 @@ int SQLDataStore::evaluateFilters(const DataObjectRef& dObj, sqlite_int64 dataob
 	HAGGLE_DBG("Evaluating filters\n");
 
 	if (dataobject_rowid == 0) {
-		dataobject_rowid = getDataObjectRowId(dObj);
+		dataobject_rowid = getDataObjectRowId(dObj->getId());
 	}
+	
+	if (dataobject_rowid < 0)
+		return -1;
 	
 	/* limit VIEW_MAP_DATAOBJECTS_TO_ATTRIBUTES_VIA_ROWID_DYNAMIC to dataobject in question */
 	setViewLimitedDataobjectAttributes(dataobject_rowid);
@@ -1848,6 +1816,76 @@ int SQLDataStore::evaluateDataObjects(long eventType)
 /* note: insert is actually an update                        */
 /*	     (existing objects get replaced)                     */
 /* ========================================================= */
+
+
+// remove old node descriptions
+// return 0 if the node description dObj passed to the function is not the newest one, else 1
+int SQLDataStore::deleteDataObjectNodeDescriptions(DataObjectRef dObj, string *node_id)
+{
+	int ret;
+	sqlite3_stmt *stmt;
+	const char *tail;
+	char *sql_cmd = sqlcmd;
+	DataObjectRefList dObjs;
+	const Attributes *attrs;
+	int result = 1;
+	
+	// get node_id
+	attrs = dObj->getAttributes();
+	for (Attributes::const_iterator it = attrs->begin(); it != attrs->end(); it++) {
+		const Attribute& a = (*it).second;
+		if (a.getName() == NODE_DESC_ATTR) {
+			*node_id = a.getValue();
+		}
+	}
+
+	// retrieve all dataobjects with same node_id
+	sprintf(sql_cmd, "SELECT * FROM %s WHERE node_id='%s' ORDER BY createtime desc", TABLE_DATAOBJECTS, node_id->c_str());
+	
+	ret = sqlite3_prepare_v2(db, sql_cmd, (int) strlen(sql_cmd), &stmt, &tail);
+	
+	if (ret != SQLITE_OK) {
+		HAGGLE_DBG("retrieve node descriptions command compilation failed\n");
+		return -1;
+	}
+	
+	unsigned int cntStoredNodeDescriptions = 0;
+	DataObjectRef newest_dObj = dObj;
+	while ((ret = sqlite3_step(stmt)) != SQLITE_DONE) {
+		if (ret == SQLITE_ROW) {
+			cntStoredNodeDescriptions++;
+			sqlite_int64 dObjRowId = sqlite3_column_int64(stmt, table_dataobjects_rowid);
+			
+			// create dObj and push it into list
+			DataObjectRef dObj_tmp = getDataObjectFromRowId(dObjRowId);
+			
+			if (dObj_tmp) {
+				if (dObj_tmp->getCreateTime() < newest_dObj->getCreateTime()) {
+					dObjs.push_back(dObj_tmp);
+				} else {
+					if (newest_dObj != dObj) {
+						dObjs.push_back(newest_dObj);
+					} else {
+						result = 0;
+					}
+					newest_dObj = dObj_tmp;
+				}
+			}
+		}
+	}
+	
+	sqlite3_finalize(stmt);
+
+	HAGGLE_DBG("%u node descriptions from same node [%s] already in datastore\n", cntStoredNodeDescriptions, node_id->c_str());
+	
+	// loop through dObjs list and delete if older createtime
+	for (DataObjectRefList::iterator it = dObjs.begin(); it != dObjs.end(); it++) {
+		_deleteDataObject(*it, true); // delete and report as event
+	}
+		
+	return result;
+}
+
 
 int SQLDataStore::_deleteFilter(long eventtype)
 {
@@ -2024,8 +2062,7 @@ int SQLDataStore::_insertNode(NodeRef& node, const EventCallback<EventHandler> *
 
 //	sqlQuery(SQL_BEGIN_TRANSACTION_CMD);
 
-	sql_cmd = SQL_INSERT_NODE_CMD((const int) node->getType(), node->getIdStr(), 
-		node->getName().c_str(), node->getMaxDataObjectsInMatch(), node->getMatchingThreshold());
+	sql_cmd = SQL_INSERT_NODE_CMD(node);
 
 	HAGGLE_DBG("SQLcmd: %s\n", sql_cmd);
 
@@ -2056,14 +2093,14 @@ int SQLDataStore::_insertNode(NodeRef& node, const EventCallback<EventHandler> *
 	sqlite3_finalize(stmt);
 
 	if (ret == SQLITE_CONSTRAINT) {
+		NodeRef existing_node = node;
 		HAGGLE_DBG("Node %s already in datastore -> replacing...\n", node->getName().c_str());
 
-#if 0
 		if (mergeBloomfilter) {
 			sqlite_int64 node_rowid = getNodeRowId(node);
 
 			if (node_rowid >= 0) {
-				NodeRef existing_node = getNodeFromRowId(node_rowid);
+				existing_node = getNodeFromRowId(node_rowid);
 
 				if (existing_node) {
 					HAGGLE_DBG("Merging bloomfilter of node %s\n", node->getName().c_str());
@@ -2071,8 +2108,8 @@ int SQLDataStore::_insertNode(NodeRef& node, const EventCallback<EventHandler> *
 				}
 			}
 		}
-#endif
-		ret = _deleteNode(node);
+
+		ret = _deleteNode(existing_node);
 		
 		if (ret < 0) {
 			HAGGLE_ERR("Could not delete node %s\n", node->getName().c_str());
@@ -2350,6 +2387,7 @@ int SQLDataStore::_insertDataObject(DataObjectRef& dObj, const EventCallback<Eve
 	sqlite_int64 dataobject_rowid;
 	sqlite_int64 attr_rowid;
 	sqlite_int64 ifaceRowId = -1;
+	string node_id;
 	const Attributes *attrs;
 
 	if (!dObj) {
@@ -2367,10 +2405,22 @@ int SQLDataStore::_insertDataObject(DataObjectRef& dObj, const EventCallback<Eve
 		return -1;
 	}
 
+	// adding node_id for node descriptions to refer to the corresponding node 
+	// and simplifying to delete old node descriptions
+	if (dObj->isNodeDescription()) {
+		ret = deleteDataObjectNodeDescriptions(dObj, &node_id);
+		if (ret == 0) {
+			// this is an old node description, ignore it.
+			HAGGLE_DBG("There are already newer node descriptions for the same node [%s] in the data store. Data object will not be inserted\n", node_id.c_str());
+			dObj.unlock();
+			return -1;
+		}
+	}
+	
 	if (dObj->getRemoteInterface())
 		ifaceRowId = getInterfaceRowId(dObj->getRemoteInterface());
-
-	sql_cmd_str = SQL_INSERT_DATAOBJECT_CMD(metadata, ifaceRowId, dObj);
+	
+	sql_cmd_str = SQL_INSERT_DATAOBJECT_CMD(metadata, ifaceRowId, dObj, node_id);
 	sql_cmd = (char *) sql_cmd_str.c_str();
 
 	ret = sqlite3_prepare_v2(db, sql_cmd, (int) strlen(sql_cmd), &stmt, &tail);
@@ -2472,7 +2522,6 @@ int SQLDataStore::_insertDataObject(DataObjectRef& dObj, const EventCallback<Eve
 			HAGGLE_ERR("SQLite insert of dataobject-attribute link failed!\n");
 			goto out_insertDataObject_err;
 		}
-
 	}
 
 	dObj.unlock();
@@ -2686,11 +2735,15 @@ int SQLDataStore::_doFilterQuery(DataStoreFilterQuery *q)
 	// insert filter into database (remove after query)
 	filter_rowid = _insertFilter((Filter*)q->getFilter());
 	
+	if (filter_rowid < 0)
+		return -1;
+	
 	/* reset view dataobject>attribute */
 	setViewLimitedDataobjectAttributes();
 
 	/* query */
 	sql_cmd = SQL_FILTER_MATCH_DATAOBJECT_CMD(filter_rowid);
+	
 	ret = sqlite3_prepare(db, sql_cmd, (int)strlen(sql_cmd), &stmt, &tail);
 	
 	if (ret != SQLITE_OK) {
@@ -2931,6 +2984,11 @@ int SQLDataStore::_doNodeQuery(DataStoreNodeQuery *q)
 	DataStoreQueryResult *qr;
 	DataObjectRef dObj = q->getDataObject();
 	
+	if (!dObj) {
+		HAGGLE_ERR("No data object in query\n");
+		return -1;
+	}
+		
 	HAGGLE_DBG("Node query for data object [%s]\n", dObj->getIdStr());
 	
 	qr = new DataStoreQueryResult();
@@ -2944,7 +3002,7 @@ int SQLDataStore::_doNodeQuery(DataStoreNodeQuery *q)
 	qr->setQuerySqlStartTime();
 	qr->setQueryInitTime(q->getQueryInitTime());
 	
-	sqlite_int64 dataobject_rowid = getDataObjectRowId(dObj);
+	sqlite_int64 dataobject_rowid = getDataObjectRowId(dObj->getId());
 	
 	/* limit the dataobject attribute links */
 	setViewLimitedDataobjectAttributes(dataobject_rowid);
@@ -3351,21 +3409,24 @@ static int dumpTable(xmlNodePtr root_node, sqlite3 *db, const char* name)
 	int ret = 0;
 	char* sql_cmd = &sqlcmd[0];
 
-	if (!root_node || !db || !name)
+	if (!root_node || !db || !name) {
+		HAGGLE_ERR("Parameter error\n");
 		return -1;
+	}
 
 	sprintf(sql_cmd, "SELECT * FROM %s;", name);
 	ret = sqlite3_prepare_v2(db, sql_cmd, (int)strlen(sql_cmd), &stmt, &tail);
 	
 	if (ret != SQLITE_OK) {
-		HAGGLE_DBG("SQLite command compilation failed! %s\n", sql_cmd);
-		HAGGLE_DBG("%s\n", sqlite3_errmsg(db));
+		HAGGLE_ERR("SQLite command compilation failed! %s\n", sql_cmd);
+		HAGGLE_ERR("%s\n", sqlite3_errmsg(db));
 		return -1;
 	}
 	
 	xmlNodePtr node = xmlNewNode(NULL, BAD_CAST name);
 	
 	if (!node) {
+		HAGGLE_ERR("Could not allocate new XML child node\n");
 		goto xml_alloc_fail;
 	}
 
@@ -3374,13 +3435,14 @@ static int dumpTable(xmlNodePtr root_node, sqlite3 *db, const char* name)
 	}
 
 	if (ret != SQLITE_DONE) {
-		HAGGLE_DBG("SQLite statement evaluation failed! %s\n", sql_cmd);
-		HAGGLE_DBG("%s\n", sqlite3_errmsg(db));
+		HAGGLE_ERR("SQLite statement evaluation failed! %s\n", sql_cmd);
+		HAGGLE_ERR("%s\n", sqlite3_errmsg(db));
                 return -1;
 	}
 	
 	if (!xmlAddChild(root_node, node)) {
 		xmlFreeNode(node);
+		HAGGLE_ERR("Could not add XML child node\n");
 		goto xml_alloc_fail;
 	}
 
@@ -3395,45 +3457,60 @@ xmlDocPtr SQLDataStore::dumpToXML()
 {
 	xmlDocPtr doc = NULL;
 	xmlNodePtr root_node = NULL;
-
+	
 	HAGGLE_DBG("Dumping data base to XML\n");
-
+	
 	doc = xmlNewDoc(BAD_CAST "1.0");
-
+	
 	if (!doc) {
 		HAGGLE_ERR("Could not allocate new XML document\n");
 		return NULL;
 	}
+	
 	root_node = xmlNewNode(NULL, BAD_CAST "HaggleDump");
-
+	
 	if (!root_node) {
+		HAGGLE_ERR("Could not allocate new XML root node\n");
 		goto xml_alloc_fail;
 	}
 	
-	if (!xmlDocSetRootElement(doc, root_node))
+	xmlDocSetRootElement(doc, root_node);
+	
+	if (dumpTable(root_node, db, TABLE_ATTRIBUTES) < 0) {
+		HAGGLE_ERR("Could not dump %s\n", TABLE_ATTRIBUTES);
 		goto xml_alloc_fail;
-
-	if (!dumpTable(root_node, db, TABLE_ATTRIBUTES))
+	}
+	
+	if (dumpTable(root_node, db, TABLE_DATAOBJECTS) < 0) {
+		HAGGLE_ERR("Could not dump %s\n", TABLE_DATAOBJECTS);
 		goto xml_alloc_fail;
-
-	if (!dumpTable(root_node, db, TABLE_DATAOBJECTS))
+	}
+	
+	if (dumpTable(root_node, db, TABLE_NODES) < 0) {
+		HAGGLE_ERR("Could not dump %s\n", TABLE_NODES);
 		goto xml_alloc_fail;
-
-	if (!dumpTable(root_node, db, TABLE_NODES))
+	}
+	
+	if (dumpTable(root_node, db, TABLE_FILTERS) < 0) {
+		HAGGLE_ERR("Could not dump %s\n", TABLE_FILTERS);
 		goto xml_alloc_fail;
-
-	if (!dumpTable(root_node, db, TABLE_FILTERS))
+	}
+	
+	if (dumpTable(root_node, db, TABLE_MAP_DATAOBJECTS_TO_ATTRIBUTES_VIA_ROWID) < 0) {
+		HAGGLE_ERR("Could not dump %s\n", TABLE_MAP_DATAOBJECTS_TO_ATTRIBUTES_VIA_ROWID);
 		goto xml_alloc_fail;
-
-	if (!dumpTable(root_node, db, TABLE_MAP_DATAOBJECTS_TO_ATTRIBUTES_VIA_ROWID))
-		goto xml_alloc_fail;	
-
-	if (!dumpTable(root_node, db, TABLE_MAP_NODES_TO_ATTRIBUTES_VIA_ROWID))
+	}
+	
+	if (dumpTable(root_node, db, TABLE_MAP_NODES_TO_ATTRIBUTES_VIA_ROWID) < 0) {
+		HAGGLE_ERR("Could not dump %s\n", TABLE_MAP_NODES_TO_ATTRIBUTES_VIA_ROWID);
 		goto xml_alloc_fail;
-
-	if (!dumpTable(root_node, db, TABLE_MAP_FILTERS_TO_ATTRIBUTES_VIA_ROWID))
+	}
+	
+	if (dumpTable(root_node, db, TABLE_MAP_FILTERS_TO_ATTRIBUTES_VIA_ROWID) < 0) {
+		HAGGLE_ERR("Could not dump %s\n", TABLE_MAP_FILTERS_TO_ATTRIBUTES_VIA_ROWID);
 		goto xml_alloc_fail;
-
+	}
+	
 //	setViewLimitedDataobjectAttributes();
 //	dumpTable(root_node, db, VIEW_MATCH_DATAOBJECTS_AND_NODES_AS_RATIO);
 //	dumpTable(root_node, db, VIEW_MATCH_FILTERS_AND_DATAOBJECTS_AS_RATIO);

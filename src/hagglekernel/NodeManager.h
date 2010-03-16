@@ -37,13 +37,13 @@ class NodeManager : public Manager
 	} SendEntry_t;
 	typedef List< Pair<NodeRef, SendEntry_t> > SendList_t;
 
-	long thumbnail_size;
+	size_t thumbnail_size;
 	char *thumbnail;
-	unsigned long sequence_number;
+	unsigned long nodeDescriptionRetries;
+	double nodeDescriptionRetryWait;
 	SendList_t sendList;
 	EventCallback<EventHandler> *onRetrieveNodeCallback;
 	EventCallback<EventHandler> *onRetrieveThisNodeCallback;
-	EventCallback<EventHandler> *onRetrieveNodeDescriptionCallback;
 	EventCallback<EventHandler> *onInsertedNodeCallback;
         EventType nodeDescriptionEType;
 	bool isInSendList(const NodeRef& node, const DataObjectRef& dObj);
@@ -58,10 +58,9 @@ class NodeManager : public Manager
         void onNewNodeContact(Event *e);
 	void onSendResult(Event *e);
 	void onRetrieveNode(Event *e);
-	void onRetrieveNodeDescription(Event *e);
-	//int onNodeContactEnd(Event *e);
 	void onRetrieveThisNode(Event *e);
 	void onNodeInformation(Event *e);
+	void nodeUpdate(NodeRef& node);
 	void onInsertedNode(Event *e);
 
 #if defined(ENABLE_METADAPARSER)
@@ -70,6 +69,7 @@ class NodeManager : public Manager
 	
 	void onPrepareShutdown();
 	bool init_derived();
+	void onConfig(Metadata *m);
 public:
         NodeManager(HaggleKernel *_haggle = haggleKernel);
         ~NodeManager();

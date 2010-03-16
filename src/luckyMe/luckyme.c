@@ -13,7 +13,6 @@
  * limitations under the License.
  */ 
 
-
 /*
  LuckyMe challenges your luck. 
  How many random dataobjects floating around in the Haggle network
@@ -26,8 +25,6 @@
  Think creative, why not use puzzle parts as random objects? Make a 
  competition with you buddies to collect as many objects as possible. 
  */
-
-
 #include <libhaggle/haggle.h>
 #include "luckyme.h"
 
@@ -59,21 +56,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-unsigned long grid_size = 0;						// overwrite by -g
-char *filename = "\\luckyme.png";					// overwrite by -f
-char *single_source_name = NULL;					// overwrite by -s
-unsigned long create_data_interval = 30;				// overwrite by -t
-unsigned long repeatableSeed = 0;					// overwrite by -r
-unsigned long use_node_number = 0;					// overwrite by -n
+unsigned long grid_size = 0;			// overwrite with -g
+char *filename = "\\luckyme.jpg";		// overwrite with -f
+char *data_trace_filename = NULL;		// overwrite with -l
+FILE *data_trace_fp = NULL;
+char *single_source_name = NULL;		// overwrite with -s
+unsigned long create_data_interval = 120000;	// milliseconds, overwrite with -t (given in seconds)
+unsigned long repeatableSeed = 0;		// overwrite with -r
+unsigned long use_node_number = 0;		// overwrite with -n
+unsigned long num_dataobjects = 0;		// overwrite with -N
 
 #if defined(OS_WINDOWS_MOBILE)
 unsigned long attribute_pool_size = 100;
 unsigned long num_dataobject_attributes = 4; 
 unsigned long num_interest_attributes = 10;
 #else
-unsigned long attribute_pool_size = 100;	// overwrite by -A
-unsigned long num_dataobject_attributes = 4;	// overwrite by -d
-unsigned long num_interest_attributes = 10;	// overwrite by -i
+unsigned long attribute_pool_size = 100;	// overwrite with -A
+unsigned long num_dataobject_attributes = 4;	// overwrite with -d
+unsigned long num_interest_attributes = 10;	// overwrite with -i
 #endif
 
 unsigned long node_number = 0;
@@ -467,7 +467,15 @@ int create_interest_binomial()
 {
 	unsigned long i = 0;
 	struct attributelist *al;	
-	const unsigned long luck = luckyme_prng_uint32() % attribute_pool_size;
+	unsigned long luck = 0;
+	
+	// define luck (mean of binomial distribution)
+	if (use_node_number == 1) {
+		luck = node_number;
+	} else {
+		luck = luckyme_prng_uint32() % attribute_pool_size;
+	}
+
 	// use binomial distribution to approximate normal distribution (sum of weights = 100)
 	// mean = u = np, variance = np(1-p)
 
@@ -584,8 +592,12 @@ int create_interest_node_number()
 int create_dataobject_random() 
 {
 	unsigned int i = 0;
+	unsigned long *values;
 	struct dataobject *dobj = NULL;
 	
+	if (num_dataobject_attributes == 0)
+		return -1;
+
 	if (filename) {
 		dobj = haggle_dataobject_new_from_file(filename);
 		
@@ -602,12 +614,37 @@ int create_dataobject_random()
 	
 	LIBHAGGLE_DBG("create data object %lu\n", num_dobj_created);
 	
-	// todo: get unique attributes
-	for (i = 0; i < num_dataobject_attributes; i++) {
+	values = (unsigned long *)malloc(sizeof(unsigned long) * num_dataobject_attributes);
+
+	if (!values) {
+		haggle_dataobject_free(dobj);
+		return -1;
+	}
+
+	i = 0;
+
+	while (i < num_dataobject_attributes) {
+		unsigned int j, have_value = 0;
 		unsigned long value = luckyme_prng_uint32() % attribute_pool_size;
+		
+		// Check if we alread generated this attribute
+		for (j = 0; j < i; j++) {
+			if (value == values[j]) {
+				have_value = 1;
+			}
+		}
+
+		// see if the value was found, and in that case try again
+		if (have_value)
+			continue;
+
 		haggle_dataobject_add_attribute(dobj, APP_NAME, ulong_to_str(value));
 		printf("   %s=%s\n", APP_NAME, ulong_to_str(value));
+		values[i] = value;
+		i++;
 	}
+
+	free(values);
 
 	luckyme_dataobject_set_createtime(dobj);
 	haggle_ipc_publish_dataobject(hh, dobj);
@@ -665,6 +702,215 @@ int create_dataobject_grid()
 	return 1;
 }
 
+int read_interest_from_trace()
+{
+	int ret = 0;
+	char buf[4096];
+	char *line = NULL;	
+	long off_start, off_end;
+	int bytes = 0;
+	unsigned long total_bytes = 0;
+	struct attributelist *al;
+	
+	if (!data_trace_fp)
+		return -1;
+	
+	LIBHAGGLE_DBG("Reading interest\n");
+	
+	while (1) {
+		off_start = ftell(data_trace_fp);
+		
+		// Read entire line into buffer
+		line = fgets(buf, 4096, data_trace_fp);
+		
+		if (!line) {
+			if (feof(data_trace_fp) != 0) {
+				LIBHAGGLE_DBG("EOF when reading data trace\n");
+				return 0;
+			} else {
+				LIBHAGGLE_ERR("An error occured when reading data trace\n");
+				return -1;
+			}
+		}
+		
+		off_end = ftell(data_trace_fp);
+
+		if (line[0] != '#') {
+			// if what we read is not what we were looking for,
+			// reset the stream to the position before the read.
+			LIBHAGGLE_ERR("Line was not an interest\n");
+			fseek(data_trace_fp, off_start - off_end, SEEK_CUR);
+			return 0;
+		}
+		
+		// read until first whitespace -- there we should find the end of the node name
+		int pos = 2;
+		while (line[pos] != ' ' && pos < strlen(line)) {
+			pos++;
+		}
+
+		// skip lines that do not match our hostname
+		if (strlen(hostname) != pos-2)								// different length
+			continue;
+		if (strncmp(&line[2], hostname, strlen(hostname)) != 0)		// different name
+			continue;
+		
+		break;
+	}
+	// Skip the # character and hostname and one whitespace
+	total_bytes = 1 + strlen(hostname) + 1;
+	
+	al = haggle_attributelist_new();
+
+	if (!al)
+		return -1;
+	
+	
+	do {
+		char name[50], value[50];
+		unsigned long weight;
+		struct attribute *attr;
+		
+		ret = sscanf(line + total_bytes, " %[^=]=%[^:]:%lu%n", name, value, &weight, &bytes);
+		
+		if (ret == 3) {
+			LIBHAGGLE_DBG("Read interest %s=%s:%lu\n", name, value, weight);
+			total_bytes += bytes;
+			
+			attr = haggle_attribute_new_weighted(name, value, weight);
+		
+			haggle_attributelist_add_attribute(al, attr);
+		}
+		
+	} while (ret == 3);
+	
+	haggle_ipc_add_application_interests(hh, al);
+	
+	haggle_attributelist_free(al);
+	
+	return 1;
+}
+
+int read_dataobject_from_trace(struct dataobject **dobj, struct timeval *timeout)
+{
+	char buf[4096];
+	char *line = NULL;
+	int ret;	
+	char node[50];
+	int bytes = 0;
+	unsigned long total_bytes = 0;
+	
+	
+	if (!dobj || !timeout || !data_trace_fp)
+		return -1;
+	
+	while (1) {
+		long off_start;
+		unsigned long i = 0, bytes_read = 0;
+		
+		off_start = ftell(data_trace_fp);
+		
+		// Read entire line into buffer
+		line = fgets(buf, 4096, data_trace_fp);
+		
+		bytes_read = ftell(data_trace_fp) - off_start;
+		
+		if (!line) {
+			if (feof(data_trace_fp) != 0) {
+				LIBHAGGLE_DBG("EOF when reading data trace\n");
+				return 0;
+			} else {
+				LIBHAGGLE_ERR("An error occured when reading data trace\n");
+				return -1;
+			}
+		}
+		
+		if (line[0] == '#') {
+			// skip these lines if they haven't already been read by read_interest_from_trace()
+			continue;
+		} 
+				
+		// read until first whitespace -- there we should find the node name
+		while (line[i] != ' ' && i < bytes_read - 1) {
+			i++;
+		}
+		
+	
+		// skip whitespace
+		i++;
+
+		int pos = i;
+		while (line[pos] != ' ' && pos < strlen(line)) {
+			pos++;
+		}
+		
+		
+		// Skip lines that do not match our hostname
+		if (strlen(hostname) != pos-i)
+			continue;
+		if (strncmp(hostname, &line[i], strlen(hostname)) != 0) 
+			continue;
+		
+		break;
+	}	
+	
+	LIBHAGGLE_DBG("reading data object\n");
+	
+	if (filename) {
+		*dobj = haggle_dataobject_new_from_file(filename);
+		
+		if (*dobj)
+			haggle_dataobject_add_hash(*dobj);
+		else
+			*dobj = haggle_dataobject_new();
+	} else {
+		*dobj = haggle_dataobject_new();
+	}
+	
+	if (!*dobj)
+		return -1;
+	
+	// conversion format: create_time|node-nr|attribute list|
+	ret = sscanf(line, "%ld.%ld %[^ ]%n", 
+		     (long *)&timeout->tv_sec, 
+		     (long *)&timeout->tv_usec, 
+		     node, &bytes);
+	
+	if (ret == EOF) {
+		LIBHAGGLE_DBG("EOF when reading data trace\n");
+		haggle_dataobject_free(*dobj);
+		*dobj = NULL;
+		return 0;
+	} else if (ret < 3) {
+		LIBHAGGLE_ERR("A conversion error occured when reading data trace\n");
+		haggle_dataobject_free(*dobj);
+		*dobj = NULL;
+		return -1;
+	}
+	
+	total_bytes += bytes;
+	
+	LIBHAGGLE_DBG("%ld.%06ld %s\n", (long)timeout->tv_sec, (long)timeout->tv_usec, node);
+	
+	do {
+		char name[50], value[50];
+		unsigned long weight;
+		
+		ret = sscanf(line + total_bytes, " %[^=]=%[^:]:%lu%n", name, value, &weight, &bytes);
+		
+		if (ret == 3) {
+			LIBHAGGLE_DBG("\tadding attribute %s=%s:%lu\n", name, value, weight);
+			total_bytes += bytes;
+			haggle_dataobject_add_attribute_weighted(*dobj, name, value, weight);
+		}
+	} while (ret == 3);
+	
+	luckyme_dataobject_set_createtime(*dobj);
+	
+	num_dobj_created++;
+			
+	return 1;
+}
 
 int on_dataobject(haggle_event_t *e, void* nix)
 {
@@ -797,12 +1043,17 @@ int on_interests(haggle_event_t *e, void* nix)
 		LIBHAGGLE_DBG("No existing interests, generating new ones\n");
 
 		// No old interests: Create new interests.
-		if (use_node_number == 1) {
-			create_interest_node_number();
-		} else if (grid_size > 0) {
-			create_interest_grid();
+		// Read interests from file, if trace filename is set
+		if (data_trace_filename) {
+			// Read interests
+// christian: had to do a hack because the callback on_interest is too late.
+			// while (read_interest_from_trace() > 0) {}
 		} else {
-			create_interest_binomial();
+			if (grid_size > 0) {
+				create_interest_grid();
+			} else {
+				create_interest_binomial();
+			}
 		}
 	}
 	
@@ -818,17 +1069,19 @@ int on_interests(haggle_event_t *e, void* nix)
 static void print_usage()
 {	
 	fprintf(stderr, 
-		"Usage: ./%s [-A num] [-d num] [-i num] [-t interval] [-n] [-g gridSize] [-s hostname] [-f path]\n", 
+		"Usage: ./%s [-A num] [-d num] [-i num] [-t interval] [-n] [-g gridSize] [-N num] [-s hostname] [-f path] [-l data_trace]\n", 
 		APP_NAME);
 	fprintf(stderr, "          -A attribute pool (default %lu)\n", attribute_pool_size);
 	fprintf(stderr, "          -d number of attributes per data object (default %lu)\n", num_dataobject_attributes);
 	fprintf(stderr, "          -i number of interests (default %lu)\n", num_interest_attributes);
 	fprintf(stderr, "          -t interval to create data objects [s] (default %lu)\n", create_data_interval);
+	fprintf(stderr, "          -N number of data objects to be generated (no limit: 0, default %lu)\n", num_dataobjects);
 	fprintf(stderr, "          -s singe source (create data objects only on node 'name', default off)\n");
 	fprintf(stderr, "          -f data file to be sent (default off)\n");
 	fprintf(stderr, "          -n use node number as interest (default off)\n");
 	fprintf(stderr, "          -g use grid topology (gridSize x gridSize, overwrites -Adi, default off)\n");
 	fprintf(stderr, "          -r repeatable experiments (constant seed, incremental createtime, default off)\n");
+	fprintf(stderr, "          -l data trace log used to generate data objects\n");
 }
 
 static void parse_commandline(int argc, char **argv)
@@ -840,7 +1093,7 @@ static void parse_commandline(int argc, char **argv)
 	// Parse command line options using getopt.
 	
 	do {
-		ch = getopt(argc, argv, "A:d:i:t:g:nrs:f:");
+		ch = getopt(argc, argv, "A:d:i:t:g:nrs:f:l:N:");
 		if (ch != -1) {
 			switch (ch) {
 				case 'A':
@@ -853,7 +1106,7 @@ static void parse_commandline(int argc, char **argv)
 					num_interest_attributes = strtoul(optarg, NULL, 10);
 					break;
 				case 't':
-					create_data_interval = strtoul(optarg, NULL, 10);
+					create_data_interval = strtoul(optarg, NULL, 10) * 1000;
 					break;
 				case 'g':
 					grid_size = strtoul(optarg, NULL, 10);
@@ -870,6 +1123,12 @@ static void parse_commandline(int argc, char **argv)
 					break;
 				case 'f':
 					filename = optarg;
+					break;
+				case 'l':
+					data_trace_filename = optarg;
+					break;
+				case 'N':
+					num_dataobjects = strtoul(optarg, NULL, 10);
 					break;
 				default:
 					print_usage();
@@ -891,18 +1150,66 @@ static void parse_commandline(int argc, char **argv)
 
 #endif // OS_UNIX
 
+void milliseconds_to_timeval(struct timeval *tv, unsigned long milliseconds)
+{
+	while (milliseconds >= 1000) {
+		tv->tv_sec++;
+		milliseconds -= 1000;
+	}
+	
+	tv->tv_usec = milliseconds;
+}
+
 void test_loop() {
 	int result = 0;
 		
-#if defined(OS_WINDOWS_MOBILE)
+#if defined(OS_WINDOWS)
+	DWORD wait, ret;
 	// Signal that we are running
 	SetEvent(luckyme_start_event);
+#else
+	unsigned int nfds = test_loop_event[0] + 1;
+	fd_set readfds;
 #endif
+
+	if (data_trace_filename) {
+		// Read interests
+		while (read_interest_from_trace() > 0) {}
+	}
+
+
 	while (!stop_now) {
-#if defined(OS_WINDOWS)
-		DWORD timeout = test_is_running ? create_data_interval * 1000 : INFINITE;
+		struct dataobject *dobj = NULL;
+		struct timeval *t = NULL, timeout = { 0, 0 };
 		
-		DWORD ret = WaitForSingleObject(test_loop_event, timeout);
+		if (data_trace_filename) {
+			// Read next data object from trace
+			result = read_dataobject_from_trace(&dobj, &timeout);
+			
+			if (result > 0) {
+				create_data_interval = timeout.tv_sec * 1000 + (timeout.tv_usec / 1000);
+				
+				LIBHAGGLE_DBG("publishing data object in %ld.%06ld seconds\n", (long)timeout.tv_sec, (long)timeout.tv_usec);
+				t = &timeout;
+				
+			} else if (result == 0) {
+#if defined(OS_WINDOWS)
+				create_data_interval = INFINITE;
+#else
+				t = NULL;
+#endif
+			} else {
+				LIBHAGGLE_ERR("Error when reading data trace\n");
+				return;
+			}
+		} else {
+			milliseconds_to_timeval(&timeout, create_data_interval);
+			t = &timeout;
+		}
+#if defined(OS_WINDOWS)
+		wait = test_is_running ? create_data_interval : INFINITE;
+		
+		ret = WaitForSingleObject(test_loop_event, wait);
 		
 		switch (ret) {
 			case WAIT_OBJECT_0:
@@ -921,16 +1228,11 @@ void test_loop() {
 				break;
 		}
 #else
-		struct timeval timeout;
-		unsigned int nfds = test_loop_event[0] + 1;
-		fd_set readfds;
-		timeout.tv_sec = (long)create_data_interval;
-		timeout.tv_usec = 0;
 		
 		FD_ZERO(&readfds);
 		FD_SET(test_loop_event[0], &readfds);
 		
-		result = select(nfds, &readfds, NULL, NULL, &timeout);
+		result = select(nfds, &readfds, NULL, NULL, t);
 #endif
 		if (result < 0) {
 			if (ERRNO != EINTR) {
@@ -938,12 +1240,19 @@ void test_loop() {
 				stop_now = 1;
 			}
 		} else if (result == 0) {
-			if (single_source_name == NULL || strcmp(hostname, single_source_name) == 0) {
-				LIBHAGGLE_DBG("Creating data object\n");
-				if (grid_size > 0) {
-					create_dataobject_grid();
-				} else {
-					create_dataobject_random();
+			if ((num_dataobjects == 0) || (num_dobj_created < num_dataobjects)) {
+				if (single_source_name == NULL || strcmp(hostname, single_source_name) == 0) {
+					LIBHAGGLE_DBG("Creating data object\n");
+					if (dobj) {
+						haggle_ipc_publish_dataobject(hh, dobj);
+						haggle_dataobject_free(dobj);
+					} else {
+						if (grid_size > 0) {
+							create_dataobject_grid();
+						} else {
+							create_dataobject_random();
+						}
+					}
 				}
 #if defined(OS_WINDOWS_MOBILE)
 				if (callback)
@@ -994,14 +1303,6 @@ int luckyme_run()
 	int ret = 0, i;
 	unsigned int retry = 3;
 	
-#if defined(OS_UNIX)
-	ret = pipe(test_loop_event);
-
-	if (ret == -1) {
-		LIBHAGGLE_ERR("Could not open pipe\n");
-		return -1;
-	}
-#endif
 	stop_now = 0;
 	// get hostname (used to set interest)
 	gethostname(hostname, 128);
@@ -1074,6 +1375,15 @@ int luckyme_run()
 		goto out_error;
 	}
 	
+	if (data_trace_filename) {
+		data_trace_fp = fopen(data_trace_filename, "r");
+		
+		if (!data_trace_fp) {
+			LIBHAGGLE_ERR("Could not open data trace \'%s\'\n", data_trace_filename);
+			goto out_error;
+		}
+	}
+	
 	if (haggle_event_loop_run_async(hh) != HAGGLE_NO_ERROR) {
 		LIBHAGGLE_ERR("Could not start event loop\n");
 		goto out_error;
@@ -1095,6 +1405,9 @@ int luckyme_run()
 		}
 	}
 	
+	if (data_trace_fp)
+		fclose(data_trace_fp);
+	
 	return 0;
 	
 out_error:
@@ -1102,6 +1415,9 @@ out_error:
 
 	if (hh)
 		haggle_handle_free(hh);
+	
+	if (data_trace_fp)
+		fclose(data_trace_fp);
 	
 	return ret;
 }
@@ -1120,12 +1436,26 @@ int main(int argc, char **argv)
 
 	signal(SIGINT, signal_handler);      // SIGINT is what you get for a Ctrl-C
 	parse_commandline(argc, argv);
+	
+	res = pipe(test_loop_event);
+	
+	if (res == -1) {
+		LIBHAGGLE_ERR("Could not open pipe\n");
+		return -1;
+	}
+	
 	mutex_init(&mutex);
 
 	res = luckyme_run();
 	
 	mutex_del(&mutex);
-
+	
+	if (test_loop_event[0])
+		close(test_loop_event[0]);
+	
+	if (test_loop_event[1])
+		close(test_loop_event[1]);
+	
 	return res;
 }
 #elif defined(OS_WINDOWS_MOBILE) && defined(CONSOLE)

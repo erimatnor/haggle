@@ -80,12 +80,17 @@ inline bool Node::init_node(const unsigned char *_id)
 #endif
 			0.01, 
 			MAX_RECV_DATAOBJECTS);
+
+		if (!doBF)
+			return false;
 	}
 
 	if (createdFromNodeDescription) {
 		struct base64_decode_context b64_ctx;
 		size_t decodelen;
 		const char *pval;
+
+		nodeDescriptionCreateTime = dObj->getCreateTime();
 
 		Metadata *nm = dObj->getMetadata()->getMetadata(NODE_METADATA);
 
@@ -189,16 +194,18 @@ inline bool Node::init_node(const unsigned char *_id)
 	return true;
 }
 
-Node::Node(const NodeType_t _type, const string _name) : 
+Node::Node(const NodeType_t _type, const string _name, Timeval _nodeDescriptionCreateTime) : 
 #ifdef DEBUG_LEAKS
 	LeakMonitor(LEAK_TYPE_NODE),
 #endif
 	type(_type), num(totNum++), name(_name), nodeDescExch(false), 
 	dObj(NULL), doBF(NULL), eventid(-1),
 	stored(false), createdFromNodeDescription(false),
+	nodeDescriptionCreateTime(_nodeDescriptionCreateTime),
 	filterEventId(-1), matchThreshold(NODE_DEFAULT_MATCH_THRESHOLD), 
 	numberOfDataObjectsPerMatch(NODE_DEFAULT_DATAOBJECTS_PER_MATCH)
 {
+	
 }
 
 Node::Node(const Node& n) :
@@ -213,6 +220,7 @@ Node::Node(const Node& n) :
 	eventid(n.eventid),
 	stored(n.stored), 
         createdFromNodeDescription(n.createdFromNodeDescription),
+	nodeDescriptionCreateTime(n.nodeDescriptionCreateTime),
 	filterEventId(n.filterEventId),
 	matchThreshold(n.matchThreshold),
 	numberOfDataObjectsPerMatch(n.numberOfDataObjectsPerMatch)
@@ -248,9 +256,9 @@ Node *Node::create(NodeType_t type, const DataObjectRef& dObj)
 	return node;
 }
 
-Node *Node::create(NodeType_t type, const string name)
+Node *Node::create(NodeType_t type, const string name, Timeval _nodeDescriptionCreateTime)
 {
-	Node *node = new Node(type, name);
+	Node *node = new Node(type, name, _nodeDescriptionCreateTime);
 
 	if (!node)
 		return NULL;
@@ -272,9 +280,9 @@ Node *Node::create(NodeType_t type, const string name)
 	return node;
 }
 
-Node *Node::create_with_id(NodeType_t type, const NodeId_t id, const string name)
+Node *Node::create_with_id(NodeType_t type, const NodeId_t id, const string name, Timeval _nodeDescriptionCreateTime)
 {
-	Node *node = new Node(type, name);
+	Node *node = new Node(type, name, _nodeDescriptionCreateTime);
 
 	if (!node)
 		return NULL;
@@ -296,7 +304,7 @@ Node *Node::create_with_id(NodeType_t type, const NodeId_t id, const string name
 	return node;
 }
 
-Node *Node::create_with_id(NodeType_t type, const char *_idStr, const string name)
+Node *Node::create_with_id(NodeType_t type, const char *_idStr, const string name, Timeval _nodeDescriptionCreateTime)
 {
 	NodeId_t iD;
 	unsigned int i;
@@ -326,7 +334,7 @@ Node *Node::create_with_id(NodeType_t type, const char *_idStr, const string nam
 			iD[i] += (_idStr[i*2 + 1] - 'a' + 10);
 	}
 
-	Node *node = new Node(type, name);
+	Node *node = new Node(type, name, _nodeDescriptionCreateTime);
 
 	if (!node)
 		return NULL;
@@ -380,6 +388,7 @@ Node& Node::operator=(const Node &node)
 	stored = node.stored;
 	interfaces = node.interfaces;
 	createdFromNodeDescription = node.createdFromNodeDescription;
+	nodeDescriptionCreateTime = node.nodeDescriptionCreateTime;
 	filterEventId = node.filterEventId;
 	eventInterests = node.eventInterests;
 	eventid = node.eventid;
@@ -494,7 +503,7 @@ int Node::addAttribute(const Attribute & a)
 	int n = dObj->addAttribute(a);
 	
 	if (n) 
-		setCreateTime();
+		setNodeDescriptionCreateTime();
 	
 	return n;
 }
@@ -504,7 +513,7 @@ int Node::addAttribute(const string name, const string value, const unsigned lon
   	int n = dObj->addAttribute(name, value, weight);
 	
 	if (n)
-		setCreateTime();
+		setNodeDescriptionCreateTime();
 	
 	return n;
 }
@@ -514,7 +523,7 @@ int Node::removeAttribute(const Attribute & a)
 	int n = dObj->removeAttribute(a);
 	
 	if (n)
-		setCreateTime();
+		setNodeDescriptionCreateTime();
 	
 	return n;
 }
@@ -524,7 +533,7 @@ int Node::removeAttribute(const string name, const string value)
 	int n = dObj->removeAttribute(name, value);
 	
 	if (n)
-		setCreateTime();
+		setNodeDescriptionCreateTime();
 	
 	return n;
 }
@@ -748,7 +757,7 @@ bool Node::addInterface(InterfaceRef inIface)
 	}
 
 	interfaces.add(inIface);
-	setCreateTime();
+	setNodeDescriptionCreateTime();
 	return true;
 }
 
@@ -759,7 +768,7 @@ bool Node::setInterfaceUp(const InterfaceRef inIface)
 		InterfaceRef& iface = *it;
 		if (inIface == iface && !iface->isUp()) {
 			iface->up();
-			setCreateTime();
+			setNodeDescriptionCreateTime();
 			return true;
 		}
 	}
@@ -773,7 +782,7 @@ bool Node::setInterfaceDown(const InterfaceRef inIface)
 		InterfaceRef& iface = *it;
 		if (inIface == iface && iface->isUp()) {
 			iface->down();
-			setCreateTime();
+			setNodeDescriptionCreateTime();
 			return true;
 		}
 	}
@@ -786,7 +795,7 @@ bool Node::removeInterface(const InterfaceRef& inIface)
 		InterfaceRef& iface = *it;
 		if (inIface == iface) {
 			interfaces.erase(it);
-			setCreateTime();
+			setNodeDescriptionCreateTime();
 			return true;
 		}
 	}
@@ -894,7 +903,7 @@ void Node::setBloomfilter(const char *base64, const bool set_create_time)
 	 It is not yet clear what is the best strategy here.
 	 */
 	if (set_create_time)
-		setCreateTime();
+		setNodeDescriptionCreateTime();
 }
 
 void Node::setBloomfilter(const Bloomfilter& bf, const bool set_create_time)
@@ -906,20 +915,21 @@ void Node::setBloomfilter(const Bloomfilter& bf, const bool set_create_time)
 
 	/* See not above about setting the create time here. */
 	if (set_create_time)
-		setCreateTime();
+		setNodeDescriptionCreateTime();
 }
 
-void Node::setCreateTime(Timeval t)
+void Node::setNodeDescriptionCreateTime(Timeval t)
 {
 	if (type == NODE_TYPE_THIS_NODE) {
 		//HAGGLE_DBG("SETTING create time on node description\n");
 		dObj->setCreateTime(t);
+		nodeDescriptionCreateTime = t;
 	}
 }
 
-Timeval Node::getCreateTime() const
+Timeval Node::getNodeDescriptionCreateTime() const
 {
-	return dObj->getCreateTime();
+	return nodeDescriptionCreateTime;
 }
 
 bool operator==(const Node &n1, const Node &n2)

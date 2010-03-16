@@ -361,6 +361,8 @@ void DebugManager::onDumpDataStore(Event *e)
                 dsDump = static_cast <DataStoreDump *>(e->getData());
         }
 	
+	HAGGLE_DBG("Got dump from data store\n");
+	
 	// Send out a general request for XML dumps from managers.
 	DebugCmdRef dbgCmdRef = new DebugCmd(DBG_CMD_GET_XML_DUMP, getName());
 	kernel->addEvent(new Event(dbgCmdRef));
@@ -371,10 +373,7 @@ void DebugManager::onDumpDataStore(Event *e)
 
 void DebugManager::onDebugCmd(Event *e)
 {
-	if (!e) 
-                return;
-        
-        DebugCmdRef& cmd = e->getDebugCmd();
+	DebugCmdRef& cmd = e->getDebugCmd();
 	
         if (cmd->getType() == DBG_CMD_XML_DUMP) {
                 /*
@@ -391,6 +390,8 @@ void DebugManager::onDebugCmd(Event *e)
 
                   However, this solution works for now.
                 */
+		HAGGLE_DBG("Got XML dump\n");
+		
 		for (List<SOCKET>::iterator it = client_sockets.begin(); it != client_sockets.end(); it++) {
 			if (dsDump)
 				dumpTo(*it, dsDump, cmd->getMsg());
@@ -398,6 +399,7 @@ void DebugManager::onDebugCmd(Event *e)
 			kernel->unregisterWatchable(*it);
 			CLOSE_SOCKET(*it);
 		}
+		
 		client_sockets.clear();
 		
                 if (dsDump) {
@@ -514,6 +516,9 @@ void DebugManager::onWatchableEvent(const Watchable& wbl)
 				kernel->getDataStore()->print();
 				break;
 #endif
+			case 'u':
+				kernel->getThisNode()->getDataObject()->print();
+				break;
 			case 'i':
 				// Interface list
 				//dbgCmdRef = DebugCmdRef(new DebugCmd(DBG_CMD_PRINT_INTERNAL_STATE), "PrintInterfacesDebugCmd");
@@ -596,8 +601,16 @@ void DebugManager::publicEvent(Event *e)
 {
 	if (!e)
 		return;
-
+	
 	HAGGLE_DBG("%s data=%s\n", e->getName(), e->hasData() ? "Yes" : "No");
+
+	switch (e->getType()) {
+		case EVENT_TYPE_DEBUG_CMD:
+			onDebugCmd(e);
+			break;
+		default:
+			break;
+	}
 }
 
 SOCKET openSocket(int port)
@@ -642,5 +655,26 @@ SOCKET openSocket(int port)
 	listen(sock, 1);
 
 	return sock;
+}
+
+void DebugManager::onConfig(Metadata *m)
+{
+	Metadata *dm = m->getMetadata("DebugTrace");
+
+	if (dm) {
+		const char *parm = dm->getParameter("enable");
+
+		if (parm) {
+			if (strcmp(parm, "true") == 0) {
+				HAGGLE_DBG("Enabling debug trace\n");
+				Trace::trace.enableFileTrace();
+			} else if (strcmp(parm, "false") == 0) {
+				HAGGLE_DBG("Disabling debug trace\n");
+				Trace::trace.disableFileTrace();
+				fclose(stdout);
+				fclose(stderr);
+			}
+		}
+	}
 }
 #endif

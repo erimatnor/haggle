@@ -58,7 +58,6 @@ private:
 	int evaluateFilters(const DataObjectRef& dObj, sqlite_int64 dataobject_rowid = 0);
 
 	sqlite_int64 getDataObjectRowId(const DataObjectId_t& id);
-	sqlite_int64 getDataObjectRowId(const DataObjectRef& dObj);
 	sqlite_int64 getAttributeRowId(const Attribute* attr);
 	sqlite_int64 getNodeRowId(const NodeRef& node);
 	sqlite_int64 getNodeRowId(const InterfaceRef& iface);
@@ -73,7 +72,9 @@ private:
 	Interface *getInterfaceFromRowId(const sqlite_int64 ifaceRowId);
 	
 	int findAndAddDataObjectTargets(DataObjectRef& dObj, const sqlite_int64 dataObjectRowId, const long ratio);
+	int deleteDataObjectNodeDescriptions(DataObjectRef ref_dObj, string *node_id);
 
+	
 #ifdef DEBUG_SQLDATASTORE
 	void _print();
 #endif
