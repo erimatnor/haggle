@@ -36,7 +36,7 @@ class XMLGetter implements Runnable {
 	{
 		// Comment this out to hide parsing debug:
 		try{
-			System.out.println(str);
+			//System.out.println(str);
 		} catch (Exception e) {
 		}
 	}
@@ -44,7 +44,7 @@ class XMLGetter implements Runnable {
 	{
 		// Comment this out to hide progress debug:
 		try{
-			System.out.println(str);
+			//System.out.println(str);
 		} catch (Exception e) {
 		}
 	}
@@ -52,7 +52,7 @@ class XMLGetter implements Runnable {
 	{
 		// Comment this out to hide parsing debug:
 		try{
-			System.out.println(str);
+			//System.out.println(str);
 		} catch (Exception e) {
 		}
 	}
@@ -164,9 +164,6 @@ class XMLGetter implements Runnable {
 			}else{
 				MyClient = new Socket(ip, 9090);
 			}
-			
-			progressDebug("Socket created");
-			
 			PrintWriter output = 
 				new PrintWriter(
 					MyClient.getOutputStream(), 
@@ -178,10 +175,6 @@ class XMLGetter implements Runnable {
 			
 			String xmlString = "";
 			String tmp;
-			
-			
-			progressDebug("reading lines");
-			
 			do{
 				tmp = input.readLine();
 				if(tmp != null)
@@ -274,7 +267,7 @@ public class SensorNode extends MonitorNode {
 	{
 		// Comment this out to hide parsing debug:
 		try{
-			LOG.debug(str);
+			//LOG.debug(str);
 		} catch (Exception e) {
 		}
 	}

@@ -780,11 +780,11 @@ int get_peer_mac_address(const struct sockaddr *saddr, const char *ifname, unsig
 	struct sockaddr_inarp *sin2;
 	struct sockaddr_dl *sdl;
 	int res = 0;
-	unsigned long addr;
+	unsigned long addr = 0;
 	
 	switch (saddr->sa_family) {
 		case AF_INET:
-			memcpy(&addr, &((struct sockaddr_in*)saddr)->sin_addr.s_addr, sizeof(struct in_addr));
+			memcpy(&addr, &((struct sockaddr_in*)saddr)->sin_addr, sizeof(struct in_addr));
 			break;
 		case AF_INET6:
 			// IPv6 not supported yet
