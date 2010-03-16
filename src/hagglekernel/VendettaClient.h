@@ -15,14 +15,9 @@
 #ifndef _VENDETTACLIENT_H
 #define _VENDETTACLIENT_H
 
-/*
-	Forward declarations of all data types declared in this file. This is to
-	avoid circular dependencies. If/when a data type is added to this file,
-	remember to add it here.
-*/
-class VendettaClient;
-
 #include "VendettaAsynchronous.h"
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 using namespace haggle;
 
@@ -31,9 +26,8 @@ private:
         string our_name;
         string our_ip_address;
         string our_port;
-#define SITE_MANAGER_ADDRESS "192.168.2.50"
-#define SITE_MANAGER_TCP_PORT "4444"
-#define SITE_MANAGER_UDP_PORT "4445"
+	struct in_addr sitemgr_addr;
+	unsigned short sitemgr_udp_port, sitemgr_tcp_port;
         SOCKET tcp_socket;
         SOCKET udp_socket;
 	void determine_name(void);
@@ -44,12 +38,13 @@ private:
     protected:
 	bool sendEvent(string event, string params);
         
-        virtual void _handleEvent(void);
-	virtual void _handleSendEvent(string &event, string &params);
-        virtual void _sendPING(void);
+        void _handleEvent(void);
+	void _handleSendEvent(string &event, string &params);
+        void _sendPING(void);
     public:
+	void setSiteManager(struct in_addr ip, unsigned short udp_port, unsigned short tcp_port);
 	string getOurName(void) { return our_name; }
-        VendettaClient(VendettaManager *m = NULL,
+        VendettaClient(VendettaManager *m, struct in_addr ip, unsigned short udp_port, unsigned short tcp_port,
                        const string name = "Vendetta client module");
         ~VendettaClient();
 };

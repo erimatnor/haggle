@@ -645,6 +645,8 @@ finish:
 #endif
 	delete kernel;
 	kernel = NULL;
+	
+	HAGGLE_DBG("Exit from main\n");
 
 	return retval;
 }

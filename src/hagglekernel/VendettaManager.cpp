@@ -16,10 +16,13 @@
 #include "VendettaManager.h"
 #include "VendettaClient.h"
 
-VendettaManager::VendettaManager(HaggleKernel *_kernel) : 
-    Manager("Vendetta manager", _kernel) 
-{
+#define SITE_MANAGER_ADDRESS "192.168.2.50"
+#define SITE_MANAGER_TCP_PORT 4444
+#define SITE_MANAGER_UDP_PORT 4445
 
+VendettaManager::VendettaManager(HaggleKernel *_kernel) : 
+	Manager("VendettaManager", _kernel)
+{	
 }
 
 bool VendettaManager::init_derived()
@@ -34,10 +37,14 @@ bool VendettaManager::init_derived()
 	setEventHandler(EVENT_TYPE_DELEGATE_NODES, onNodeNodeListDataObjectEvent);
 	setEventHandler(EVENT_TYPE_DATAOBJECT_SEND_SUCCESSFUL, onNodeDataObjectEvent);
 	setEventHandler(EVENT_TYPE_DATAOBJECT_SEND_FAILURE, onNodeDataObjectEvent);
-
-        theClient = new VendettaClient(this);
-
-        if (!theClient)
+	
+	struct in_addr sitemgr_addr;
+	
+	sitemgr_addr.s_addr = inet_addr(SITE_MANAGER_ADDRESS);
+	
+        client = new VendettaClient(this, sitemgr_addr, SITE_MANAGER_UDP_PORT, SITE_MANAGER_TCP_PORT);
+	
+        if (!client)
                 return false;
 	
 	onEventQueueRunningCallback = newEventCallback(onEventQueueRunning);
@@ -46,58 +53,58 @@ bool VendettaManager::init_derived()
 		// Wait 5 seconds before starting to send pings... that should make it 
 		// wait until after the first batch of events.
 		kernel->addEvent(new Event(onEventQueueRunningCallback, NULL, 0.0));
-
+	
         return true;
 }
 
 VendettaManager::~VendettaManager()
 {
-    if (theClient)
-            delete theClient;
-    if (onEventQueueRunningCallback)
-            delete onEventQueueRunningCallback;
+	if (client)
+		delete client;
+	
+	if (onEventQueueRunningCallback)
+		delete onEventQueueRunningCallback;
 }
 
-static void sendEvent(
-		VendettaAsynchronous *client,
-		const char *event, 
-		const char *param1 = NULL, 
-		const char *param2 = NULL, 
-		const char *param3 = NULL)
+
+#define EVENT_STRING_LEN 512
+
+static void sendEvent(VendettaAsynchronous *client,
+		      const char *event, 
+		      const char *param1 = NULL, 
+		      const char *param2 = NULL, 
+		      const char *param3 = NULL)
 {
-	// 512 is the buffer size in the site manager...
-	char str[512];
+	char str[EVENT_STRING_LEN];
 	
-	if(!client)
+	if (!client)
 		return;
 	
 	// Create the event string:
-	if(param3 != NULL)
-	{
-		sprintf(
-			str,
+	if (param3 != NULL) {
+		snprintf(str,
+			 EVENT_STRING_LEN,
 			"%s %s %s", 
 			param1,
 			param2,
 			param3);
-	}else if(param2 != NULL)
-	{
-		sprintf(
-			str,
+	} else if(param2 != NULL) {
+		snprintf(str,
+			EVENT_STRING_LEN,
 			"%s %s", 
 			param1,
 			param2);
-	}else if(param1 != NULL)
-	{
-		sprintf(
-			str,
+	} else if(param1 != NULL) {
+		snprintf(str,
+			EVENT_STRING_LEN,
 			"%s", 
 			param1);
-	}else{
+	} else {
 		str[0] = '\0';
 	}
 	string params = str;
 	string _event = event;
+	
 	client->handleSendEvent(_event, params);
 }
 
@@ -115,16 +122,16 @@ string VendettaManager::getDOIDStr(DataObjectRef dObj)
                         }
 		}
 	}
+	
+	HAGGLE_DBG("Data obj id is %s (from data object)\n", dObjIdStr.c_str());
 	return dObjIdStr;
 }
 
 static string getNodeIDStr(DataObjectRef dObj)
 {
 	string dObjIdStr = "";
-	if(dObj)
-	{
-		if(dObj->isNodeDescription())
-		{
+	if (dObj) {
+		if (dObj->isNodeDescription()) {
 			NodeRef dNode = Node::create(NODE_TYPE_PEER, dObj);
 			
                         if (dNode) {
@@ -134,126 +141,178 @@ static string getNodeIDStr(DataObjectRef dObj)
                         }
 		}
 	}
+	
+	HAGGLE_DBG("Node id is %s (from data object)\n", dObjIdStr.c_str());
 	return dObjIdStr;
 }
 
 static string getNodeIDStr(NodeRef node)
 {
 	string NodeIdStr = "[Unknown]";
-	if(node)
-	{
+	
+	if (node) {
 		NodeIdStr = node->getIdStr();
-		if(NodeIdStr == "[Not yet set]")
+		if (NodeIdStr.length() == 0)
 			NodeIdStr = "[Notyetset]";
 	}
+	HAGGLE_DBG("Node id is %s (from node)\n", NodeIdStr.c_str());
 	return NodeIdStr;
 }
 
 void VendettaManager::onDataObjectEvent(Event *e)
 {
-	if(theClient)
-		theClient->handleEvent();
+	const Attribute *attr;
+	
+	if (client)
+		client->handleEvent();
+	
 	DataObjectRef &dObj = e->getDataObject();
-	bool should_send_event = true;
-    if(dObj)
-    {
-		const Attribute *attr;
-		// Should be: HAGGLE_ATTR_CONTROL_NAME
-		attr = dObj->getAttribute("HaggleIPC");
-		if(attr)
-			should_send_event = false;
-		attr = dObj->getAttribute("Forward");
-		if(attr)
-			if(attr->getValue() != "*")
-				should_send_event = false;
-		attr = dObj->getAttribute("Hide");
-		if(attr)
-			if(attr->getValue() == "this")
-				should_send_event = false;
-		if(!dObj->isPersistent())
-			should_send_event = false;
-		if(should_send_event)
-		{
-			NodeRef node = 
-				kernel->getNodeStore()->retrieve(
-					dObj->getRemoteInterface());
-			string nodeIDStr = getNodeIDStr(dObj);
-			sendEvent(
-				theClient, 
-				e->getName(), 
-				getDOIDStr(e->getDataObject()).c_str(),
-				nodeIDStr != ""?nodeIDStr.c_str():(node?"-":NULL),
-				node?getNodeIDStr(node).c_str():NULL);
-		}
-    }
+	
+	if (!dObj)
+		return;
+	
+	// Should be: HAGGLE_ATTR_CONTROL_NAME
+	if (dObj->getAttribute("HaggleIPC"))
+		return;
+	
+	attr = dObj->getAttribute("Forward");
+	
+	if (attr && attr->getValue() != "*")
+		return;
+	
+	attr = dObj->getAttribute("Hide");
+	
+	if (attr && attr->getValue() == "this")
+		return;
+	
+	if (!dObj->isPersistent())
+		return;
+	
+	NodeRef node = kernel->getNodeStore()->retrieve(dObj->getRemoteInterface());
+	
+	if (!node || strlen(node->getIdStr()) == 0)
+		return;
+	
+	string nodeIDStr = getNodeIDStr(dObj);
+	
+	sendEvent(client, 
+		  e->getName(), 
+		  getDOIDStr(e->getDataObject()).c_str(),
+		  nodeIDStr != "" ? nodeIDStr.c_str() : (node ? "-" : NULL),
+		  node ? getNodeIDStr(node).c_str() : NULL);
 }
 
 void VendettaManager::onNodeEvent(Event *e)
 {
 	NodeRef &neighbor = e->getNode();
-	if(neighbor)
-		sendEvent(theClient, e->getName(), getNodeIDStr(neighbor).c_str());
+	
+	if (neighbor)
+		sendEvent(client, e->getName(), getNodeIDStr(neighbor).c_str());
 }
 
 void VendettaManager::onNodeNodeListEvent(Event *e)
 {
-    if(theClient)
-    {
-        NodeRefList &nodes = e->getNodeList();
-        NodeRef &node = e->getNode();
-        
-        for(NodeRefList::iterator it = nodes.begin(); it != nodes.end(); it++)
-        {
-			sendEvent(
-				theClient, 
-				e->getName(), 
-				getNodeIDStr(node).c_str(), 
-				getNodeIDStr((*it)).c_str());
-        }
-    }
+	if (client) {
+		NodeRefList &nodes = e->getNodeList();
+		NodeRef &node = e->getNode();
+		
+		for (NodeRefList::iterator it = nodes.begin(); it != nodes.end(); it++) {
+			sendEvent(client, 
+				  e->getName(), 
+				  getNodeIDStr(node).c_str(), 
+				  getNodeIDStr((*it)).c_str());
+		}
+	}
 }
 
 void VendettaManager::onNodeNodeListDataObjectEvent(Event *e)
 {
-    if(theClient)
-    {
-        NodeRef &target = e->getNode();
-        NodeRefList &nodes = e->getNodeList();
-        DataObjectRef &dObj = e->getDataObject();
-        
-        for(NodeRefList::iterator it = nodes.begin(); it != nodes.end(); it++)
-        {
-			sendEvent(theClient, 
-				e->getName(), 
-				getDOIDStr(dObj).c_str(), 
-				getNodeIDStr((*it)).c_str(),
-				getNodeIDStr(target).c_str());
-        }
-    }
+	if (client) {
+		NodeRef &target = e->getNode();
+		NodeRefList &nodes = e->getNodeList();
+		DataObjectRef &dObj = e->getDataObject();
+		
+		for (NodeRefList::iterator it = nodes.begin(); it != nodes.end(); it++) {
+			sendEvent(client, 
+				  e->getName(), 
+				  getDOIDStr(dObj).c_str(), 
+				  getNodeIDStr((*it)).c_str(),
+				  getNodeIDStr(target).c_str());
+		}
+	}
 }
 
 void VendettaManager::onNodeDataObjectEvent(Event *e)
 {
 	NodeRef &node = e->getNode();
 	DataObjectRef &dObj = e->getDataObject();
-	if(node && dObj)
-		sendEvent(
-			theClient, 
-			e->getName(), 
-			getDOIDStr(dObj).c_str(), 
-			getNodeIDStr(node).c_str());
+	if (node && dObj)
+		sendEvent(client, 
+			  e->getName(), 
+			  getDOIDStr(dObj).c_str(), 
+			  getNodeIDStr(node).c_str());
 }
 
-void VendettaManager::hookShutdown()
+void VendettaManager::onShutdown()
 {
-	sendEvent(
-		theClient, 
-		Event::getTypeName(EVENT_TYPE_SHUTDOWN));
-	theClient->handleQuit();
+	sendEvent(client, Event::getTypeName(EVENT_TYPE_SHUTDOWN));
+	client->handleQuit();
+	HAGGLE_DBG("Joining with client thread\n");
+	client->join();
+	HAGGLE_DBG("Joined with client\n");
+	
+	unregisterWithKernel();
 }
 
 void VendettaManager::onEventQueueRunning(Event *e)
 {
-	if(theClient)
-		theClient->startSendingPings();
+	if (client)
+		client->start();
+}
+
+void VendettaManager::onConfig(Metadata *m)
+{
+	Metadata *sm = m->getMetadata("SiteManager");
+	
+	if (sm) {
+		struct in_addr ip;
+		unsigned short udp_port = SITE_MANAGER_UDP_PORT, tcp_port = SITE_MANAGER_UDP_PORT;
+		
+		HAGGLE_DBG("SiteManager configuration...\n");
+		
+		ip.s_addr = inet_addr(SITE_MANAGER_ADDRESS);
+		
+		const char *param = sm->getParameter("ip");
+		
+		if (param) {
+			ip.s_addr = inet_addr(param);
+				
+			HAGGLE_DBG("config site manager address is %s\n", ip_to_str(ip));
+		}
+		
+		param = sm->getParameter("udp_port");
+		
+		if (param) {
+			char *endptr = NULL;
+			udp_port = strtoul(param, &endptr, 10) & 0xFFFF;
+			
+			if (endptr && endptr != param) {
+				HAGGLE_DBG("config site manager udp port is %u\n", tcp_port);
+			}
+		}
+		
+		param = sm->getParameter("tcp_port");
+		
+		if (param) {
+			char *endptr = NULL;
+			tcp_port = strtoul(param, &endptr, 10) & 0xFFFF;
+			
+			if (endptr && endptr != param) {
+				HAGGLE_DBG("config site manager tcp port is %u\n", tcp_port);
+			}
+		}
+		
+		if (client)
+			client->setSiteManager(ip, udp_port, tcp_port);
+	}
 }

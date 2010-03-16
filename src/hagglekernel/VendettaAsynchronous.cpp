@@ -14,120 +14,108 @@
  */
 
 #include "VendettaAsynchronous.h"
-VendettaAsynchronous::VendettaAsynchronous(
-		VendettaManager *m, 
-		const string name) :
-    ManagerModule<VendettaManager>(m,name)
+VendettaAsynchronous::VendettaAsynchronous(VendettaManager *m, const string name) :
+	ManagerModule<VendettaManager>(m, name), should_send_events(false), should_call_handle_event(false)
 {
-    ping_time_delta = Timeval(5,0);
-    next_ping_time = Timeval::now() + ping_time_delta;
-    should_call_handle_event = false;
-	should_send_events = false;
-    start();
+	ping_time_delta = Timeval(5,0);
+	next_ping_time = Timeval::now() + ping_time_delta;
 }
 
 VendettaAsynchronous::~VendettaAsynchronous()
 {
-	// Tell the thread to quit:
-	actionQueue.insert(new VC_Action(VC_quit));
-	// Make sure noone else adds stuff to the queue:
-	actionQueue.close();
-	// Wait for the thread to terminate:
-        stop();
+	while (!taskQ.empty()) {
+		Task *task = NULL;
+		taskQ.retrieve(&task, NULL);
+		
+		if (task)
+			delete task;
+	}
 }
 
 void VendettaAsynchronous::handleEvent(void)
 {
-    should_call_handle_event = true;
-    call_handle_event_at = Timeval::now() + Timeval(2,0);
-    actionQueue.insert(new VC_Action(VC_event));
+	should_call_handle_event = true;
+	call_handle_event_at = Timeval::now() + Timeval(2,0);
+	taskQ.insert(new Task(TASK_TYPE_EVENT));
 }
 
 void VendettaAsynchronous::handleSendEvent(string &event, string &params)
 {
-    actionQueue.insert(new VC_Action(VC_send_event, event, params));
+	taskQ.insert(new Task(TASK_TYPE_SEND, event, params));
 }
 
 void VendettaAsynchronous::handleQuit(void)
 {
-    actionQueue.insert(new VC_Action(VC_quit));
+	taskQ.insert(new Task(TASK_TYPE_QUIT));
 }
 
 bool VendettaAsynchronous::run(void)
 {
-
-	while(!shouldExit() && !should_send_events)
-	{
-		cancelableSleep(10);
-	}
-
-	while(!shouldExit())
-	{
-		VC_Action *action;
+	HAGGLE_DBG("Running task queue\n");
+	
+	while (!shouldExit()) {
+		Timeval now = Timeval::now();
+		Task *task = NULL;
 		Timeval	time_left, time_left_ping, time_left_handle_event;
 		bool call_handle_event;
-
-		action = NULL;
-		time_left_ping = next_ping_time - Timeval::now();
-		if(should_call_handle_event)
-		{
-			time_left_handle_event = call_handle_event_at - Timeval::now();
-			if(time_left_handle_event < time_left_ping)
-			{
+		
+		time_left_ping = next_ping_time - now;
+		
+		if (should_call_handle_event) {
+			time_left_handle_event = call_handle_event_at - now;
+			if (time_left_handle_event < time_left_ping) {
 				call_handle_event = true;
 				time_left = time_left_handle_event;
-			}else{
+			} else {
 				call_handle_event = false;
 				time_left = time_left_ping;
 			}
-		}else{
+		} else {
 			time_left = time_left_ping;
 			call_handle_event = false;
 		}
-
-		switch(actionQueue.retrieve(&action, &time_left))
-		{
-		default:
-			break;
-
-		case QUEUE_TIMEOUT:
-			if(call_handle_event)
-			{
-				_handleEvent();
-				should_call_handle_event = false;
-			}else{
-				_sendPING();
-			}
-			// Update the time until the next PING:
-			{
-				Timeval Now = Timeval::now();
-
-				while(next_ping_time < Now)
-				{
-					next_ping_time += ping_time_delta;
-				}
-			}
-			break;
-
-		case QUEUE_ELEMENT:
-			switch(action->action)
-			{
-			case VC_event:
-				//_handleEvent();
-				break;
-
-			case VC_send_event:
-				_handleSendEvent(action->event, action->params);
-				break;
-
-			case VC_quit:
+		
+		switch (taskQ.retrieve(&task, &time_left)) {
+			default:
+				HAGGLE_DBG("some error occurred!\n");
 				cancel();
 				break;
-			}
-			break;
+			case QUEUE_TIMEOUT:
+				if (call_handle_event) {
+					//HAGGLE_DBG("handle event\n");
+					_handleEvent();
+					should_call_handle_event = false;
+				} else {
+					//HAGGLE_DBG("send ping\n");
+					_sendPING();
+				}
+				// Update the time until the next PING:
+				
+				while (next_ping_time < now) {
+					next_ping_time += ping_time_delta;
+				}
+				break;
+				
+			case QUEUE_ELEMENT:
+				switch (task->type) {
+					case TASK_TYPE_EVENT:
+						//_handleEvent();
+						//HAGGLE_DBG("handle event (element)\n");
+						break;
+					case TASK_TYPE_SEND:
+						//HAGGLE_DBG("handle send event (element)\n");
+						_handleSendEvent(task->event, task->params);
+						break;
+					case TASK_TYPE_QUIT:
+						//HAGGLE_DBG("Quit!\n");
+						cancel();
+						break;
+				}
+				break;
 		}
-		if(action)
-			delete action;
+		
+		if (task)
+			delete task;
 	}
 	return false;
 }

@@ -15,35 +15,30 @@
 #ifndef _VENDETTAMANAGER_H
 #define _VENDETTAMANAGER_H
 
-/*
-	Forward declarations of all data types declared in this file. This is to
-	avoid circular dependencies. If/when a data type is added to this file,
-	remember to add it here.
-*/
-class VendettaManager;
-
 #include "Manager.h"
 #include "Event.h"
-#include "VendettaAsynchronous.h"
+
+class VendettaClient;
 
 /** */
 class VendettaManager : public Manager
 {
 private:
-    VendettaAsynchronous *theClient;
+	VendettaClient *client;
 	string getDOIDStr(DataObjectRef dObj);
 	EventCallback<EventHandler> *onEventQueueRunningCallback;
-	virtual void hookShutdown();
+	void onShutdown();
 public:
         bool init_derived();
-	VendettaAsynchronous *getClient(void) { return theClient; }
+	VendettaClient *getClient(void) { return client; }
 	void onDataObjectEvent(Event *e);
 	void onNodeEvent(Event *e);
 	void onNodeNodeListEvent(Event *e);
 	void onNodeNodeListDataObjectEvent(Event *e);
 	void onNodeDataObjectEvent(Event *e);
 	void onEventQueueRunning(Event *e);
-
+	void onConfig(Metadata *m);
+	
 	VendettaManager(HaggleKernel *_kernel = haggleKernel);
 	~VendettaManager();
 };

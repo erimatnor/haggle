@@ -172,68 +172,64 @@ void VendettaClient::determine_ip(void)
 SOCKET VendettaClient::open_tcp_socket(void)
 {
 	SOCKET sock;
-	struct addrinfo hints, *res;
-
-//UDP socket:
-
-//Get address / port etc.:
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-
-	getaddrinfo(SITE_MANAGER_ADDRESS, SITE_MANAGER_TCP_PORT, &hints, &res);
-
-//Open socket:
-	sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	struct sockaddr_in saddr;
+	socklen_t addrlen = sizeof(struct sockaddr_in);
+	
+	saddr.sin_family = AF_INET;
+	saddr.sin_addr.s_addr = sitemgr_addr.s_addr;
+	saddr.sin_port = htons(sitemgr_tcp_port);
+	
+	//Open socket:
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	
 	if (sock == INVALID_SOCKET) {
 		HAGGLE_ERR("could not open socket : %s\n", STRERROR(ERRNO));
 		return INVALID_SOCKET;
 	}
-//Connect:
-	if (connect(sock, res->ai_addr, res->ai_addrlen) == SOCKET_ERROR) {
-		HAGGLE_ERR("could not connect socket : %s\n", STRERROR(ERRNO));
+
+	//Connect:
+	if (connect(sock, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
+		HAGGLE_ERR("could not connect to %s:%u : %s\n", ip_to_str(sitemgr_addr), sitemgr_tcp_port, STRERROR(ERRNO));
 		CLOSE_SOCKET(sock);
 		return INVALID_SOCKET;
 	}
-	freeaddrinfo(res);
 
 	determine_ip();
+	
 	return sock;
 }
 
 SOCKET VendettaClient::open_udp_socket(void)
 {
 	SOCKET sock;
-	struct addrinfo hints, *res;
-
-//UDP socket:
-
-//Get address / port etc.:
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_DGRAM;
-
-	getaddrinfo(SITE_MANAGER_ADDRESS, SITE_MANAGER_UDP_PORT, &hints, &res);
-
-//Open socket:
-	sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	struct sockaddr_in saddr;
+	socklen_t addrlen = sizeof(struct sockaddr_in);
+	
+	saddr.sin_family = AF_INET;
+	saddr.sin_addr.s_addr = sitemgr_addr.s_addr;
+	saddr.sin_port = htons(sitemgr_udp_port);
+	
+	//Open socket:
+	sock = socket(AF_INET, SOCK_DGRAM, 0);
+	
 	if (sock == INVALID_SOCKET) {
 		HAGGLE_ERR("could not open socket : %s\n", STRERROR(ERRNO));
 		return INVALID_SOCKET;
 	}
-//Connect:
-	if (connect(sock, res->ai_addr, res->ai_addrlen) == SOCKET_ERROR) {
-		HAGGLE_ERR("could not connect socket : %s\n", STRERROR(ERRNO));
+
+	//Connect:
+	if (connect(sock, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
+		HAGGLE_ERR("could not connect to %s:%u : %s\n", ip_to_str(sitemgr_addr), sitemgr_udp_port, STRERROR(ERRNO));
 		CLOSE_SOCKET(sock);
 		return INVALID_SOCKET;
 	}
-	freeaddrinfo(res);
+
 	return sock;
 }
 
 void VendettaClient::addToBlacklist(const char *type, const char *mac)
 {
-	String str;
+	string str;
 
 	str = "<Haggle persistent=\"no\">"
 		"<Attr name=\"Connectivity\">Blacklist</Attr>"
@@ -251,12 +247,14 @@ void VendettaClient::addToBlacklist(const char *type, const char *mac)
                                         DataObjectRef(DataObject::create((unsigned char *)str.c_str(), str.length()))));
 }
 
-VendettaClient::VendettaClient(VendettaManager * m, const string name):
-        VendettaAsynchronous(m, name)
+VendettaClient::VendettaClient(VendettaManager *m, struct in_addr ip, unsigned short udp_port, unsigned short tcp_port, const string name):
+	VendettaAsynchronous(m, name), sitemgr_udp_port(udp_port), sitemgr_tcp_port(tcp_port)
 {
 	tcp_socket = INVALID_SOCKET;
 	udp_socket = INVALID_SOCKET;
 
+	memcpy(&sitemgr_udp_port, &ip, sizeof(struct in_addr));
+	
 	handleEvent();
 	determine_name();
         // Post this into the send queue:
@@ -277,6 +275,14 @@ VendettaClient::~VendettaClient()
 {
 	CLOSE_SOCKET(udp_socket);
 	CLOSE_SOCKET(tcp_socket);
+}
+
+void VendettaClient::setSiteManager(struct in_addr ip, unsigned short udp_port, unsigned short tcp_port)
+{
+	memcpy(&sitemgr_addr, &ip, sizeof(ip));
+	
+	sitemgr_tcp_port = tcp_port;
+	sitemgr_udp_port = udp_port;
 }
 
 bool VendettaClient::sendEvent(string event, string params)
