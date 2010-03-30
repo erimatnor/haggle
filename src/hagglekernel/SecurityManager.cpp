@@ -288,7 +288,16 @@ void SecurityHelper::doTask(SecurityTask *task)
 				HAGGLE_DBG("Verifying data object [%s]\n", task->dObj->getIdStr());
 				verifyDataObject(task->dObj, task->cert);
 			} else {
-				HAGGLE_DBG("Could not verify data object due to lack of certificate\n");
+                                size_t len;
+                                char *raw;
+
+                                HAGGLE_DBG("Could not verify data object due to lack of certificate\n");
+
+                                if (task->dObj->getRawMetadataAlloc((unsigned char **)&raw, &len)) {
+                                        printf("data object:\n%s\n", raw);
+                                        free(raw);
+                                }
+
 			}
 			break;
                 case SECURITY_TASK_SIGN_DATAOBJECT:
