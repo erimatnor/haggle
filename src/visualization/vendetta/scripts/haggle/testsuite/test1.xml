@@ -1,0 +1,5 @@
+<Scenario>
+	<tracefile>traces/test1.txt</tracefile>
+	<Application>scenarioapp.sh 1</Application>
+	<magic>haggle</magic>
+</Scenario>

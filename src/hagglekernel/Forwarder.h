@@ -157,6 +157,16 @@ public:
 	*/
 	virtual void printRoutingTable(void) {}
 #endif
+	
+	/**
+		Returns the routing table in XML format.
+		
+		This function only exists in the haggle-demo branch, and should only
+		be there. Changes including this function should not be merged with
+		the default development branch.
+	*/
+	virtual void getInternalStateAsXML(void) {}
+	
 };
 
 #endif
