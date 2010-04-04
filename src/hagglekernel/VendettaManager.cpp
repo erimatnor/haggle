@@ -52,7 +52,7 @@ bool VendettaManager::init_derived()
 	if (onEventQueueRunningCallback)
 		// Wait 5 seconds before starting to send pings... that should make it 
 		// wait until after the first batch of events.
-		kernel->addEvent(new Event(onEventQueueRunningCallback, NULL, 0.0));
+		kernel->addEvent(new Event(onEventQueueRunningCallback, NULL, 5.0));
 	
         return true;
 }

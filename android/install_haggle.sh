@@ -70,25 +70,37 @@ if [ -f $DEVICE_FILES_DIR/adhoc.sh ]; then
 	$ADB -s $dev shell rm /data/haggle/*
 
 	# Install scripts and other configuration files
-
-	$ADB -s $dev push $DEVICE_FILES_DIR/adhoc.sh $DATA_DIR/
+	$ADB -s $dev push $DEVICE_FILES_DIR/adhoc.sh /system/bin/adhoc
 	$ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
-	$ADB -s $dev shell chmod 775 $DATA_DIR/adhoc.sh
+	$ADB -s $dev shell chmod 775 /system/bin/adhoc
 
 	$ADB -s $dev shell mkdir /data/haggle
-	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
-	
-	if [ "$dev" = "HT93XKF09536" ]; then 
+	$ADB -s $dev shell mkdir /sdcard/PhotoShare
+
+	if [ "$dev" = "HT02KP900026" ]; then 
+	    # This is a nexus one device
 	    echo "#ffbf2c00" > /tmp/deviceColor
 	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
+	    $ADB -s $dev shell echo  
 	fi
-	if [ "$dev" = "HT93XKF03557" ]; then 
+	if [ "$dev" = "HT93XKF09536" ]; then 
+	    # This is a Magic
+	    echo "#ffbf2c00" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+	fi
+	if [ "$dev" = "HT93XKF03557" ]; then
+	    # This is a Magic
 	    echo "#ffa200bf" > /tmp/deviceColor
 	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
 	fi
 	if [ "$dev" = "HT93YKF07043" ]; then 
+	    # This is a Magic
 	    echo "#ff00bf20" > /tmp/deviceColor
 	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
 	fi
     done
 fi

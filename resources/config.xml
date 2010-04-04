@@ -4,7 +4,7 @@
 		<ForwardingModule/>
 	</ForwardingManager>
 	<DebugManager>
-		<DebugTrace enable="false"/>
+		<DebugTrace enable="true"/>
 	</DebugManager>
 	<NodeManager>
 		<Node matching_threshold="10" max_dataobjects_in_match="10"/>
@@ -57,6 +57,6 @@
 		</Bluetooth>
 	</ConnectivityManager>
 	<VendettaManager>
-		<SiteManager ip="192.168.1.54" tcp_port="4444" udp_port="4445"/>
+		<SiteManager ip="192.168.1.55" tcp_port="4444" udp_port="4445"/>
 	</VendettaManager>
 </Haggle>
