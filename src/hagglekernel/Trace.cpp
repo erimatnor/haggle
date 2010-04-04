@@ -25,9 +25,7 @@ bool Trace::stdout_enabled = true;
 Trace::Trace(TraceType_t _type, bool _enabled) :
 	type(_type), traceFile(NULL), startTime(Timeval::now()), enabled(_enabled)
 {
-       	set_trace_timestamp_base(startTime.getTimevalStruct());
-	
-	HAGGLE_DBG("Initializing trace\n");
+	set_trace_timestamp_base(startTime.getTimevalStruct());
 }
 
 Trace::~Trace()

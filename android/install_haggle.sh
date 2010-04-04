@@ -65,12 +65,45 @@ pushd $SCRIPT_DIR
 if [ -f $DEVICE_FILES_DIR/adhoc.sh ]; then
     for dev in $DEVICES; do
 	echo "Installing configuration files onto device $dev"
-	$ADB -s $dev push $DEVICE_FILES_DIR/adhoc.sh $DATA_DIR/
+	
+	# Cleanup data folder if any
+	$ADB -s $dev shell rm /data/haggle/*
+
+	# Install scripts and other configuration files
+	$ADB -s $dev push $DEVICE_FILES_DIR/adhoc.sh /system/bin/adhoc
 	$ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
-	$ADB -s $dev shell chmod 775 $DATA_DIR/adhoc.sh
+	$ADB -s $dev shell chmod 775 /system/bin/adhoc
+
+	$ADB -s $dev shell mkdir /data/haggle
+	$ADB -s $dev shell mkdir /sdcard/PhotoShare
+
+	if [ "$dev" = "HT02KP900026" ]; then 
+	    # This is a nexus one device
+	    echo "#ffbf2c00" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
+	    $ADB -s $dev shell echo  
+	fi
+	if [ "$dev" = "HT93XKF09536" ]; then 
+	    # This is a Magic
+	    echo "#ffbf2c00" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+	fi
+	if [ "$dev" = "HT93XKF03557" ]; then
+	    # This is a Magic
+	    echo "#ffa200bf" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+	fi
+	if [ "$dev" = "HT93YKF07043" ]; then 
+	    # This is a Magic
+	    echo "#ff00bf20" > /tmp/deviceColor
+	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
+	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+	fi
     done
 fi
-
 
 FRAMEWORK_PATH_PREFIX="system/framework"
 FRAMEWORK_FILES="haggle.jar"
@@ -132,9 +165,6 @@ for dev in $DEVICES; do
 	$ADB -s $dev push $FRAMEWORK_PATH_PREFIX/$file /$FRAMEWORK_PATH_PREFIX/$file
 	$ADB -s $dev shell chmod 644 /$FRAMEWORK_PATH_PREFIX/$file
     done
-
-    # Cleanup data folder if any
-    $ADB -s $dev shell rm /data/haggle/*
 
     # Reset filesystem to read-only
     $ADB -s $dev shell mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system

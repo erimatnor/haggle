@@ -44,6 +44,9 @@
 #include "XMLMetadata.h"
 #endif
 #include "SecurityManager.h"
+#ifdef ENABLE_VENDETTA_MANAGER
+#include "VendettaManager.h"
+#endif
 
 #ifdef OS_WINDOWS_MOBILE
 #include <TrayNotifier.h>
@@ -396,6 +399,9 @@ int run_haggle()
 	BenchmarkManager *bm = NULL;
 	//recreateDataStore = true;
 #endif
+#ifdef ENABLE_VENDETTA_MANAGER
+	VendettaManager *vm = NULL;
+#endif
 	ResourceManager *rm = NULL;
 	ProtocolSocket *p = NULL;
 #ifdef OS_WINDOWS_MOBILE
@@ -549,7 +555,14 @@ int run_haggle()
 		goto finish;
 	}
 #endif
+#if defined(ENABLE_VENDETTA_MANAGER)
+        vm = new VendettaManager(kernel);
 
+        if (!vm || !vm->init()) {
+		HAGGLE_ERR("Could not initialize vendetta manager\n");
+		goto finish;
+	}
+#endif
 	HAGGLE_DBG("Starting Haggle...\n");
 
 #ifdef OS_WINDOWS_MOBILE
@@ -566,6 +579,11 @@ finish:
 #ifdef BENCHMARK
 	if (bm)
 		delete bm;
+#endif
+
+#ifdef ENABLE_VENDETTA_MANAGER
+        if (vm)
+                delete vm;
 #endif
 	if (cm)
 		delete cm;
@@ -593,6 +611,8 @@ finish:
 #endif
 	delete kernel;
 	kernel = NULL;
+	
+	HAGGLE_DBG("Exit from main\n");
 
 	return retval;
 }
