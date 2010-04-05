@@ -17,7 +17,7 @@
 
 # The address here is the address for the machine running siteManager.
 <PROXY>
-	address=192.168.1.55
+	address=192.168.1.53
 	port_up=5000
 	port_down=5051
 </PROXY>

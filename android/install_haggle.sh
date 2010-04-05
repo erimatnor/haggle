@@ -76,7 +76,8 @@ if [ -f $DEVICE_FILES_DIR/adhoc.sh ]; then
 
 	$ADB -s $dev shell mkdir /data/haggle
 	$ADB -s $dev shell mkdir /sdcard/PhotoShare
-
+	$ADB -s $dev push ../resources/config.xml /data/haggle/
+	
 	if [ "$dev" = "HT02KP900026" ]; then 
 	    # This is a nexus one device
 	    echo "#ffbf2c00" > /tmp/deviceColor

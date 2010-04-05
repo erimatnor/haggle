@@ -253,7 +253,7 @@ VendettaClient::VendettaClient(VendettaManager *m, struct in_addr ip, unsigned s
 	tcp_socket = INVALID_SOCKET;
 	udp_socket = INVALID_SOCKET;
 
-	memcpy(&sitemgr_udp_port, &ip, sizeof(struct in_addr));
+	memcpy(&sitemgr_addr, &ip, sizeof(struct in_addr));
 	
 	handleEvent();
 	determine_name();
@@ -340,6 +340,7 @@ void VendettaClient::_handleSendEvent(string & event, string & params)
 			return;
 		} else {
 			num_fails++;
+			cancelableSleep(2000);
 			handleSendEvent(event, params);
 		}
 	} else {

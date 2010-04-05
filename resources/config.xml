@@ -1,8 +1,5 @@
 <Haggle persistent="no">
 	<Attr name="ManagerConfiguration">*</Attr>
-	<ForwardingManager>
-		<ForwardingModule/>
-	</ForwardingManager>
 	<DebugManager>
 		<DebugTrace enable="true"/>
 	</DebugManager>
@@ -57,6 +54,6 @@
 		</Bluetooth>
 	</ConnectivityManager>
 	<VendettaManager>
-		<SiteManager ip="192.168.1.55" tcp_port="4444" udp_port="4445"/>
+		<SiteManager ip="192.168.1.53" tcp_port="4444" udp_port="4445"/>
 	</VendettaManager>
 </Haggle>

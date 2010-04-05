@@ -364,7 +364,11 @@ void ForwardingManager::onDebugCmd(Event *e)
                         HAGGLE_DBG("Requesting dump from forwarding module %s\n", 
                                    forwardingModule->getName());
                         forwardingModule->getInternalStateAsXML();
-                }
+                } else {
+			// Generate a reply here since there is no forwarding module
+			DebugCmdRef cmd = new DebugCmd(DBG_CMD_XML_DUMP, getName(), "");
+                        kernel->addEvent(new Event(cmd));
+		}
         }
 }
 #endif
