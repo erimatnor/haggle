@@ -46,6 +46,8 @@ void VendettaAsynchronous::handleSendEvent(string &event, string &params)
 
 void VendettaAsynchronous::handleQuit(void)
 {
+	//cancel();
+	//_handleQuit();
 	taskQ.insert(new Task(TASK_TYPE_QUIT));
 }
 
@@ -74,6 +76,8 @@ bool VendettaAsynchronous::run(void)
 			time_left = time_left_ping;
 			call_handle_event = false;
 		}
+		
+		//HAGGLE_DBG("Handling task\n");
 		
 		switch (taskQ.retrieve(&task, &time_left)) {
 			default:
@@ -107,8 +111,9 @@ bool VendettaAsynchronous::run(void)
 						_handleSendEvent(task->event, task->params);
 						break;
 					case TASK_TYPE_QUIT:
-						//HAGGLE_DBG("Quit!\n");
+						HAGGLE_DBG("Quit!\n");
 						cancel();
+						_handleQuit();
 						break;
 				}
 				break;

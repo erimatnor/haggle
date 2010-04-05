@@ -30,6 +30,7 @@ private:
 	unsigned short sitemgr_udp_port, sitemgr_tcp_port;
         SOCKET tcp_socket;
         SOCKET udp_socket;
+	bool inShutdown;
 	void determine_name(void);
 	void determine_ip(void);
 	SOCKET open_tcp_socket(void);
@@ -41,6 +42,7 @@ private:
         void _handleEvent(void);
 	void _handleSendEvent(string &event, string &params);
         void _sendPING(void);
+	void _handleQuit(void);
     public:
 	void setSiteManager(struct in_addr ip, unsigned short udp_port, unsigned short tcp_port);
 	string getOurName(void) { return our_name; }

@@ -171,60 +171,74 @@ void VendettaClient::determine_ip(void)
 
 SOCKET VendettaClient::open_tcp_socket(void)
 {
-	SOCKET sock;
 	struct sockaddr_in saddr;
 	socklen_t addrlen = sizeof(struct sockaddr_in);
+	
+	HAGGLE_DBG("Opening tcp socket\n");
+
+	if (tcp_socket != INVALID_SOCKET) {
+		HAGGLE_ERR("tcp socket already open...\n");
+		return tcp_socket;
+	}
 	
 	saddr.sin_family = AF_INET;
 	saddr.sin_addr.s_addr = sitemgr_addr.s_addr;
 	saddr.sin_port = htons(sitemgr_tcp_port);
 	
 	//Open socket:
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+	tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
 	
-	if (sock == INVALID_SOCKET) {
+	if (tcp_socket == INVALID_SOCKET) {
 		HAGGLE_ERR("could not open socket : %s\n", STRERROR(ERRNO));
 		return INVALID_SOCKET;
 	}
-
+		
+	HAGGLE_DBG("Connecting to sitemanager...\n");
+	
 	//Connect:
-	if (connect(sock, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
-		HAGGLE_ERR("could not connect to %s:%u : %s\n", ip_to_str(sitemgr_addr), sitemgr_tcp_port, STRERROR(ERRNO));
-		CLOSE_SOCKET(sock);
+	if (connect(tcp_socket, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
+		HAGGLE_ERR("connect to %s:%u : %s\n", ip_to_str(sitemgr_addr), sitemgr_tcp_port, STRERROR(ERRNO));
+		CLOSE_SOCKET(tcp_socket);
 		return INVALID_SOCKET;
 	}
-
+	
 	determine_ip();
 	
-	return sock;
+	return tcp_socket;
 }
 
 SOCKET VendettaClient::open_udp_socket(void)
 {
-	SOCKET sock;
 	struct sockaddr_in saddr;
 	socklen_t addrlen = sizeof(struct sockaddr_in);
+		
+	if (udp_socket != INVALID_SOCKET) {
+		HAGGLE_ERR("udp socket already open...\n");
+		return udp_socket;
+	}
 	
 	saddr.sin_family = AF_INET;
 	saddr.sin_addr.s_addr = sitemgr_addr.s_addr;
 	saddr.sin_port = htons(sitemgr_udp_port);
 	
 	//Open socket:
-	sock = socket(AF_INET, SOCK_DGRAM, 0);
+	udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
 	
-	if (sock == INVALID_SOCKET) {
+	if (udp_socket == INVALID_SOCKET) {
 		HAGGLE_ERR("could not open socket : %s\n", STRERROR(ERRNO));
 		return INVALID_SOCKET;
 	}
 
+	HAGGLE_DBG("Connecting to monitor...\n");
+	
 	//Connect:
-	if (connect(sock, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
+	if (connect(udp_socket, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
 		HAGGLE_ERR("could not connect to %s:%u : %s\n", ip_to_str(sitemgr_addr), sitemgr_udp_port, STRERROR(ERRNO));
-		CLOSE_SOCKET(sock);
+		CLOSE_SOCKET(udp_socket);
 		return INVALID_SOCKET;
 	}
 
-	return sock;
+	return udp_socket;
 }
 
 void VendettaClient::addToBlacklist(const char *type, const char *mac)
@@ -248,7 +262,7 @@ void VendettaClient::addToBlacklist(const char *type, const char *mac)
 }
 
 VendettaClient::VendettaClient(VendettaManager *m, struct in_addr ip, unsigned short udp_port, unsigned short tcp_port, const string name):
-	VendettaAsynchronous(m, name), sitemgr_udp_port(udp_port), sitemgr_tcp_port(tcp_port)
+	VendettaAsynchronous(m, name), sitemgr_udp_port(udp_port), sitemgr_tcp_port(tcp_port), inShutdown(false)
 {
 	tcp_socket = INVALID_SOCKET;
 	udp_socket = INVALID_SOCKET;
@@ -316,6 +330,7 @@ bool VendettaClient::sendEvent(string event, string params)
         if (tcp_socket == INVALID_SOCKET) {
 		return false;
 	}
+	
         //Create the event string:
         timestamp = Timeval::now().getTimeAsMilliSeconds();
         sprintf(str, INT64_FORMAT " %s:%s %s %s %s\n",
@@ -325,6 +340,7 @@ bool VendettaClient::sendEvent(string event, string params)
 		event.c_str(),
 		our_name.c_str(),
 		params.c_str());
+	
 	send(tcp_socket, str, strlen(str), 0);
 
 	return true;
@@ -334,11 +350,13 @@ void VendettaClient::_handleSendEvent(string & event, string & params)
 {
 	static unsigned int num_fails = 0;
 
+	HAGGLE_DBG("Handling send event\n");
+	
 	if (!sendEvent(event, params)) {
 		if (num_fails > 5) {
 			HAGGLE_DBG("Max number of failed send events reached! not rescheduling this one...\n");
 			return;
-		} else {
+		} else if (!inShutdown) {
 			num_fails++;
 			cancelableSleep(2000);
 			handleSendEvent(event, params);
@@ -376,3 +394,30 @@ void VendettaClient::_sendPING(void)
                 our_name.c_str());
         send(udp_socket, str, strlen(str), 0);
 }
+
+void VendettaClient::_handleQuit(void)
+{
+	inShutdown = true;
+	/*	
+	HAGGLE_DBG("Closing sockets\n");
+
+	if (tcp_socket != INVALID_SOCKET) {
+#ifdef OS_WINDOWS
+		unsigned long on = 1;
+		
+		if (ioctlsocket(tcp_socket, FIONBIO, &on) == SOCKET_ERROR) {
+			HAGGLE_ERR("Could not set non-blocking mode on socket %d : %s\n", tcp_socket, STRERROR(ERRNO));
+		}
+#elif defined(OS_UNIX)
+		if (fcntl(tcp_socket, F_SETFL, O_NONBLOCK) == -1) {
+			HAGGLE_ERR("Could not set non-blocking mode on socket %d : %s\n", tcp_socket, STRERROR(ERRNO));
+		}
+#endif
+		
+		CLOSE_SOCKET(tcp_socket);
+	}
+	if (udp_socket != INVALID_SOCKET)
+		CLOSE_SOCKET(udp_socket);
+	 */
+}
+

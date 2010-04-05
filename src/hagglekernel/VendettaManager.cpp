@@ -50,9 +50,11 @@ bool VendettaManager::init_derived()
 	onEventQueueRunningCallback = newEventCallback(onEventQueueRunning);
 	
 	if (onEventQueueRunningCallback)
-		// Wait 5 seconds before starting to send pings... that should make it 
-		// wait until after the first batch of events.
-		kernel->addEvent(new Event(onEventQueueRunningCallback, NULL, 5.0));
+		// Wait a few seconds before starting to send pings... that should make it 
+		// wait until after the first batch of events. We might, for example, receive
+		// a configuration data object that contains the address of the sitemanager 
+		// to connect to.
+		kernel->addEvent(new Event(onEventQueueRunningCallback, NULL, 2.0));
 	
         return true;
 }

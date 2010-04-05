@@ -68,7 +68,8 @@ class VendettaAsynchronous : public ManagerModule<VendettaManager> {
 protected:
 	virtual void _handleEvent(void) = 0;
 	virtual void _handleSendEvent(string &event, string &params) = 0;
-	virtual void _sendPING(void) {};
+	virtual void _sendPING(void) {}
+	virtual void _handleQuit(void) {}
 	
 public:
 	VendettaAsynchronous(VendettaManager *m = NULL, const string name = "Asynchronous vendetta module");
