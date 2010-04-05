@@ -155,8 +155,6 @@ for dev in $DEVICES; do
 	$ADB -s $dev shell chmod 644 /$FRAMEWORK_PATH_PREFIX/$file
     done
 
-<<<<<<< local
-=======
     # Cleanup data folder if any
     $ADB -s $dev shell rm /data/haggle/haggle.db
     $ADB -s $dev shell rm /data/haggle/haggle.log
@@ -164,7 +162,6 @@ for dev in $DEVICES; do
     $ADB -s $dev shell rm /data/haggle/libhaggle.txt
     $ADB -s $dev shell rm /data/haggle/haggle.pid
 
->>>>>>> other
     # Reset filesystem to read-only
     $ADB -s $dev shell mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system
 done
