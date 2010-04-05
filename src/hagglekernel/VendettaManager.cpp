@@ -189,8 +189,10 @@ void VendettaManager::onDataObjectEvent(Event *e)
 	
 	if (!dObj->isPersistent())
 		return;
+		
+	InterfaceRef remoteIface = dObj->getRemoteInterface();
 	
-	NodeRef node = kernel->getNodeStore()->retrieve(dObj->getRemoteInterface());
+	NodeRef node = kernel->getNodeStore()->retrieve(remoteIface);
 	
 	if (!node || strlen(node->getIdStr()) == 0)
 		return;
