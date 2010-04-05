@@ -57,54 +57,38 @@ read
 
 pushd $SCRIPT_DIR
 
-# Depending on how the device is rooted, it might not be possible to
-# write directly to the root partition due to lack of permissions. We
-# therefore write first to the sdcard, and then we run a script on the
-# device as 'root', which copies the files to their correct places.
+for dev in $DEVICES; do
+    echo "Installing configuration files onto device $dev"
+    $ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
 
-if [ -f $DEVICE_FILES_DIR/adhoc.sh ]; then
-    for dev in $DEVICES; do
-	echo "Installing configuration files onto device $dev"
-	
-	# Cleanup data folder if any
-	$ADB -s $dev shell rm /data/haggle/*
-
-	# Install scripts and other configuration files
-	$ADB -s $dev push $DEVICE_FILES_DIR/adhoc.sh /system/bin/adhoc
-	$ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
-	$ADB -s $dev shell chmod 775 /system/bin/adhoc
-
-	$ADB -s $dev shell mkdir /data/haggle
-	$ADB -s $dev shell mkdir /sdcard/PhotoShare
-	$ADB -s $dev push ../resources/config.xml /data/haggle/
-	
-	if [ "$dev" = "HT02KP900026" ]; then 
-	    # This is a nexus one device
-	    echo "#ffbf2c00" > /tmp/deviceColor
-	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
-	    $ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
-	    $ADB -s $dev shell echo  
-	fi
-	if [ "$dev" = "HT93XKF09536" ]; then 
-	    # This is a Magic
-	    echo "#ffbf2c00" > /tmp/deviceColor
-	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
-	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
-	fi
-	if [ "$dev" = "HT93XKF03557" ]; then
-	    # This is a Magic
-	    echo "#ffa200bf" > /tmp/deviceColor
-	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
-	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
-	fi
-	if [ "$dev" = "HT93YKF07043" ]; then 
-	    # This is a Magic
-	    echo "#ff00bf20" > /tmp/deviceColor
-	    $ADB -s $dev push /tmp/deviceColor /data/haggle/
-	    $ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
-	fi
-    done
-fi
+    #$ADB -s $dev push ../resources/config.xml /data/haggle/
+    
+    if [ "$dev" = "HT02KP900026" ]; then 
+	# This is a Nexus One device
+	echo "#ffbf2c00" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
+	$ADB -s $dev shell echo  
+    fi
+    if [ "$dev" = "HT93XKF09536" ]; then 
+        # This is a Magic
+	echo "#ffbf2c00" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+    fi
+    if [ "$dev" = "HT93XKF03557" ]; then
+	# This is a Magic
+	echo "#ffa200bf" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+    fi
+    if [ "$dev" = "HT93YKF07043" ]; then 
+	# This is a Magic
+	echo "#ff00bf20" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+    fi
+done
 
 FRAMEWORK_PATH_PREFIX="system/framework"
 FRAMEWORK_FILES="haggle.jar"
@@ -130,6 +114,10 @@ for dev in $DEVICES; do
 
     # Enter directory holding unstripped binaries
     pushd symbols
+
+    # Install ad hoc settings script
+    $ADB -s $dev push $DEVICE_FILES_DIR/adhoc.sh $BIN_PATH_PREFIX/adhoc
+    $ADB -s $dev shell chmod 775 $BIN_PATH_PREFIX/adhoc
 
     # Install Haggle binary
     echo
@@ -167,6 +155,16 @@ for dev in $DEVICES; do
 	$ADB -s $dev shell chmod 644 /$FRAMEWORK_PATH_PREFIX/$file
     done
 
+<<<<<<< local
+=======
+    # Cleanup data folder if any
+    $ADB -s $dev shell rm /data/haggle/haggle.db
+    $ADB -s $dev shell rm /data/haggle/haggle.log
+    $ADB -s $dev shell rm /data/haggle/trace.log
+    $ADB -s $dev shell rm /data/haggle/libhaggle.txt
+    $ADB -s $dev shell rm /data/haggle/haggle.pid
+
+>>>>>>> other
     # Reset filesystem to read-only
     $ADB -s $dev shell mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system
 done
