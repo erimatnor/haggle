@@ -246,11 +246,11 @@ string LeakMonitor::getLeakReport()
 
 #endif /* DEBUG_LEAKS */
 
-DebugCmd::DebugCmd(DebugCmdType_t _type, string _msg) :
+DebugCmd::DebugCmd(const DebugCmdType_t _type, const string _authority, const string _msg) :
 #ifdef DEBUG_LEAKS
 LeakMonitor(LEAK_TYPE_DEBUGCMD),
 #endif
-type(_type), msg(_msg)
+type(_type), authority(_authority), msg(_msg)
 {
 }
 
