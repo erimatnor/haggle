@@ -1,0 +1,128 @@
+# Parser for logevents from monitor nodes
+<MONITORED_NETWORK>
+	vendetta.monitored_network.haggle.Haggle
+</MONITORED_NETWORK>
+
+<PORT>
+	4444
+</PORT>
+
+<BUFFERSIZE>
+	0
+</BUFFERSIZE>
+
+<BGCOLOR>
+	255
+</BGCOLOR>
+
+# The address here is the address for the machine running siteManager.
+<PROXY>
+	address=130.238.8.121
+	port_up=5000
+	port_down=5051
+</PROXY>
+
+<TABLECOLUMN>
+	Alive
+	Node name
+	Node number
+</TABLECOLUMN>
+
+<CANVAS>
+	vendetta.visualization.canvases.HaggleCanvas
+</CANVAS>
+
+<NODECMD>
+	label=Insert data object
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 insert_DO.sh <NODE_NAME>
+</NODECMD>
+
+<NODECMD>
+	label=Link up
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 linkup.sh <NODE_NAME> <NODE_NAME_NEXT>
+	onlyone=yes
+</NODECMD>
+
+<NODECMD>
+	label=Link down
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 linkdown.sh <NODE_NAME> <NODE_NAME_NEXT>
+	onlyone=yes
+</NODECMD>
+
+<NODECMD>
+	label=Start Haggle
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 start_program_on_node.sh <NODE_NAME> haggle "--non-interactive"
+</NODECMD>
+
+<NODECMD>
+	label=Stop Haggle
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 stop_program_on_node.sh <NODE_NAME> haggle
+</NODECMD>
+
+<NODECMD>
+	label=Start LuckyMe
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 start_program_on_node.sh <NODE_NAME> luckyMe
+</NODECMD>
+
+<NODECMD>
+	label=Stop LuckyMe
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 stop_program_on_node.sh <NODE_NAME> luckyMe
+</NODECMD>
+
+<NODECMD>
+	label=Save logs
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 save_logs.sh <ARGS> manuel
+	onlyone=yes
+</NODECMD>
+
+<NODECMD>
+	label=Remove logs
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 remove_logs.sh <NODE_NAME>
+</NODECMD>
+
+<TESTBEDCMD>
+	label=Run scenario
+	type=EXEC
+	msg=scripts/haggle/run_scenario.sh --run-with-controller <PROXY_IP>
+	select=no
+	onlyone=yes
+</TESTBEDCMD>
+
+<TESTBEDCMD>
+	label=Init network filter
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 initfilter.sh
+	select=no
+	onlyone=yes
+</TESTBEDCMD>
+
+<TESTBEDCMD>
+	label=Start node
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 start_node.sh
+	select=no
+	onlyone=yes
+</TESTBEDCMD>
+
+<TESTBEDCMD>
+	label=Stop node
+	type=EXEC
+	msg=scripts/haggle/do_quiet.sh <PROXY_IP> 9797 stop_node.sh <NODE_NAME>
+</TESTBEDCMD>
+
+<LOGFILTER>
+	Event:LE_EVENT
+</LOGFILTER>
+
+<NODEFILE>
+	nodes.txt
+</NODEFILE>
