@@ -109,6 +109,9 @@
 		D384C5D80F4D718A00E55BC7 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = D3F44E5B0E83E040005981E6 /* platform.c */; };
 		D384C5D90F4D718A00E55BC7 /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = D3F44E5C0E83E040005981E6 /* sha1.c */; };
 		D39264750F44F25E0014F6B6 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D39264740F44F25E0014F6B6 /* libcrypto.dylib */; };
+		D39B686810D13085003A6361 /* VendettaAsynchronous.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D39B686210D13085003A6361 /* VendettaAsynchronous.cpp */; };
+		D39B686910D13085003A6361 /* VendettaClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D39B686410D13085003A6361 /* VendettaClient.cpp */; };
+		D39B686A10D13085003A6361 /* VendettaManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D39B686610D13085003A6361 /* VendettaManager.cpp */; };
 		D3B2ED1C0F521FC4009C8EA9 /* webserver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3B2ED1A0F521F9D009C8EA9 /* webserver.cpp */; };
 		D3B2ED240F5220FC009C8EA9 /* liblibhaggle.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D3CAD56B0E23E40E00E9B3D9 /* liblibhaggle.a */; };
 		D3B4DCF210C6C41600DC16C8 /* prng.c in Sources */ = {isa = PBXBuildFile; fileRef = D3B4DCEE10C6C41600DC16C8 /* prng.c */; };
@@ -269,6 +272,12 @@
 		D384C58B0F4D710400E55BC7 /* metadata_xml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metadata_xml.h; path = ../src/libhaggle/metadata_xml.h; sourceTree = SOURCE_ROOT; };
 		D39264420F44ED690014F6B6 /* Certificate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Certificate.h; path = ../src/hagglekernel/Certificate.h; sourceTree = SOURCE_ROOT; };
 		D39264740F44F25E0014F6B6 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = usr/lib/libcrypto.dylib; sourceTree = SDKROOT; };
+		D39B686210D13085003A6361 /* VendettaAsynchronous.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VendettaAsynchronous.cpp; path = ../src/hagglekernel/VendettaAsynchronous.cpp; sourceTree = SOURCE_ROOT; };
+		D39B686310D13085003A6361 /* VendettaAsynchronous.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VendettaAsynchronous.h; path = ../src/hagglekernel/VendettaAsynchronous.h; sourceTree = SOURCE_ROOT; };
+		D39B686410D13085003A6361 /* VendettaClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VendettaClient.cpp; path = ../src/hagglekernel/VendettaClient.cpp; sourceTree = SOURCE_ROOT; };
+		D39B686510D13085003A6361 /* VendettaClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VendettaClient.h; path = ../src/hagglekernel/VendettaClient.h; sourceTree = SOURCE_ROOT; };
+		D39B686610D13085003A6361 /* VendettaManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VendettaManager.cpp; path = ../src/hagglekernel/VendettaManager.cpp; sourceTree = SOURCE_ROOT; };
+		D39B686710D13085003A6361 /* VendettaManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VendettaManager.h; path = ../src/hagglekernel/VendettaManager.h; sourceTree = SOURCE_ROOT; };
 		D3B2ED1A0F521F9D009C8EA9 /* webserver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = webserver.cpp; path = ../src/webserver/webserver.cpp; sourceTree = SOURCE_ROOT; };
 		D3B4DCEE10C6C41600DC16C8 /* prng.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = prng.c; path = ../src/utils/prng.c; sourceTree = SOURCE_ROOT; };
 		D3B4DCEF10C6C41600DC16C8 /* prng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = prng.h; path = ../src/utils/prng.h; sourceTree = SOURCE_ROOT; };
@@ -734,8 +743,8 @@
 			isa = PBXGroup;
 			children = (
 				D3F44D160E83DF40005981E6 /* Address.h */,
-				D3F44D1A0E83DF40005981E6 /* Attribute.h */,
 				D3F44D180E83DF40005981E6 /* ApplicationManager.h */,
+				D3F44D1A0E83DF40005981E6 /* Attribute.h */,
 				D3F44D1C0E83DF40005981E6 /* BenchmarkManager.h */,
 				D3B6F1CC0FC4A9330081CB2B /* Bloomfilter.h */,
 				D39264420F44ED690014F6B6 /* Certificate.h */,
@@ -790,6 +799,9 @@
 				D3F44D940E83DF41005981E6 /* SQLDataStore.h */,
 				D3EAD7B60F126C74008AC81A /* Trace.h */,
 				D3EAD7B80F126C74008AC81A /* Utility.h */,
+				D39B686310D13085003A6361 /* VendettaAsynchronous.h */,
+				D39B686510D13085003A6361 /* VendettaClient.h */,
+				D39B686710D13085003A6361 /* VendettaManager.h */,
 				D3F44D990E83DF41005981E6 /* XMLMetadata.h */,
 			);
 			name = Headers;
@@ -851,6 +863,9 @@
 				D3F44D930E83DF41005981E6 /* SQLDataStore.cpp */,
 				D3EAD7B50F126C74008AC81A /* Trace.cpp */,
 				D3EAD7B70F126C74008AC81A /* Utility.cpp */,
+				D39B686210D13085003A6361 /* VendettaAsynchronous.cpp */,
+				D39B686410D13085003A6361 /* VendettaClient.cpp */,
+				D39B686610D13085003A6361 /* VendettaManager.cpp */,
 				D3F44D980E83DF41005981E6 /* XMLMetadata.cpp */,
 			);
 			name = Sources;
@@ -1275,6 +1290,9 @@
 				D384C5CC0F4D718100E55BC7 /* XMLMetadata.cpp in Sources */,
 				D3B6F1CD0FC4A9330081CB2B /* Bloomfilter.cpp in Sources */,
 				D320CDD110B2A40B00C78F03 /* Forwarder.cpp in Sources */,
+				D39B686810D13085003A6361 /* VendettaAsynchronous.cpp in Sources */,
+				D39B686910D13085003A6361 /* VendettaClient.cpp in Sources */,
+				D39B686A10D13085003A6361 /* VendettaManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

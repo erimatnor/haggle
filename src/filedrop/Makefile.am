@@ -1,3 +1,4 @@
+if ENABLE_FILEDROP
 if OS_IPHONEOS
 else
 if OS_LINUX
@@ -24,3 +25,4 @@ clean-local:
 	rm -f *~
 
 endif 
+endif
