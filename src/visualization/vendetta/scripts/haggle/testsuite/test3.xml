@@ -1,0 +1,6 @@
+<Scenario>
+	<comment>Yes, test2.txt: same trace as test 2</comment>
+	<tracefile>traces/test2.txt</tracefile>
+	<Application>scenarioapp.sh 3</Application>
+	<magic>haggle</magic>
+</Scenario>
