@@ -1,0 +1,4 @@
+Vendetta is run by providing a path to the configuration directory, like so:
+
+> ./run_vendetta.sh --config-path configs/haggledemo/
+
