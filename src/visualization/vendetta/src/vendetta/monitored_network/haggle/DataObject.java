@@ -273,7 +273,7 @@ public class DataObject {
 			float h;
 			long i;
 			
-			int which = 0;
+			int which = 3;
 			i = Integer.parseInt(node_id.substring(which,which+6),16);
 			h =  ((float) i) / ((float) 0xFFFFFF);
 			java.awt.Color c = java.awt.Color.getHSBColor(h,1.0f,0.75f);
