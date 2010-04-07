@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd $(dirname $0)
+CONTROLLER_DIR=../../../../controller
+if [ "$1" == "gdb" ] ; then
+	cd $CONTROLLER_DIR && make && cd - > /dev/null && gdb $CONTROLLER_DIR/controller $@
+else
+	cd $CONTROLLER_DIR && make && cd - > /dev/null && $CONTROLLER_DIR/controller $@
+fi
