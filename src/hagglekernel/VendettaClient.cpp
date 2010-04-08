@@ -105,7 +105,7 @@ void VendettaClient::determine_name(void)
 
 	our_name = "node-unknown";
 
-	getLocalInterfaceList(ifr, false);
+	getLocalInterfaceList(ifr, true);
 
         for (InterfaceRefList::const_iterator it = ifr.begin(); it != ifr.end(); it++) {
 		const Address *addr;
@@ -132,7 +132,8 @@ void VendettaClient::determine_ip(void)
 	our_port = "5001";
 	our_ip_address = "127.0.0.1";
 
-	getLocalInterfaceList(ifr, false);
+	getLocalInterfaceList(ifr, true);
+	
         for (InterfaceRefList::const_iterator it = ifr.begin(); it != ifr.end(); it++) {
 		const Address *addr;
                 
