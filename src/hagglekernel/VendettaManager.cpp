@@ -37,6 +37,7 @@ bool VendettaManager::init_derived()
 	setEventHandler(EVENT_TYPE_DELEGATE_NODES, onNodeNodeListDataObjectEvent);
 	setEventHandler(EVENT_TYPE_DATAOBJECT_SEND_SUCCESSFUL, onNodeDataObjectEvent);
 	setEventHandler(EVENT_TYPE_DATAOBJECT_SEND_FAILURE, onNodeDataObjectEvent);
+	setEventHandler(EVENT_TYPE_LOCAL_INTERFACE_UP, onLocalInterfaceUp);
 	
 	struct in_addr sitemgr_addr;
 	
@@ -46,15 +47,6 @@ bool VendettaManager::init_derived()
 	
         if (!client)
                 return false;
-	
-	onEventQueueRunningCallback = newEventCallback(onEventQueueRunning);
-	
-	if (onEventQueueRunningCallback)
-		// Wait a few seconds before starting to send pings... that should make it 
-		// wait until after the first batch of events. We might, for example, receive
-		// a configuration data object that contains the address of the sitemanager 
-		// to connect to.
-		kernel->addEvent(new Event(onEventQueueRunningCallback, NULL, 2.0));
 	
         return true;
 }
@@ -268,11 +260,15 @@ void VendettaManager::onShutdown()
 	unregisterWithKernel();
 }
 
-void VendettaManager::onEventQueueRunning(Event *e)
+void VendettaManager::onLocalInterfaceUp(Event *e)
 {
-	if (client)
+	// A local inteface was brought up. This is our trigger to start the 
+	// Vendetta client in hope that we can connect to the Vendetta monitor
+	// over this interface
+	if (client && !client->isRunning())
 		client->start();
 }
+
 
 void VendettaManager::onConfig(Metadata *m)
 {

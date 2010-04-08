@@ -24,15 +24,15 @@ using namespace haggle;
 class VendettaClient : public VendettaAsynchronous {
 private:
         string our_name;
-        string our_ip_address;
-        string our_port;
-	struct in_addr sitemgr_addr;
+        unsigned short our_port;
+	struct in_addr our_ip_addr;
+	struct in_addr sitemgr_ip_addr;
 	unsigned short sitemgr_udp_port, sitemgr_tcp_port;
         SOCKET tcp_socket;
         SOCKET udp_socket;
 	bool inShutdown;
-	void determine_name(void);
-	void determine_ip(void);
+	void determine_name(struct sockaddr& sa);
+	void determine_ip(SOCKET sock);
 	SOCKET open_tcp_socket(void);
 	SOCKET open_udp_socket(void);
 	void addToBlacklist(const char *type, const char *mac);

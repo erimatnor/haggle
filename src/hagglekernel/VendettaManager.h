@@ -36,7 +36,7 @@ public:
 	void onNodeNodeListEvent(Event *e);
 	void onNodeNodeListDataObjectEvent(Event *e);
 	void onNodeDataObjectEvent(Event *e);
-	void onEventQueueRunning(Event *e);
+	void onLocalInterfaceUp(Event *e);
 	void onConfig(Metadata *m);
 	
 	VendettaManager(HaggleKernel *_kernel = haggleKernel);

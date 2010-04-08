@@ -98,19 +98,18 @@ static const string do_name_lookup(string mac, bool & success)
 	return "node-" + mac;
 }
 
-void VendettaClient::determine_name(void)
+void VendettaClient::determine_name(struct sockaddr &sa)
 {
 	InterfaceRefList ifr;
 	bool has_set = false;
-
+	Address ipAddr(&sa);
+	
 	our_name = "node-unknown";
 
-	getLocalInterfaceList(ifr, true);
-
-        for (InterfaceRefList::const_iterator it = ifr.begin(); it != ifr.end(); it++) {
-		const Address *addr;
-                
-		addr = (*it)->getAddressByType(AddressType_EthMAC);
+	InterfaceRef iface = getKernel()->getInterfaceStore()->retrieve(ipAddr);
+	
+	if (iface) {
+		const Address *addr = iface->getAddressByType(AddressType_EthMAC);
 
 		if (addr) {
 			bool success = false;
@@ -124,49 +123,23 @@ void VendettaClient::determine_name(void)
 	}
 }
 
-void VendettaClient::determine_ip(void)
+void VendettaClient::determine_ip(SOCKET sock)
 {
-	InterfaceRefList ifr;
-	int current_address_level = 0;
-
-	our_port = "5001";
-	our_ip_address = "127.0.0.1";
-
-	getLocalInterfaceList(ifr, true);
+	struct sockaddr_in inaddr;
+	socklen_t addrlen = sizeof(inaddr);
+	int ret;
 	
-        for (InterfaceRefList::const_iterator it = ifr.begin(); it != ifr.end(); it++) {
-		const Address *addr;
-                
-		addr = (*it)->getAddressByType(AddressType_IPv4);
-		if (addr) {
-			if (strcmp(addr->getAddrStr(), "127.0.0.1") == 0) {
-				//Ignore 127.0 .0 .1 address - it 's meaningless!
-			} else if (strncmp(addr->getAddrStr(), "169.", 4) == 0) {
-				if (current_address_level < 1) {
-					our_ip_address = addr->getAddrStr();
-					current_address_level = 1;
-				}
-			} else if (strncmp(addr->getAddrStr(), "130.238.", 8) == 0) {
-				if (current_address_level < 3) {
-					our_ip_address = addr->getAddrStr();
-					current_address_level = 3;
-				}
-			} else if (strncmp(addr->getAddrStr(), "192.168.", 8) == 0) {
-				if (current_address_level < 2) {
-					our_ip_address = addr->getAddrStr();
-					current_address_level = 2;
-				}
-			} else {
-				if (current_address_level < 1) {
-					our_ip_address = addr->getAddrStr();
-					current_address_level = 1;
-				}
-			}
-		}
-	}
-	HAGGLE_DBG("Vendetta info: ip: %s port: %s name: %s\n",
-		   our_ip_address.c_str(),
-		   our_port.c_str(),
+	our_port = 5001;
+	
+	ret = getsockname(sock, (struct sockaddr *)&inaddr, &addrlen);
+	
+	memcpy(&our_ip_addr, &inaddr.sin_addr, sizeof(our_ip_addr));
+	
+	determine_name((struct sockaddr&)inaddr);
+	
+	HAGGLE_DBG("Vendetta info: our ip: %s port: %u name: %s\n",
+		   ip_to_str(our_ip_addr),
+		   our_port,
 		   our_name.c_str());
 }
 
@@ -183,7 +156,7 @@ SOCKET VendettaClient::open_tcp_socket(void)
 	}
 	
 	saddr.sin_family = AF_INET;
-	saddr.sin_addr.s_addr = sitemgr_addr.s_addr;
+	saddr.sin_addr.s_addr = sitemgr_ip_addr.s_addr;
 	saddr.sin_port = htons(sitemgr_tcp_port);
 	
 	//Open socket:
@@ -198,12 +171,12 @@ SOCKET VendettaClient::open_tcp_socket(void)
 	
 	//Connect:
 	if (connect(tcp_socket, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
-		HAGGLE_ERR("connect to %s:%u : %s\n", ip_to_str(sitemgr_addr), sitemgr_tcp_port, STRERROR(ERRNO));
+		HAGGLE_ERR("connect to %s:%u : %s\n", ip_to_str(sitemgr_ip_addr), sitemgr_tcp_port, STRERROR(ERRNO));
 		CLOSE_SOCKET(tcp_socket);
 		return INVALID_SOCKET;
 	}
 	
-	determine_ip();
+	determine_ip(tcp_socket);
 	
 	return tcp_socket;
 }
@@ -219,7 +192,7 @@ SOCKET VendettaClient::open_udp_socket(void)
 	}
 	
 	saddr.sin_family = AF_INET;
-	saddr.sin_addr.s_addr = sitemgr_addr.s_addr;
+	saddr.sin_addr.s_addr = sitemgr_ip_addr.s_addr;
 	saddr.sin_port = htons(sitemgr_udp_port);
 	
 	//Open socket:
@@ -234,7 +207,7 @@ SOCKET VendettaClient::open_udp_socket(void)
 	
 	//Connect:
 	if (connect(udp_socket, (struct sockaddr *)&saddr, addrlen) == SOCKET_ERROR) {
-		HAGGLE_ERR("could not connect to %s:%u : %s\n", ip_to_str(sitemgr_addr), sitemgr_udp_port, STRERROR(ERRNO));
+		HAGGLE_ERR("could not connect to %s:%u : %s\n", ip_to_str(sitemgr_ip_addr), sitemgr_udp_port, STRERROR(ERRNO));
 		CLOSE_SOCKET(udp_socket);
 		return INVALID_SOCKET;
 	}
@@ -268,10 +241,9 @@ VendettaClient::VendettaClient(VendettaManager *m, struct in_addr ip, unsigned s
 	tcp_socket = INVALID_SOCKET;
 	udp_socket = INVALID_SOCKET;
 
-	memcpy(&sitemgr_addr, &ip, sizeof(struct in_addr));
+	memcpy(&sitemgr_ip_addr, &ip, sizeof(struct in_addr));
 	
 	handleEvent();
-	determine_name();
         // Post this into the send queue:
         string evt = "LE_MACHINE_TYPE";
         string param = get_hardware_name();
@@ -294,7 +266,7 @@ VendettaClient::~VendettaClient()
 
 void VendettaClient::setSiteManager(struct in_addr ip, unsigned short udp_port, unsigned short tcp_port)
 {
-	memcpy(&sitemgr_addr, &ip, sizeof(ip));
+	memcpy(&sitemgr_ip_addr, &ip, sizeof(ip));
 	
 	sitemgr_tcp_port = tcp_port;
 	sitemgr_udp_port = udp_port;
@@ -334,10 +306,10 @@ bool VendettaClient::sendEvent(string event, string params)
 	
         //Create the event string:
         timestamp = Timeval::now().getTimeAsMilliSeconds();
-        sprintf(str, INT64_FORMAT " %s:%s %s %s %s\n",
+        sprintf(str, INT64_FORMAT " %s:%u %s %s %s\n",
 		timestamp,
-		our_ip_address.c_str(),
-		our_port.c_str(),
+		ip_to_str(our_ip_addr),
+		our_port,
 		event.c_str(),
 		our_name.c_str(),
 		params.c_str());
@@ -388,10 +360,10 @@ void VendettaClient::_sendPING(void)
 
         timestamp = Timeval::now().getTimeAsMilliSeconds();
         sprintf(str,
-                INT64_FORMAT " %s:%s PING %s (0.0,0.0,0.0) 1337\n",
+                INT64_FORMAT " %s:%u PING %s (0.0,0.0,0.0) 1337\n",
                 timestamp,
-                our_ip_address.c_str(),
-                our_port.c_str(),
+                ip_to_str(our_ip_addr),
+                our_port,
                 our_name.c_str());
         send(udp_socket, str, strlen(str), 0);
 }
