@@ -44,9 +44,9 @@ for i in $@ ; do
 				(
 					echo "<Haggle persistent=\"no\" create_time=\""$TIME".000000\">";
 					echo "	<Attr name=\"Connectivity\">Blacklist</Attr>";
-					echo "	<Connectivity>";
+					echo "	<ConnectivityManager>";
 					echo "		<Blacklist type=\""$l"\""$ONOFF">"$i"</Blacklist>";
-					echo "	</Connectivity>";
+					echo "	</ConnectivityManager>";
 					echo "</Haggle>"
 				) | ./do.sh $1 9697
 			fi
