@@ -53,6 +53,9 @@ class ForwardingManager : public Manager
 	Forwarder *forwardingModule;
 	EventType forwardingObjectEType;
 	List<NodeRef> pendingQueryList;
+#if defined(ENABLE_RECURSIVE_ROUTING_UPDATES)
+	bool recursiveRoutingUpdates;
+#endif
 
 	void onPrepareStartup();
 	void onPrepareShutdown();
