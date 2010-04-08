@@ -803,10 +803,7 @@ void ForwardingManager::findMatchingDataObjectsAndTargets(NodeRef& node)
 
 size_t ForwardingManager::fromTriggerListMetadata(Metadata *m, NodeRefList& trigger_list)
 {	
-	
-	HAGGLE_DBG("Parsing triggerlist\n");
-
-	if (m->getName() != "TriggerList")
+	if (!m || m->getName() != "TriggerList")
 		return 0;
 		
 	Metadata *tm = m->getMetadata("Node");
