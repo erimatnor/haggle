@@ -147,6 +147,17 @@ haggle_CXXFLAGS :=$(CXXFLAGS)
 haggle_CPPFLAGS :=$(XML_CPPFLAGS) -I$(top_srcdir)/src/utils -I$(top_srcdir)/src/libcpphaggle/include -I$(top_srcdir)/src/libhaggle/include
 libhagglekernel_a_CPPFLAGS:=$(haggle_CPPFLAGS)
 
+if ENABLE_VENDETTA_MANAGER
+libhagglekernel_a_SOURCES +=  \
+	VendettaManager.cpp \
+	VendettaAsynchronous.cpp \
+	VendettaClient.cpp
+EXTRA_DIST +=  \
+	VendettaManager.h \
+	VendettaAsynchronous.h \
+	VendettaClient.h
+endif
+
 if HAVE_EXCEPTION
 haggle_CXXFLAGS +=-DHAVE_EXCEPTION=1
 else
