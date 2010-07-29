@@ -12,7 +12,7 @@
 		<TCPServer port="9697" backlog="30"/>
 	</ProtocolManager>
 	<DataManager set_createtime_on_bloomfilter_update="true">
-		<Aging period="3600" max_age="86400"/>
+		<Aging period="35" max_age="30"/>
 	</DataManager>
 	<ConnectivityManager>
 		<Bluetooth scan_base_time="120" scan_random_time="60">
@@ -54,4 +54,7 @@
 			<IgnoreNonListedInterfaces>yes</IgnoreNonListedInterfaces>
 		</Bluetooth>
 	</ConnectivityManager>
+	<VendettaManager>
+		<SiteManager ip="192.168.1.53" tcp_port="4444" udp_port="4445"/>
+	</VendettaManager>
 </Haggle>

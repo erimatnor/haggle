@@ -1,0 +1,36 @@
+# ping for the PING tutorial
+
+# This is how often in milliseconds vclient will report to the
+# monitor that is still alive. Note that it has nothing to do
+# with the /bin/ping program!
+<PING_INTERVALL>
+	1000
+</PING_INTERVALL>
+
+# This is the only log event we use. We will report when the
+# ping program outputs that it has received a reply to an
+# request. The type -- or name -- of the event is LE_RECVD.
+# We'll just send the complete line from ping to the monitor
+# by using the send_plain method. The regular expression
+# `regexp' defines which lines to send.
+# By specifying `net=tcp' we state that we want the data to
+# be sent to the monitor over TCP.
+<LOGEVENT>
+	type=LE_RECVD
+	method=send_plain
+    regexp=^[[:digit:]]\+ bytes from [^:]\+:
+	net=tcp
+</LOGEVENT>
+
+
+# We do not care, since we will use TCP only.
+<UDP_TIMEOUT>
+	6000
+</UDP_TIMEOUT>
+
+# This is not used currently.
+<LOGPARSER>
+	vclient.overlays.wisenet.WisenetParser
+</LOGPARSER>
+
+
