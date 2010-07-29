@@ -59,6 +59,9 @@ LOCAL_SRC_FILES := \
 	ResourceManager.cpp \
 	ResourceMonitorAndroid.cpp \
 	SecurityManager.cpp \
+	VendettaManager.cpp \
+	VendettaAsynchronous.cpp \
+	VendettaClient.cpp \
 	SQLDataStore.cpp \
 	Trace.cpp \
 	Utility.cpp \
@@ -114,7 +117,7 @@ LOCAL_SHARED_LIBRARIES += libdl libstdc++ libsqlite libcrypto libdbus libhaggle-
 LOCAL_STATIC_LIBRARIES += libcpphaggle
 
 LOCAL_CFLAGS:=-O2 -g
-LOCAL_CFLAGS +=-DHAVE_CONFIG -DOS_ANDROID -DHAVE_EXCEPTION=0 -DENABLE_ETHERNET -DENABLE_BLUETOOTH -DDEBUG -DDEBUG_LEAKS
+LOCAL_CFLAGS +=-DHAVE_CONFIG -DOS_ANDROID -DHAVE_EXCEPTION=0 -DENABLE_ETHERNET -DENABLE_BLUETOOTH -DDEBUG -DDEBUG_LEAKS -DENABLE_VENDETTA_MANAGER
 
 ifneq ($(BOARD_WLAN_TI_STA_DK_ROOT),)
 LOCAL_STATIC_LIBRARIES += libWifiApi

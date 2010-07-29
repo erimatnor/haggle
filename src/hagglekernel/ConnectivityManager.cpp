@@ -539,12 +539,12 @@ void ConnectivityManager::onIncomingDataObject(Event *e)
 		// Check whether this interface is already registered or not
 		if (!have_interface(remoteIface)) {
 			remoteIface->setFlag(IFFLAG_SNOOPED);
-			if (remoteIface->getType() == IFTYPE_BLUETOOTH)
+			if (remoteIface->getType() == IFTYPE_BLUETOOTH) {
 				report_interface(remoteIface, localIface, new ConnectivityInterfacePolicyTTL(2));
-			else if (remoteIface->getType() == IFTYPE_ETHERNET ||
-				remoteIface->getType() == IFTYPE_WIFI)
+			} else if (remoteIface->getType() == IFTYPE_ETHERNET ||
+				   remoteIface->getType() == IFTYPE_WIFI) {
 				report_interface(remoteIface, localIface, new ConnectivityInterfacePolicyTTL(3));
-			else {
+			} else {
 				// hmm... this shouldn't happen. If it does we've added an 
 				// interface type and forgotten to add it above.
 				HAGGLE_DBG("Snooped unknown interface type.");

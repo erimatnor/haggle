@@ -180,6 +180,7 @@ static int do_search(sdp_session_t *session, uuid_t *uuid)
 	uint32_t range = 0x0000ffff;
 	int err = 0;
 	int result = 0;
+	char buf[MAXLEN];
 
 	search_list = sdp_list_append(0, uuid );
 	attrid_list = sdp_list_append(0, &range );
@@ -192,11 +193,12 @@ static int do_search(sdp_session_t *session, uuid_t *uuid)
 		goto cleanup;
 	}
 
+	memset(buf, 0, MAXLEN);
+
 	// go through each of the service records
 	for (r = response_list; r; r = r->next) {
 		sdp_record_t *rec = (sdp_record_t*) r->data;
 		sdp_list_t *proto_list = NULL;
-		
 		// get a list of the protocol sequences
 		if (sdp_get_access_protos( rec, &proto_list) == 0) {
 			sdp_list_t *p = proto_list;
@@ -320,12 +322,10 @@ void bluetoothDiscovery(ConnectivityBluetooth *conn)
                                         conn->report_known_interface(IFTYPE_BLUETOOTH, macaddr, false);
                                 }
                                 break;
-                    
                         case BLUETOOTH_ADDRESS_IS_HAGGLE_NODE:
                                 report_interface = true;
                                 conn->report_known_interface(IFTYPE_BLUETOOTH, macaddr, true);
                                 break;
-                    
                         case BLUETOOTH_ADDRESS_IS_NOT_HAGGLE_NODE:
                                 conn->report_known_interface(IFTYPE_BLUETOOTH, macaddr, false);
                                 break;
