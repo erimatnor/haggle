@@ -51,14 +51,15 @@ class ForwardingManager : public Manager
 	
 	forwardingList forwardedObjects;
 	Forwarder *forwardingModule;
+	EventType forwardingObjectEType;
 	List<NodeRef> pendingQueryList;
 #if defined(ENABLE_RECURSIVE_ROUTING_UPDATES)
 	bool recursiveRoutingUpdates;
 #endif
-	
+
 	void onPrepareStartup();
 	void onPrepareShutdown();
-	
+
         // See comment in ForwardingManager.cpp about isNeighbor()
         bool isNeighbor(const NodeRef& node);
         bool addToSendList(DataObjectRef& dObj, const NodeRef& node, int repeatCount = 0);
@@ -92,6 +93,7 @@ class ForwardingManager : public Manager
 	void onNodeUpdated(Event *e);
 	void onRoutingInformation(Event *e);
 	void onNewDataObject(Event *e);
+	void onForwardingDataObject(Event * e);
 	void onNewNeighbor(Event *e);
 	void onEndNeighbor(Event *e);
 	void onRepositoryData(Event *e);
