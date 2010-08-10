@@ -59,7 +59,7 @@ pushd $SCRIPT_DIR
 
 for dev in $DEVICES; do
     echo "Installing configuration files onto device $dev"
-
+    $ADB -s $dev shell mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system
     $ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
 
     $ADB -s $dev shell mkdir /data/haggle
@@ -67,21 +67,21 @@ for dev in $DEVICES; do
     
     if [ "$dev" = "HT02KP900026" ]; then 
 	# This is a Nexus One device
-	echo "#ffbf2c00" > /tmp/deviceColor
+	echo "#FFFFFF00" > /tmp/deviceColor
 	$ADB -s $dev push /tmp/deviceColor /data/haggle/
 	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
 	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-4" > /system/etc/hosts'
     fi
     if [ "$dev" = "HT018P801846" ]; then 
 	# This is a Nexus One device
-	echo "#ffa200bf" > /tmp/deviceColor
+	echo "#FF0000FF" > /tmp/deviceColor
 	$ADB -s $dev push /tmp/deviceColor /data/haggle/
 	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
 	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-5" > /system/etc/hosts'
     fi
     if [ "$dev" = "HT018P804594" ]; then 
 	# This is a Nexus One device
-	echo "#ff00bf20" > /tmp/deviceColor
+	echo "#FFFF0000" > /tmp/deviceColor
 	$ADB -s $dev push /tmp/deviceColor /data/haggle/
 	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
   	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-6" > /system/etc/hosts'
@@ -104,6 +104,8 @@ for dev in $DEVICES; do
 	$ADB -s $dev push /tmp/deviceColor /data/haggle/
 	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
     fi
+    
+    $ADB -s $dev shell mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system
 done
 
 FRAMEWORK_PATH_PREFIX="system/framework"
