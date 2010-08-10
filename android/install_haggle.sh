@@ -59,9 +59,51 @@ pushd $SCRIPT_DIR
 
 for dev in $DEVICES; do
     echo "Installing configuration files onto device $dev"
+
     $ADB -s $dev push $DEVICE_FILES_DIR/tiwlan.ini $DATA_DIR/
+
     $ADB -s $dev shell mkdir /data/haggle
     $ADB -s $dev shell mkdir /sdcard/PhotoShare
+    
+    if [ "$dev" = "HT02KP900026" ]; then 
+	# This is a Nexus One device
+	echo "#ffbf2c00" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
+	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-4" > /system/etc/hosts'
+    fi
+    if [ "$dev" = "HT018P801846" ]; then 
+	# This is a Nexus One device
+	echo "#ffa200bf" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
+	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-5" > /system/etc/hosts'
+    fi
+    if [ "$dev" = "HT018P804594" ]; then 
+	# This is a Nexus One device
+	echo "#ff00bf20" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
+  	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-6" > /system/etc/hosts'
+    fi
+    if [ "$dev" = "HT93XKF09536" ]; then 
+        # This is a Magic
+	echo "#ffbf2c00" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+    fi
+    if [ "$dev" = "HT93XKF03557" ]; then
+	# This is a Magic
+	echo "#ffa200bf" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+    fi
+    if [ "$dev" = "HT93YKF07043" ]; then 
+	# This is a Magic
+	echo "#ff00bf20" > /tmp/deviceColor
+	$ADB -s $dev push /tmp/deviceColor /data/haggle/
+	$ADB -s $dev push $DEVICE_FILES_DIR/htc-magic-small.jpg /data/haggle/Avatar.jpg
+    fi
 done
 
 FRAMEWORK_PATH_PREFIX="system/framework"

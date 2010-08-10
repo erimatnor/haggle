@@ -1,0 +1,4 @@
+<Scenario>
+	<tracefile>traces/test4.txt</tracefile>
+	<magic>haggle</magic>
+</Scenario>
