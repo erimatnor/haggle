@@ -42,12 +42,7 @@ echo "Removing module $MODULE"
 rmmod $MODULE
 
 echo "Node IP is $IP_PREFIX.$NODE"
-
-if ls /system/bin/hostname 2>/dev/null; then
-    hostname "$HOSTNAME-$NODE"
-else
-    echo "127.0.0.1    $HOSTNAME-$NODE" > /system/etc/hosts
-fi
+echo "$HOSTNAME-$NODE" > /proc/sys/kernel/hostname
 
 insmod $MODULE_PATH/$MODULE.ko
 

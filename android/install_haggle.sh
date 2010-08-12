@@ -70,21 +70,21 @@ for dev in $DEVICES; do
 	echo "#FFFFFF00" > /tmp/deviceColor
 	$ADB -s $dev push /tmp/deviceColor /data/haggle/
 	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
-	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-4" > /system/etc/hosts'
+	$ADB -s $dev shell 'echo NexusOne-4" > /proc/sys/kernel/hostname'
     fi
     if [ "$dev" = "HT018P801846" ]; then 
 	# This is a Nexus One device
 	echo "#FF0000FF" > /tmp/deviceColor
 	$ADB -s $dev push /tmp/deviceColor /data/haggle/
 	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
-	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-5" > /system/etc/hosts'
+	$ADB -s $dev shell 'echo NexusOne-5" > /proc/sys/kernel/hostname'
     fi
     if [ "$dev" = "HT018P804594" ]; then 
 	# This is a Nexus One device
 	echo "#FFFF0000" > /tmp/deviceColor
 	$ADB -s $dev push /tmp/deviceColor /data/haggle/
 	$ADB -s $dev push $DEVICE_FILES_DIR/google-nexus-one.jpg /data/haggle/Avatar.jpg  
-  	$ADB -s $dev shell 'echo "127.0.0.1    nexus-one-6" > /system/etc/hosts'
+	$ADB -s $dev shell 'echo NexusOne-6" > /proc/sys/kernel/hostname'
     fi
     if [ "$dev" = "HT93XKF09536" ]; then 
         # This is a Magic
