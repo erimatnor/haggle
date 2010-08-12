@@ -25,6 +25,7 @@ static void callback_data_free(callback_data_t *cd)
                 return;
 
         (*cd->env)->DeleteGlobalRef(cd->env, cd->obj);
+	(*cd->env)->DeleteGlobalRef(cd->env, cd->cls);
         free(cd);
 }
 
@@ -45,7 +46,8 @@ static callback_data_t *callback_list_get(haggle_handle_t hh, int type)
 static callback_data_t *callback_list_insert(haggle_handle_t hh, int type, JNIEnv *env, jobject obj)
 {
         callback_data_t *cd;
-        
+        jclass cls;
+
         if (callback_list_get(hh, type) != NULL)
                 return NULL;
 
@@ -60,7 +62,14 @@ static callback_data_t *callback_list_insert(haggle_handle_t hh, int type, JNIEn
         // We must retain this object
 	cd->obj = (*env)->NewGlobalRef(env, obj);
         // Cache the object class
-        cd->cls = (*env)->GetObjectClass(env, cd->obj);
+        cls = (*env)->GetObjectClass(env, cd->obj);
+	
+	if (!cls) {
+		free(cd);
+		return NULL;
+	}
+
+	cd->cls = (*env)->NewGlobalRef(env, cls);
 
         list_add(&cd->l, &cdlist);
 
@@ -125,25 +134,53 @@ static int event_handler(haggle_event_t *e, void *arg)
         if (!env)
 		return -1;
 
+	if ((*env)->PushLocalFrame(env, 20) < 0) {
+		return -1; 
+	}
+
 	switch (cd->type) {
                 case LIBHAGGLE_EVENT_SHUTDOWN:
                         mid = (*env)->GetMethodID(env, cd->cls, "onShutdown", "(I)V");
                         if (mid) {
-
                                 (*env)->CallVoidMethod(env, cd->obj, mid, (jint)e->shutdown_reason);
+
+				if ((*env)->ExceptionCheck(env)) {
+					fprintf(stdout, "An exception occurred when calling onShutdown()\n");
+				}
                         }
                         break;
                 case LIBHAGGLE_EVENT_NEIGHBOR_UPDATE:
                         mid = (*env)->GetMethodID(env, cd->cls, "onNeighborUpdate", "([Lorg/haggle/Node;)V");
                         if (mid) {
+				jobjectArray jarr = libhaggle_jni_nodelist_to_node_jobjectArray(env, e->neighbors);
+				
+				if (!jarr)
+					break;
 
-                                (*env)->CallVoidMethod(env, cd->obj, mid, libhaggle_jni_nodelist_to_node_jobjectArray(env, e->neighbors));
+                                (*env)->CallVoidMethod(env, cd->obj, mid, jarr);
+
+				if ((*env)->ExceptionCheck(env)) {
+					fprintf(stdout, "An exception occurred when calling onNeighborUpdate()\n");
+				}
+				
+				(*env)->DeleteLocalRef(env, jarr);
                         }
                         break;
                 case LIBHAGGLE_EVENT_NEW_DATAOBJECT:                
                         mid = (*env)->GetMethodID(env, cd->cls, "onNewDataObject", "(Lorg/haggle/DataObject;)V");	
                         if (mid) {
-                                (*env)->CallVoidMethod(env, cd->obj, mid, java_object_new(env, JCLASS_DATAOBJECT, e->dobj));
+				jobject jdobj = java_object_new(env, JCLASS_DATAOBJECT, e->dobj);
+
+				if (!jdobj)
+					break;
+
+                                (*env)->CallVoidMethod(env, cd->obj, mid, jdobj);
+				 
+				if ((*env)->ExceptionCheck(env)) {
+					fprintf(stdout, "An exception occurred when calling onNewDataObject()\n");
+				}
+
+				(*env)->DeleteLocalRef(env, jdobj);
                         }
                         /* For this event the data object is turned
                          * into a java data object which will be garbage
@@ -154,14 +191,27 @@ static int event_handler(haggle_event_t *e, void *arg)
                 case LIBHAGGLE_EVENT_INTEREST_LIST:
                         mid = (*env)->GetMethodID(env, cd->cls, "onInterestListUpdate", "([Lorg/haggle/Attribute;)V");	
                         if (mid) {
-                                (*env)->CallVoidMethod(env, cd->obj, mid, libhaggle_jni_attributelist_to_attribute_jobjectArray(env, e->interests));
+				jobjectArray jarr = libhaggle_jni_attributelist_to_attribute_jobjectArray(env, e->interests);
+
+				if (!jarr)
+					break;
+
+                                (*env)->CallVoidMethod(env, cd->obj, mid, jarr);
+				 
+				if ((*env)->ExceptionCheck(env)) {
+					fprintf(stdout, "An exception occurred when calling onInterestListUpdate()\n");
+				}
+
+				(*env)->DeleteLocalRef(env, jarr);
                         }
                         break;
                 default:
                         break;
 	}
 
-        return ret;
+	(*env)->PopLocalFrame(env, NULL);
+
+	return ret;
 }
 
 /*
@@ -250,14 +300,11 @@ JNIEXPORT jint JNICALL Java_org_haggle_Handle_registerEventInterest(JNIEnv *env,
         callback_data_t *cd;
 	haggle_handle_t hh;
         jint res;
-        jclass cls;
 
         hh = (haggle_handle_t)get_native_handle(env, JCLASS_HANDLE, obj);
         
         if (!hh)
                 return -1;
-
-	cls = (*env)->GetObjectClass(env, handler);
 
         cd = callback_list_insert(hh, type, env, handler);
 	
@@ -305,8 +352,10 @@ JNIEXPORT jint JNICALL Java_org_haggle_Handle_registerInterests(JNIEnv *env, job
                 return 0;
         
         for (i = 0; i < (*env)->GetArrayLength(env, attrArr); i++) {
-                haggle_attr_t *attr = (haggle_attr_t *)get_native_handle(env, JCLASS_ATTRIBUTE, (*env)->GetObjectArrayElement(env, attrArr, i));
+		jobject jattr = (*env)->GetObjectArrayElement(env, attrArr, i);
+                haggle_attr_t *attr = (haggle_attr_t *)get_native_handle(env, JCLASS_ATTRIBUTE, jattr);
                 haggle_attributelist_add_attribute(al, haggle_attribute_copy(attr));
+		(*env)->DeleteLocalRef(env, jattr);
         }
 
         ret = haggle_ipc_add_application_interests((haggle_handle_t)get_native_handle(env, JCLASS_HANDLE, obj), al);
@@ -350,8 +399,10 @@ JNIEXPORT jint JNICALL Java_org_haggle_Handle_unregisterInterests(JNIEnv *env, j
                 return 0;
         
         for (i = 0; i < (*env)->GetArrayLength(env, attrArr); i++) {
-                haggle_attr_t *attr = (haggle_attr_t *)get_native_handle(env, JCLASS_ATTRIBUTE, (*env)->GetObjectArrayElement(env, attrArr, i));
+		jobject jattr = (*env)->GetObjectArrayElement(env, attrArr, i);
+                haggle_attr_t *attr = (haggle_attr_t *)get_native_handle(env, JCLASS_ATTRIBUTE, jattr);
                 haggle_attributelist_add_attribute(al, haggle_attribute_copy(attr));
+		(*env)->DeleteLocalRef(env, jattr);
         }
 
         ret = haggle_ipc_remove_application_interests((haggle_handle_t)get_native_handle(env, JCLASS_HANDLE, obj), al);
@@ -418,6 +469,16 @@ JNIEXPORT jint JNICALL Java_org_haggle_Handle_deleteDataObjectById(JNIEnv *env, 
 JNIEXPORT jint JNICALL Java_org_haggle_Handle_deleteDataObject(JNIEnv *env, jobject obj, jobject dObj)
 {
         return (jint)haggle_ipc_delete_data_object((haggle_handle_t)get_native_handle(env, JCLASS_HANDLE, obj), (haggle_dobj_t *)get_native_handle(env, JCLASS_DATAOBJECT, dObj));
+}
+
+/*
+ * Class:     org_haggle_Handle
+ * Method:    sendNodeDescription
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_haggle_Handle_sendNodeDescription(JNIEnv *env, jobject obj)
+{
+	return (jint)haggle_ipc_send_node_description((haggle_handle_t)get_native_handle(env, JCLASS_HANDLE, obj));
 }
 
 /*
@@ -521,17 +582,30 @@ static int spawn_daemon_callback(unsigned int milliseconds)
         
         cls = (*env)->GetObjectClass(env, spawn_object);
 
+	if (!cls)
+		return -1;
+
         mid = (*env)->GetMethodID(env, cls, "callback", "(J)I");
+	
+	(*env)->DeleteLocalRef(env, cls);
 
         if (mid) {
                 ret = (*env)->CallIntMethod(env, spawn_object, mid, (jlong)milliseconds);
+						
+		if ((*env)->ExceptionCheck(env)) {
+			(*env)->DeleteGlobalRef(env, spawn_object);
+			spawn_object = NULL;
+			return -1;
+		}
         } else {
                 (*env)->DeleteGlobalRef(env, spawn_object);
+		spawn_object = NULL;
                 return -1;
         }
 
         if (milliseconds == 0 || ret == 1) {
                 (*env)->DeleteGlobalRef(env, spawn_object);
+		spawn_object = NULL;
         }
 
         return ret;
@@ -576,7 +650,14 @@ JNIEXPORT jboolean JNICALL Java_org_haggle_Handle_spawnDaemon__Ljava_lang_String
  */
 JNIEXPORT jboolean JNICALL Java_org_haggle_Handle_spawnDaemon__Lorg_haggle_LaunchCallback_2(JNIEnv *env, jclass cls, jobject obj)
 {
+	if (spawn_object) {
+		(*env)->DeleteGlobalRef(env, spawn_object);
+	}
+
         spawn_object = (*env)->NewGlobalRef(env, obj);
+
+	if (!spawn_object)
+		return JNI_FALSE;
 
         return haggle_daemon_spawn_with_callback(NULL, spawn_daemon_callback) >= 0 ? JNI_TRUE : JNI_FALSE;
 }
@@ -591,7 +672,14 @@ JNIEXPORT jboolean JNICALL Java_org_haggle_Handle_spawnDaemon__Ljava_lang_String
         const char *daemonpath;
         jint ret;
 
+	if (spawn_object) {
+		(*env)->DeleteGlobalRef(env, spawn_object);
+	}
+
         spawn_object = (*env)->NewGlobalRef(env, obj);
+
+	if (!spawn_object)
+		return JNI_FALSE;
 
         daemonpath = (*env)->GetStringUTFChars(env, path, 0); 
         

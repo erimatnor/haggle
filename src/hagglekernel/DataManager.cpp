@@ -120,8 +120,7 @@ void DataHelper::cleanup()
 }
 
 DataManager::DataManager(HaggleKernel * _kernel, const bool _setCreateTimeOnBloomfilterUpdate) : 
-	Manager("DataManager", _kernel), localBF(NULL),
-	setCreateTimeOnBloomfilterUpdate(_setCreateTimeOnBloomfilterUpdate)
+	Manager("DataManager", _kernel), localBF(NULL), setCreateTimeOnBloomfilterUpdate(_setCreateTimeOnBloomfilterUpdate)
 {	
 	if (setCreateTimeOnBloomfilterUpdate) {
 		HAGGLE_DBG("Will set create time in node description when updating bloomfilter\n");
@@ -192,7 +191,7 @@ bool DataManager::init_derived()
 		return false;
 	}
 	
-	localBF = new Bloomfilter((float) 0.01, MAX_RECV_DATAOBJECTS, true);
+	localBF = Bloomfilter::create(Bloomfilter::BF_TYPE_COUNTING);
 	
 	if (!localBF) {
 		HAGGLE_ERR("Could not create data manager bloomfilter\n");
@@ -291,11 +290,16 @@ void DataManager::onGetLocalBF(Event *e)
 		if (re) {
 			HAGGLE_DBG("Retrieved bloomfilter from data store\n");
 			// Yes:
-			if (localBF)
-				delete localBF;
 			
-			localBF = new Bloomfilter(re->getValueBlob(), re->getValueLen());
-			kernel->getThisNode()->setBloomfilter(*localBF, setCreateTimeOnBloomfilterUpdate);
+			Bloomfilter *tmpBF = Bloomfilter::create(re->getValueBlob(), re->getValueLen());
+
+			if (tmpBF) {
+				if (localBF)
+					delete localBF;
+				
+				localBF = tmpBF;
+				kernel->getThisNode()->setBloomfilter(*localBF, setCreateTimeOnBloomfilterUpdate);
+			}
 		}
 		RepositoryEntryRef lbf = new RepositoryEntry("DataManager", "Local Bloomfilter");
 		kernel->getDataStore()->deleteRepository(lbf);
@@ -505,7 +509,8 @@ void DataManager::onDeletedDataObject(Event * e)
 		return;
 	
 	DataObjectRefList dObjs = e->getDataObjectList();
-	
+	unsigned int n_removed = 0;
+
 	for (DataObjectRefList::iterator it = dObjs.begin(); it != dObjs.end(); it++) {
 		/* 
 		  Do not remove Node descriptions from the bloomfilter. We do not
@@ -514,10 +519,11 @@ void DataManager::onDeletedDataObject(Event * e)
 		if (!(*it)->isNodeDescription()) {
 			HAGGLE_DBG("Removing deleted data object [id=%s] from bloomfilter\n", (*it)->getIdStr());
 			localBF->remove(*it);
+			n_removed++;
 		}
 	}
 	
-	if (dObjs.size() > 0)
+	if (n_removed > 0)
 		kernel->getThisNode()->setBloomfilter(*localBF, setCreateTimeOnBloomfilterUpdate);
 }
 
@@ -599,8 +605,38 @@ void DataManager::onConfig(Metadata *m)
 			HAGGLE_DBG("setCreateTimeOnBloomfilterUpdate set to 'false'\n");
 		}
 	}
-	
-	Metadata *dm = m->getMetadata("Aging");
+
+	Metadata *dm = m->getMetadata("Bloomfilter");
+
+	if (dm) {
+		const char *param = dm->getParameter("default_error_rate");
+
+		if (param) {
+			char *endptr = NULL;
+			float error_rate = strtof(param, &endptr);
+			
+			if (endptr && endptr != param) {
+				Bloomfilter::setDefaultErrorRate(error_rate);
+				HAGGLE_DBG("config default bloomfilter error rate %.3f\n", 
+					   Bloomfilter::getDefaultErrorRate());
+			}
+		}
+		
+		param = dm->getParameter("default_capacity");
+
+		if (param) {
+			char *endptr = NULL;
+			unsigned int capacity = (unsigned int)strtoul(param, &endptr, 10);
+			
+			if (endptr && endptr != param) {
+				Bloomfilter::setDefaultCapacity(capacity);
+				HAGGLE_DBG("config default bloomfilter capacity %u\n", 
+					   Bloomfilter::getDefaultCapacity());
+			}
+		}
+	}
+
+	dm = m->getMetadata("Aging");
 
 	if (dm) {
 		const char *param = dm->getParameter("period");

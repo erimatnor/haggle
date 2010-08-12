@@ -10,9 +10,14 @@ import org.haggle.LaunchCallback;
 public class TestApp implements EventHandler {	
         private Handle h = null;
         private String name;
+	private long num_dataobjects_received = 0;
+	private boolean should_quit = false;
+	private int num_dataobjects = 10;
 
 	public synchronized void onNewDataObject(DataObject dObj) {
-                System.out.println("Got new data object, filepath=" + dObj.getFilePath());
+		num_dataobjects_received++;
+                System.out.println("Got data object " + num_dataobjects_received + " filepath=" + dObj.getFilePath());
+		dObj.dispose();
         }
 	public synchronized void onNeighborUpdate(Node[] neighbors) {
                 System.out.println("Got neighbor update event");
@@ -30,11 +35,13 @@ public class TestApp implements EventHandler {
         }
 	public synchronized void onShutdown(int reason) {
                 System.out.println("Got shutdown event, reason=" + reason);
+		should_quit = true;
         }
-        public TestApp(String name)
+        public TestApp(String name, int num_dataobjects)
         {
                 super();
                 this.name = name;
+		this.num_dataobjects = num_dataobjects;
         }
         public void start()
         {
@@ -60,10 +67,10 @@ public class TestApp implements EventHandler {
                         }
                 }
                 try {
-			final int num_dataobjects = 5;
-			DataObject[] dobjs = new DataObject[num_dataobjects];
+			//DataObject[] dobjs = new DataObject[num_dataobjects];
                         h = new Handle(name);
 
+                        h.registerEventInterest(EVENT_NEW_DATAOBJECT, this);
                         h.registerEventInterest(EVENT_NEIGHBOR_UPDATE, this);
                         h.registerEventInterest(EVENT_INTEREST_LIST_UPDATE, this);
                         h.registerEventInterest(EVENT_HAGGLE_SHUTDOWN, this);
@@ -72,33 +79,49 @@ public class TestApp implements EventHandler {
                 
                         h.eventLoopRunAsync();
                         
+			System.out.println("Getting Application interests");
+
                         h.getApplicationInterestsAsync();
 
-                        Thread.sleep(3000);
+                        Thread.sleep(2000);
+			
+			System.out.println("Forcing Haggle to send node description");
+
+			h.sendNodeDescription();
+			
+			Thread.sleep(3000);
 
 			for (int i = 0; i < num_dataobjects; i++) {
-				dobjs[i] = new DataObject();
-				dobjs[i].addAttribute("num", "" + i);
-				h.publishDataObject(dobjs[i]);
-				Thread.sleep(1000);
+				DataObject dobj = new DataObject();
+				dobj.addAttribute("num", "" + i);
+				dobj.addAttribute(attr);
+				h.publishDataObject(dobj);
+				Thread.sleep(40);
 			}
-			for (int i = 0; i < num_dataobjects; i++) {
+			/*
+			  for (int i = 0; i < num_dataobjects; i++) {
 				h.deleteDataObject(dobjs[i]);
 				dobjs[i].dispose();
-				Thread.sleep(1000);
+				Thread.sleep(40);
 			}
-                        h.shutdown();
-                        
-                        Thread.sleep(5000);
+			*/
+
+			while (num_dataobjects != num_dataobjects_received && !should_quit)
+				Thread.sleep(1000);
 
                         h.eventLoopStop();
                         
                         Thread.sleep(2000);
+			h.shutdown();
+			Thread.sleep(2000);
 
                 } catch (Handle.RegistrationFailedException e) {
                         System.out.println("Could not get handle: " + e.getMessage());
                         return;
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+			h.unregister();
+			h.eventLoopStop();
+		} catch (Exception e) {
                         System.out.println("Got run loop exception\n");
                         return;
                 }
@@ -107,7 +130,25 @@ public class TestApp implements EventHandler {
         }
         public static void main(String args[])
         {
-                TestApp app = new TestApp("JavaTestApp");
+		int num_dataobjects = 10;
+
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].compareTo("-h") == 0) {
+				System.out.println("usage:");
+				System.out.println("\t -h : print this help");
+				System.out.println("\t -n NUM_DATAOBJECTS : generate specified number of data objects");
+				System.out.println("");
+				return;
+			} else if (args[i].compareTo("-n") == 0 && (i + 1) != args.length) {
+				try {
+					num_dataobjects = Integer.parseInt(args[++i]);
+					System.out.println("Going to generate " + num_dataobjects + " data objects");
+				} catch (NumberFormatException e) {
+					System.err.println("Bad number format in argument");
+				}
+			}
+		}
+                TestApp app = new TestApp("JavaTestApp", num_dataobjects);
 
                 app.start();
 

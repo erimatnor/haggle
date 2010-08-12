@@ -347,6 +347,22 @@ void ApplicationManager::onSendResult(Event *e)
 	}
 }
 
+void ApplicationManager::onDeletedDataObject(Event *e)
+{
+	if (!e || !e->hasData())
+		return;
+
+	
+	DataObjectRefList dObjs = e->getDataObjectList();
+	
+	for (DataObjectRefList::iterator it = dObjs.begin(); it != dObjs.end(); it++) {
+		DataObjectRef dObj = *it;
+		
+		// This is a bit of a brute force approach, removing
+		// the deleted data object from all application's
+		// bloomfilter
+	}
+}
 void ApplicationManager::sendToApplication(DataObjectRef& dObj, NodeRef& app)
 {
 	pendingDOs.push_back(make_pair(app, dObj));
@@ -778,6 +794,7 @@ static const char *ctrl_type_names[] = {
 	"matching_dataobject",
 	"delete_dataobject",
 	"get_dataobjects",
+	"send_node_description",
 	"shutdown", 
 	"event", 
 	NULL 
@@ -1136,7 +1153,7 @@ void ApplicationManager::onReceiveFromApplication(Event *e)
 							break;
 						
 						const char *id_str = dobj_m->getParameter(DATAOBJECT_METADATA_APPLICATION_CONTROL_DATAOBJECT_ID_PARAM);
-						
+					       
 						if (!id_str)
 							break;
 												
@@ -1147,8 +1164,13 @@ void ApplicationManager::onReceiveFromApplication(Event *e)
 						
 						if (base64_decode(&ctx, id_str, strlen(id_str), (char *)id, &len)) {
 							kernel->getDataStore()->deleteDataObject(id);
+							appNode->getBloomfilter()->remove(id);
 						}
 					}
+					break;
+			        case CTRL_TYPE_SEND_NODE_DESCRIPTION:
+					if (kernel->getNodeStore()->numNeighbors())
+						kernel->addEvent(new Event(EVENT_TYPE_NODE_DESCRIPTION_SEND));
 					break;
 				case CTRL_TYPE_INVALID:
 				default:

@@ -59,8 +59,6 @@ typedef enum {
 #define NODE_ID_LEN SHA_DIGEST_LENGTH
 #define MAX_NODE_ID_STR_LEN (2*NODE_ID_LEN+1) // +1 for null termination
 
-#define MAX_RECV_DATAOBJECTS 1000
-
 /* Some attribute strings in a node's metadata */
 #define NODE_DESC_ATTR "NodeDescription"
 #define NODE_DESC_SOURCE_ID_ATTR "SrcId"
@@ -300,8 +298,8 @@ public:
         // Bloomfilter functions
 	const Bloomfilter *getBloomfilter() const;
 	Bloomfilter *getBloomfilter();
-	void setBloomfilter(const char *base64, const bool set_create_time = false);
-	void setBloomfilter(const Bloomfilter& bf, const bool set_create_time = false);
+	bool setBloomfilter(const char *base64, const bool set_create_time = false);
+	bool setBloomfilter(const Bloomfilter& bf, const bool set_create_time = false);
 	
 	/**
 		Sets the create time of this node. This should only be done (and will 
