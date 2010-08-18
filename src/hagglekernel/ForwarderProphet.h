@@ -165,6 +165,15 @@ private:
 	*/
 	void _printRoutingTable(void);
 #endif
+	/**
+		Does the actual work or getRoutingTableAsXML().
+
+		This function only exists in the haggle-demo branch, and should only
+		be there. Changes including this function should not be merged with
+		the default development branch.
+	*/
+	const string _getInternalStateAsXML(void);
+
 	ForwardingStrategy *forwarding_strategy;
 public:
 	ForwarderProphet(ForwardingManager *m = NULL, const EventType type = -1, 

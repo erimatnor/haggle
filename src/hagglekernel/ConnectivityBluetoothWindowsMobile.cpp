@@ -389,10 +389,12 @@ static int findHaggleService(BT_ADDR *pb)
 			//HAGGLE_DBG("End of SDP list\n");
 			break;
 		case WSAENOTCONN:
+			HAGGLE_DBG("Could not connect to SDP service\n");
 			found = -1;
 			HAGGLE_DBG("Could not connect to SDP service\n");
 			break;
 		case WSASERVICE_NOT_FOUND:
+			HAGGLE_DBG("Could not find Haggle SDP service\n");
 			found = 0;
 			HAGGLE_DBG("SDP Service not found\n");
 			break;
@@ -551,8 +553,15 @@ bool ConnectivityBluetooth::run()
 		return false;
 	}
 
-	cancelableSleep(5000);
+	/* Hardcode mac addresses of Haggle Bluetooth devices for the demo. */
+	unsigned char macaddr1[6] = {0x00, 0x21, 0xBA, 0x45, 0x09, 0x08 };
+	report_known_interface(IFTYPE_BLUETOOTH, (char *)macaddr1, true);
+	unsigned char macaddr2[6] = {0x00, 0x17, 0xE8, 0x80, 0xD7, 0xE8 };
+	report_known_interface(IFTYPE_BLUETOOTH, (char *)macaddr2, true);
 
+	//cancelableSleep(TIME_TO_WAIT * 1000);
+	cancelableSleep(5000);
+	
 	while (!shouldExit()) {
 		
 		bluetoothDiscovery(this);

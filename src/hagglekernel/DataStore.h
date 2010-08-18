@@ -223,8 +223,9 @@ class DataStoreDump
         char *data;
         size_t len;
     public:
-	size_t getLen() { return len; }
-        const char *getData() { return data; }
+	size_t getLen() const { return len; }
+        const char *getData() const { return data; }
+
         DataStoreDump(char *_data, const size_t _len) : data(_data), len(_len) {}
         ~DataStoreDump() { if (data) free(data); }
 };

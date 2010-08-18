@@ -9,6 +9,7 @@ SUBDIRS = \
 	proxy \
 	clitool \
 	luckyMe \
+	visualization \
 	tests/test01
 
 if OS_LINUX

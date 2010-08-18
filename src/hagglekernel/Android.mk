@@ -59,6 +59,9 @@ LOCAL_SRC_FILES := \
 	ResourceManager.cpp \
 	ResourceMonitorAndroid.cpp \
 	SecurityManager.cpp \
+	VendettaManager.cpp \
+	VendettaAsynchronous.cpp \
+	VendettaClient.cpp \
 	SQLDataStore.cpp \
 	Trace.cpp \
 	Utility.cpp \
@@ -113,7 +116,7 @@ LOCAL_SHARED_LIBRARIES += libdl libstdc++ libsqlite libcrypto libdbus libhaggle-
 
 LOCAL_STATIC_LIBRARIES += libcpphaggle
 
-EXTRA_DEFINES:=-DHAVE_CONFIG -DOS_ANDROID -DHAVE_EXCEPTION=0 -DENABLE_ETHERNET -DENABLE_BLUETOOTH -DHAVE_DBUS -DDEBUG -DDEBUG_LEAKS
+EXTRA_DEFINES:=-DHAVE_CONFIG -DOS_ANDROID -DHAVE_EXCEPTION=0 -DENABLE_ETHERNET -DENABLE_BLUETOOTH -DHAVE_DBUS -DDEBUG -DDEBUG_LEAKS  -DENABLE_VENDETTA_MANAGER
 LOCAL_CFLAGS:=-O2 -g $(EXTRA_DEFINES)
 LOCAL_CPPFLAGS +=$(EXTRA_DEFINES)
 

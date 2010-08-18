@@ -248,6 +248,7 @@ void ForwarderProphet::_endNeighbor(const NodeRef &neighbor)
 	 
 	 NOTE: This is an out of draft addition to Prophet.
 	 */
+        double old = P_ab;
         P_ab = P_ab * PROPHET_GAMMA;
         
         // Is this metric close to 0?
@@ -255,6 +256,9 @@ void ForwarderProphet::_endNeighbor(const NodeRef &neighbor)
                 // Let's say it's 0:
                 P_ab = 0.0;
         }
+
+        printf("Aging neighbor metric old=%lf new=%lf\n", old, P_ab);
+
 	metric.second = Timeval::now();
 	rib_timestamp = metric.second;
 }
@@ -387,3 +391,37 @@ void ForwarderProphet::_printRoutingTable(void)
 }
 #endif
 
+const string ForwarderProphet::_getInternalStateAsXML(void)
+{
+	string retval, tmp;
+	
+	retval = "";
+	stringprintf(tmp, "  <Vector name=\"%s\">\n", id_number_to_nodeid[1].c_str());
+	retval += tmp;
+	
+	for (prophet_rib_t::iterator jt = rib.begin(); jt != rib.end(); jt++) {
+		stringprintf(tmp, "    <Metric name=\"%s\">%lf</Metric>\n", 
+			id_number_to_nodeid[jt->first].c_str(), 
+			jt->second.first);
+		retval += tmp;
+	}
+	retval += "  </Vector>\n";
+	
+	for (Map<prophet_node_id_t, prophet_rib_t>::iterator it = 
+			neighbor_ribs.begin(); it != neighbor_ribs.end(); it++) {
+		stringprintf(tmp, "  <Vector name=\"%s\">\n", 
+			id_number_to_nodeid[it->first].c_str());
+		retval += tmp;
+		
+		for (prophet_rib_t::iterator jt = it->second.begin();
+			jt != it->second.end(); jt++) {
+			stringprintf(tmp, "    <Metric name=\"%s\">%lf</Metric>\n", 
+				id_number_to_nodeid[jt->first].c_str(), jt->second.first);
+			retval += tmp;
+		}
+		
+		retval += "  </Vector>\n";
+	}
+	
+	return retval;
+}
