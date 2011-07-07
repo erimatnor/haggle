@@ -61,6 +61,9 @@ LOCAL_SRC_FILES := \
 	ResourceMonitor.cpp \
 	ResourceMonitorAndroid.cpp \
 	SecurityManager.cpp \
+	VendettaManager.cpp \
+	VendettaAsynchronous.cpp \
+	VendettaClient.cpp \
 	SQLDataStore.cpp \
 	Trace.cpp \
 	Utility.cpp \

@@ -52,7 +52,11 @@ typedef enum {
 	// Print the routing table:
 	FWD_TASK_PRINT_RIB,
 #endif
+
+	// Get the internal state as XML:
+	FWD_TASK_GET_XML_STATE,
 	FWD_TASK_CONFIG,
+
 	// Terminate the run loop
 	FWD_TASK_QUIT
 } ForwardingTaskType_t;
@@ -68,6 +72,7 @@ private:
 	NodeRef	node;
 	NodeRefList *nodes;
 	RepositoryEntryList *rel;
+        string xml;
 	Metadata *m;
 public:
 	ForwardingTask(const ForwardingTaskType_t _type, const DataObjectRef& _dObj = NULL, const NodeRef& _node = NULL, const NodeRefList *_nodes = NULL) :
@@ -82,7 +87,11 @@ public:
 	RepositoryEntryList *getRepositoryEntryList() { return rel; }
 	NodeRefList *getNodeList() { return nodes; }
 	void setRepositoryEntryList(RepositoryEntryList *_rel) { if (!rel) {rel = _rel;} }
+
 	ForwardingTaskType_t getType() const { return type; }
+        void setXML(const string& _xml) { xml = _xml; }
+        const string& getXML() const { return xml; }
+
 	Metadata *getConfig() { return m; }
 	~ForwardingTask() { if (rel) delete rel; if (nodes) delete nodes; if (m) delete m; }
 };
@@ -95,13 +104,14 @@ public:
 class ForwarderAsynchronous : public Forwarder {
 	const EventType eventType;
 	
-	GenericQueue<ForwardingTask *> taskQ;	/**
+	GenericQueue<ForwardingTask *> taskQ;	
+        /**
 		Main run loop for the prophet forwarder.
 	*/
 	bool run(void);
 protected:
 	/**
-		Does the actual work of newForwardingDataObject.
+		Does the actual work of newRoutingInformation
 	*/
 	virtual bool newRoutingInformation(const Metadata *m) { return false; }
 	
@@ -131,6 +141,15 @@ protected:
 	*/
 	virtual void _printRoutingTable(void) {}
 #endif
+	/**
+		Does the actual work or getInternatlStateAsXML().
+		
+		This function only exists in the haggle-demo branch, and should only
+		be there. Changes including this function should not be merged with
+		the default development branch.
+	*/
+	virtual const string _getInternalStateAsXML(void) { return ""; }
+
 public:
 	ForwarderAsynchronous(ForwardingManager *m = NULL, const EventType type = -1, const string name = "Asynchronous forwarding module");
 
@@ -166,6 +185,8 @@ public:
 	/** See the parent class function with the same name. */
 	void printRoutingTable(void);
 #endif
+	/** See the parent class function with the same name. */
+	void getInternalStateAsXML(void);
 	virtual void _onForwarderConfig(const Metadata& m) {}
 	void onForwarderConfig(const Metadata& m);
 };

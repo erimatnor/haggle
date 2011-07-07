@@ -22,6 +22,10 @@ ForwarderAsynchronous::ForwarderAsynchronous(ForwardingManager *m, const EventTy
 
 ForwarderAsynchronous::~ForwarderAsynchronous()
 {
+	if (isRunning()) {
+		HAGGLE_ERR("WARNING: Forwarding module %s is still running when destructor was called."
+			   " Use quit() first to stop the thread so that it can save its state.\n", getName());
+	}
 	stop();
 }
 
@@ -90,10 +94,17 @@ void ForwarderAsynchronous::printRoutingTable(void)
 }
 #endif
 
+
+void ForwarderAsynchronous::getInternalStateAsXML(void)
+{
+	taskQ.insert(new ForwardingTask(FWD_TASK_GET_XML_STATE));
+}
+
 void ForwarderAsynchronous::onForwarderConfig(const Metadata& m)
 {
 	taskQ.insert(new ForwardingTask(m));
 }
+
 /*
  General overview of thread loop:
  
@@ -152,6 +163,11 @@ bool ForwarderAsynchronous::run(void)
 						_printRoutingTable();
 						break;
 #endif
+					case FWD_TASK_GET_XML_STATE:
+						task->setXML(_getInternalStateAsXML());
+						addEvent(new Event(eventType, task));
+                                                task = NULL;
+                                                break;
 					case FWD_TASK_CONFIG:
 						_onForwarderConfig(*task->getConfig());
 						break;
@@ -180,6 +196,7 @@ bool ForwarderAsynchronous::run(void)
 				}
 				break;
 		}
+                
 		if (task)
 			delete task;
 	}

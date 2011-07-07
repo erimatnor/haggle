@@ -12,7 +12,7 @@
 		<TCPServer port="9697" backlog="30"/>
 	</ProtocolManager>
 	<DataManager set_createtime_on_bloomfilter_update="true">
-		<Aging period="3600" max_age="86400"/>
+		<Aging period="35" max_age="30"/>
 		<Bloomfilter default_error_rate="0.01" default_capacity="2000"/>
 	</DataManager>
 	<ConnectivityManager>
@@ -66,9 +66,13 @@
 			<IgnoreNonListedInterfaces>yes</IgnoreNonListedInterfaces>
 		</Bluetooth>
 	</ConnectivityManager>
+	<VendettaManager>
+		<SiteManager ip="192.168.1.53" tcp_port="4444" udp_port="4445"/>
+	</VendettaManager>
 	<ForwardingManager query_on_new_dataobject="false" periodic_dataobject_query_interval="0">
 	  <Forwarder max_generated_delegates="1" max_generated_targets="1" protocol="Prophet">
 	    <Prophet strategy="GRTR" P_encounter="0.75" alpha="0.5" beta="0.25" gamma="0.999"/>
 	  </Forwarder>
 	</ForwardingManager>
 </Haggle>
+

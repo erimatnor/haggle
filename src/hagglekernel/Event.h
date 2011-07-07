@@ -497,6 +497,13 @@ public:
 		else
 			return "[Unknown event type]";
         }
+		static const char *getTypeName(EventType t)
+		{
+			if(t >= 0 && t < MAX_NUM_EVENT_TYPES)
+				if(eventNames[t] != NULL)
+					return eventNames[t];
+			return "[Unknown event type]";
+		}
 	string getDescription(void);
         void doPrivateCallback() {
 
