@@ -103,7 +103,13 @@ int Trace::write(const TraceType_t _type, const char *func, const char *fmt, ...
 	if (traceFile)
 		fprintf(traceFile, "%.3lf:[%s]{%s}:%s", 
 			t.getTimeAsSecondsDouble(), thread_id, func, buf);
-
+/*
+#if defined(OS_ANDROID)
+	len = __android_log_print(ANDROID_LOG_DEBUG, HAGGLE_LOG_TAG, 
+				  "%.3lf:[%s]{%s}:%s", 
+				  t.getTimeAsSecondsDouble(), thread_id, func, buf);
+#endif
+*/
 	return len;
 }
 
