@@ -1,6 +1,6 @@
 /* Copyright (c) 2008 Uppsala Universitet.
  * All rights reserved.
- * 
+ *
  * This file is part of Vendetta.
  *
  * Vendetta is free software: you can redistribute it and/or modify
@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Vendetta.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package vendetta.network;
+
 
 /**
  * A minimal interface for downstream TCP connections.
- * 
+ *
  * @version $Id$
  */
 public interface TCPDown extends Runnable {
-	/**
-	 * Close the downstream TCP connection and stop listeing
-	 * for incoming messages.
-	 */
-	public void close();
+    /**
+     * Close the downstream TCP connection and stop listeing
+     * for incoming messages.
+     */
+    public void close();
 }

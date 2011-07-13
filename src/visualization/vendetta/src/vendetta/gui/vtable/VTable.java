@@ -1,6 +1,6 @@
 /* Copyright (c) 2008 Uppsala Universitet.
  * All rights reserved.
- * 
+ *
  * This file is part of Vendetta.
  *
  * Vendetta is free software: you can redistribute it and/or modify
@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Vendetta.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package vendetta.gui.vtable;
 
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+
 public class VTable extends JTable {
-	public VTable(TableModel model) {
-		super(model);
-	}
+    public VTable(TableModel model) {
+        super(model);
+    }
 }

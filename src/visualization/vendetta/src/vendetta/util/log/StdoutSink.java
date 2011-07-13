@@ -1,6 +1,6 @@
 /* Copyright (c) 2008 Uppsala Universitet.
  * All rights reserved.
- * 
+ *
  * This file is part of Vendetta.
  *
  * Vendetta is free software: you can redistribute it and/or modify
@@ -16,21 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Vendetta.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package vendetta.util.log;
 
 import java.util.Date;
 
+
 /**
  * A sink for displaying log information on stdout.
- * 
+ *
  * @version $Id$
  */
 public class StdoutSink implements LogSink {
-	/* (non-Javadoc)
-	 * @see vendetta.log.LogSink#println(java.lang.String, vendetta.log.Log.Level, java.lang.String)
-	 */
-	public void println(String name, Log.Level level, String msg) {
-		System.out.printf("%s [%10s] %5s %s\n", new Date()+"", name, level, msg);
-	}
+    /* (non-Javadoc)
+     * @see vendetta.log.LogSink#println(java.lang.String, vendetta.log.Log.Level, java.lang.String)
+     */
+    public void println(String name, Log.Level level, String msg) {
+        System.out.printf("%s [%10s] %5s %s\n", new Date() + "", name, level,
+            msg);
+    }
 }

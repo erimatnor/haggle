@@ -1,6 +1,6 @@
 /* Copyright (c) 2008 Uppsala Universitet.
  * All rights reserved.
- * 
+ *
  * This file is part of Vendetta.
  *
  * Vendetta is free software: you can redistribute it and/or modify
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vendetta.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package vendetta.util.log;
+
 
 /**
  * An interface for a mean of preseting log information.
@@ -25,5 +25,5 @@ package vendetta.util.log;
  * @version $Id$
  */
 public interface LogSink {
-	public void println(String name, Log.Level level, String msg);
+    public void println(String name, Log.Level level, String msg);
 }
