@@ -665,12 +665,12 @@ AC_CONFIG_FILES([Makefile
                  src/webserver/Makefile
 		 src/luckyMe/Makefile
                  src/hagglekernel/Makefile
-		 src/visualization/Makefile
-		 src/visualization/do_telnet/Makefile
-		 src/visualization/siteManager/Makefile
-		 src/visualization/middleware/Makefile
-		 src/visualization/vclient/Makefile
-		 src/visualization/vendetta/Makefile
+		 visualization/Makefile
+		 visualization/do_telnet/Makefile
+		 visualization/siteManager/Makefile
+		 visualization/middleware/Makefile
+		 visualization/vclient/Makefile
+		 visualization/vendetta/Makefile
 		 testsuite/Makefile 
 		 testsuite/test_thread/Makefile 
 		 testsuite/test_mutex/Makefile 

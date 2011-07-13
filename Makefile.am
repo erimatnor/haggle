@@ -9,7 +9,7 @@ if OS_IPHONEOS
 SUBDIRS += $(OPENSSL_DIR)
 endif
 
-SUBDIRS += doc src android
+SUBDIRS += doc src visualization android
 
 EXTRA_DIST = \
 	bin \
