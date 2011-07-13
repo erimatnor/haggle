@@ -40,7 +40,8 @@ public abstract class MonitorNode {
     /**
      * Minimum distance between to positions to consider them different.
      */
-    private static final float EPSILON = 0.0001f;
+    @SuppressWarnings("unused")
+	private static final float EPSILON = 0.0001f;
 
     /**
      * A (locally) unique ID for identifying this node.
@@ -209,9 +210,6 @@ public abstract class MonitorNode {
     public void pingReceived(String args) {
         String[] guids = args.split(" ");
         String[] posString;
-        float x;
-        float y;
-        float z;
 
         if (guids.length < 2) {
             LOG.warn("PING message from " + getHostName() +
@@ -231,9 +229,9 @@ public abstract class MonitorNode {
         }
 
         try {
-            x = Float.parseFloat(posString[0]);
-            y = Float.parseFloat(posString[1]);
-            z = Float.parseFloat(posString[2]);
+            Float.parseFloat(posString[0]);
+            Float.parseFloat(posString[1]);
+            Float.parseFloat(posString[2]);
         } catch (NumberFormatException nfe) {
             LOG.warn("PING message from " + getHostName() +
                 " has malformed position.");

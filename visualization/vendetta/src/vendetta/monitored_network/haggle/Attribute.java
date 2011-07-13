@@ -13,7 +13,8 @@ import vendetta.util.log.Log;
 /**
  */
 public class Attribute {
-    private static Log LOG = Log.getInstance("Attribute");
+    @SuppressWarnings("unused")
+	private static Log LOG = Log.getInstance("Attribute");
     private String name;
     private String value;
 

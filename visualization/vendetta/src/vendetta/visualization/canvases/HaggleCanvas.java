@@ -5,7 +5,6 @@
 
 package vendetta.visualization.canvases;
 
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseEvent;
@@ -13,7 +12,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 import java.awt.*;
-import java.awt.geom.*;
 import java.util.*;
 import java.net.*;
 
@@ -25,6 +23,11 @@ import vendetta.vconfig.VSettings;
 import vendetta.monitored_network.haggle.*;
 
 public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private class Animation {
 		public class EndPoint {
 			public SensorNode node;
@@ -84,8 +87,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 		public TreeMap<SensorNode, SensorWindow> subwindows;
 		public SensorWindow dragSubWindow;
 		public double window_height;
-		public double scale;
-
+		
 		private SensorWindow(SensorNode node, int type) {
 			this.type = type;
 			this.node = node;
@@ -152,6 +154,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 			}
 		}
 
+		@SuppressWarnings("unused")
 		boolean isInWindow(Coordinate c) {
 			if (allBounds != null)
 				return allBounds.contains(c);
@@ -163,6 +166,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 					((p.y / 2.0)) * window_height + 0.5);
 		}
 
+		@SuppressWarnings("unused")
 		private Coordinate revPos(Coordinate p) {
 			return new Coordinate((p.x - 0.5) * 2.0 / window_height,
 					((p.y - 0.5) / window_height) * 2.0);
@@ -220,7 +224,6 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 	private boolean try_report_nodes;
 	private ArrayList<Animation> animations;
 
-	@SuppressWarnings({ "unchecked" })
 	public HaggleCanvas() {
 		super();
 
@@ -261,11 +264,13 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 		_toNode = null;
 		for (i = 0; i < entries.length
 				&& (_fromNode == null || _toNode == null); i++) {
-			SensorNode Node = entries[i];
-			if (Node.getNodeID().equals(fromNode))
-				_fromNode = Node;
-			if (Node.getNodeID().equals(toNode))
-				_toNode = Node;
+			SensorNode sn = entries[i];
+			if (sn != null) {
+				if (sn.getNodeID().equals(fromNode))
+					_fromNode = sn;
+				if (sn.getNodeID().equals(toNode))
+					_toNode = sn;
+			}
 		}
 		if (_fromNode != null && _toNode != null) {
 			animations.add(new Animation(_fromNode, _toNode, 15, new Color(
@@ -588,7 +593,6 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 					c.y + win.window_height / 2.0);
 		}
 
-		boolean should_move_objects;
 		int i, j;
 
 		// Draw boundrary circle:
@@ -810,10 +814,10 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 		// done with the square-looking drawing area:
 		// ds.popBounds();
 	}
-	double x_bound1 = 0.0; //0.0;
-	double y_bound1 = 0.0; //0.05;
-	double x_bound2 = 0.0; //-0.1
-	double y_bound2 = 0.0; //-0.2
+	double x_bound1 = 0.0;
+	double y_bound1 = 0.05;
+	double x_bound2 = -0.1;
+	double y_bound2 = -0.4;
 	
 	@SuppressWarnings({ "unchecked" })
 	private void renderWindowArrayWindow(DrawingSurface ds, SensorWindow win,
@@ -1088,7 +1092,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 		}
 		ds.popBounds();
 	}
-
+	
 	public synchronized void paint(Graphics g) {
 		if (try_report_nodes) {
 			try {
@@ -1208,6 +1212,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 	private void mouseReleasedConnectivity(MouseEvent e, Coordinate c,
 			SensorWindow win) {
 		Coordinate p = win.toPos(new Coordinate());
+		
 		c = new Rect(p.x - win.window_height / 2.0, p.y - win.window_height
 				/ 2.0, p.x + win.window_height / 2.0, p.y + win.window_height
 				/ 2.0).revConvert(new Rect((1.0 - connectivityScale) / 2.0,
@@ -1216,6 +1221,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 				(1.0 + connectivityScale) / 2.0,
 				(win.window_height + connectivityScale)
 						/ (2.0 * win.window_height)).revConvert(c));
+		
 		if (mouseAction == 1) {
 			SensorNode s;
 			int i;
@@ -1313,7 +1319,7 @@ public class HaggleCanvas extends VendettaCanvas implements MouseWheelListener {
 
 	private void mouseReleasedWindowArray(MouseEvent e, Coordinate c,
 			SensorWindow win) {
-		c = new Rect(0, 0, 1, 1.0 / win.window_height).revConvert(c);
+		c = new Rect(0 + x_bound1, 0 + y_bound1, 1 + x_bound2, (1.0 / win.window_height) + y_bound2).revConvert(c);
 		if (mouseAction == 1) {
 			win.dragSubWindow = findSubWindow(win, c);
 		}

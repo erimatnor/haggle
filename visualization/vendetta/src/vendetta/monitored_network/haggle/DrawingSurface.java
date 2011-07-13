@@ -17,7 +17,8 @@ import java.awt.image.*;
 /**
  */
 public class DrawingSurface {
-    private static Log LOG = Log.getInstance("Attribute");
+    @SuppressWarnings("unused")
+	private static Log LOG = Log.getInstance("Attribute");
     private Graphics2D g;
     private Font baseFont;
     private FontMetrics baseFontMetrics;
@@ -267,7 +268,7 @@ public class DrawingSurface {
     }
 
     public void drawLine(Coordinate p1, Coordinate p2, double width, Color c) {
-        Rect b = currentBounds();
+        currentBounds();
         g.setColor(c);
 
         Coordinate p1a;
@@ -299,7 +300,7 @@ public class DrawingSurface {
         Coordinate a;
         Coordinate d;
         int i;
-        Rect b = currentBounds();
+        currentBounds();
         g.setColor(c);
 
         a = new Coordinate(-(p[1].y - p[0].y), p[1].x - p[0].x);
@@ -419,8 +420,6 @@ public class DrawingSurface {
                 Coordinate b;
                 Coordinate c;
                 Coordinate d;
-                Coordinate e;
-                Coordinate f;
                 Coordinate p1;
                 Coordinate p2;
 
@@ -586,7 +585,7 @@ public class DrawingSurface {
     }
 
     public void fillRect(double edgeWidth, Color edgeColor, Color col) {
-        Rect b = currentBounds();
+        currentBounds();
         boolean drawEdge = (edgeWidth > 0.0);
 
         if (drawEdge) {
@@ -629,7 +628,7 @@ public class DrawingSurface {
     public Rect fillRect(double x1, double y1, double x2, double y2, Color c) {
         g.setColor(c);
 
-        Rect b = currentBounds();
+        currentBounds();
         double _x1 = convertX(x1);
         double _y1 = convertY(y1);
         double _x2 = convertX(x2);
@@ -645,7 +644,7 @@ public class DrawingSurface {
 
     public Rect drawImageInRect(double x1, double y1, double x2, double y2,
         BufferedImage im) {
-        Rect b = currentBounds();
+        currentBounds();
         double _x1 = convertX(x1);
         double _y1 = convertY(y1);
         double _x2 = convertX(x2);
@@ -708,7 +707,7 @@ public class DrawingSurface {
     }
 
     public void fillOval(double edgeWidth, Color edgeColor, Color col) {
-        Rect b = currentBounds();
+        currentBounds();
         boolean drawEdge = (edgeWidth > 0.0);
 
         if (drawEdge) {
@@ -771,7 +770,7 @@ public class DrawingSurface {
 
     private GeneralPath createQuad(double x1, double y1, double x2, double y2,
         double x3, double y3, double x4, double y4) {
-        Rect b = currentBounds();
+        currentBounds();
         GeneralPath p = new GeneralPath();
         float x;
         float y;
@@ -797,7 +796,7 @@ public class DrawingSurface {
     private GeneralPath createHex(double x1, double y1, double x2, double y2,
         double x3, double y3, double x4, double y4, double x5, double y5,
         double x6, double y6) {
-        Rect b = currentBounds();
+        currentBounds();
         GeneralPath p = new GeneralPath();
         float x;
         float y;
@@ -827,9 +826,6 @@ public class DrawingSurface {
     }
 
     public void fillCube(double edgeWidth, Color edgeColor, Color surfaceColor) {
-        int x;
-        int y;
-        Polygon p;
         boolean drawEdge = (edgeWidth > 0.0);
 
         if (drawEdge) {

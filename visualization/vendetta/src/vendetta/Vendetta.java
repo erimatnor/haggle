@@ -182,7 +182,7 @@ public class Vendetta {
 
 	private static boolean useProxy = true;
 
-	public static String CONFIG_PATH = "./configs/";
+	public static String CONFIG_PATH = "configs/haggledemo/";
 
 	public static String proxyIP;
 	

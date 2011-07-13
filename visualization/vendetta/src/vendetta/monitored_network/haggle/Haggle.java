@@ -10,7 +10,6 @@ package vendetta.monitored_network.haggle;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Map;
@@ -24,8 +23,6 @@ import vendetta.MonitorNode;
 import vendetta.MonitoredNetwork;
 import vendetta.Vendetta;
 import vendetta.util.log.Log;
-import vendetta.visualization.canvases.HaggleCanvas;
-import java.net.*;
 
 /**
  * A Vendetta overlay implementation for managing a WISENET WSN testbed.
@@ -183,10 +180,7 @@ public class Haggle extends MonitoredNetwork {
 		}
 
 		while (sc.hasNextLine()) {
-			String nodeName = "", hostname = "";
-			int nodeId = -1, port = -1;
-			float x = 0.0f, y = 0.0f, z = 0.0f;
-
+			String nodeName = "";
 			try {
 				nodeName = sc.next();
 				if (nodeName.charAt(0) == '#' || nodeName.charAt(0) == '\n') {
@@ -195,13 +189,13 @@ public class Haggle extends MonitoredNetwork {
 					continue;
 				}
 
-				hostname = sc.next();
-				port = sc.nextInt();
-				nodeId = sc.nextInt();
+				sc.next();
+				sc.nextInt();
+				sc.nextInt();
 
-				x = Float.parseFloat(sc.next());
-				y = Float.parseFloat(sc.next());
-				z = Float.parseFloat(sc.next());
+				Float.parseFloat(sc.next());
+				Float.parseFloat(sc.next());
+				Float.parseFloat(sc.next());
 
 				sc.nextLine();
 				lineNumber++;

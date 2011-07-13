@@ -7,33 +7,12 @@
  */
 package vendetta.monitored_network.haggle;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import org.xml.sax.InputSource;
-
 import vendetta.MonitorNode;
 import vendetta.Vendetta;
 
 import vendetta.util.log.Log;
 
 import vendetta.visualization.canvases.HaggleCanvas;
-
-import java.io.*;
-import java.io.StringReader;
-
-import java.net.*;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
-import javax.xml.transform.stream.*;
 
 
 /**
@@ -46,7 +25,8 @@ import javax.xml.transform.stream.*;
  * @author Frederik Hermans (hermans@inf.fu-berlin.de)
  */
 public class HaggleLogHandler {
-    private static Log LOG = Log.getInstance("HaggleLogHandler");
+    @SuppressWarnings("unused")
+	private static Log LOG = Log.getInstance("HaggleLogHandler");
 
     /**
      * The WISENET floor canvas where we do our visualization magic.

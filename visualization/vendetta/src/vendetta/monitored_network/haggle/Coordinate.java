@@ -15,7 +15,8 @@ import java.lang.Math;
 /**
  */
 public class Coordinate {
-    private static Log LOG = Log.getInstance("Coordinate");
+    @SuppressWarnings("unused")
+	private static Log LOG = Log.getInstance("Coordinate");
     public double x;
     public double y;
 

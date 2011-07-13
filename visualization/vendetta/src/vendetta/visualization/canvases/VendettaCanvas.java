@@ -18,27 +18,14 @@
  */
 package vendetta.visualization.canvases;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-
 import vendetta.MonitorNode;
-import vendetta.Vendetta;
-
 import vendetta.util.log.Log;
 
 import java.awt.Canvas;
-import java.awt.GraphicsConfigTemplate;
-import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import javax.swing.Timer;
 
 
@@ -52,7 +39,11 @@ import javax.swing.Timer;
  * @version $Id$
  */
 public abstract class VendettaCanvas extends Canvas {
-    protected static final Log LOG = Log.getInstance("Canvas");
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected static final Log LOG = Log.getInstance("Canvas");
     public static String SCREENSHOT_FILE = "/tmp/Capture.jpg";
     public static String SCREENSHOT_CMD = "scripts/wisenet/copy_screenshot";
     public static int SCREENSHOT_TIME = 60 * 1000;
@@ -63,11 +54,6 @@ public abstract class VendettaCanvas extends Canvas {
      * Is fired when the next screenshot should be taken.
      */
     private Timer screenshotTimer;
-
-    /**
-     * True when a screenshot should be taken on next postSwap()
-     */
-    private boolean doScreenshotNow = false;
 
     /**
      * Create a new VendettaCanvas.
@@ -172,16 +158,11 @@ public abstract class VendettaCanvas extends Canvas {
             screenshotTimer = new Timer(SCREENSHOT_TIME,
                     new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
-                            doScreenshotNow = true;
                             VendettaCanvas.this.repaint();
                         }
                     });
             screenshotTimer.start();
 
-            /*
-             * Trigger the first screenshot now ...
-             */
-            doScreenshotNow = true;
             VendettaCanvas.this.repaint();
         } else {
             if (screenshotTimer != null) {

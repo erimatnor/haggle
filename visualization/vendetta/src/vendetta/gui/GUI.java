@@ -26,7 +26,6 @@ import vendetta.gui.splash.Splash;
 import vendetta.gui.vtable.VTable;
 import vendetta.gui.vtable.VTableModel;
 
-import vendetta.monitored_network.haggle.DataObject;
 import vendetta.monitored_network.haggle.SensorNode;
 
 import vendetta.util.log.Log;

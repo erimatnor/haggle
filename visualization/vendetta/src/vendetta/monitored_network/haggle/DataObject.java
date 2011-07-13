@@ -10,17 +10,12 @@ package vendetta.monitored_network.haggle;
 
 import java.awt.*;
 import java.awt.image.*;
-import java.awt.geom.*;
 import javax.imageio.*;
 import java.io.*;
 
-import java.lang.Math;
 import static java.lang.Math.PI;
-import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import vendetta.util.log.Log;
-import vendetta.visualization.canvases.HaggleCanvas;
-
 import java.util.*;
 import sun.misc.BASE64Decoder;
 /**

@@ -12,13 +12,12 @@ import vendetta.util.log.Log;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
-import java.lang.Math;
-
 
 /**
  */
 public class Rect {
-    private static Log LOG = Log.getInstance("Rect");
+    @SuppressWarnings("unused")
+	private static Log LOG = Log.getInstance("Rect");
     public double left;
     public double top;
     public double right;

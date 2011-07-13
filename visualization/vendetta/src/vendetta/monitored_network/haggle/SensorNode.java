@@ -20,16 +20,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.*;
 
 import org.xml.sax.InputSource;
-import java.io.StringReader;
 import java.io.*;
 import java.net.*;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 import java.util.*;
 import vendetta.util.log.Log;
-import java.awt.geom.*;
 import java.awt.*;
-import java.awt.font.*;
 
 class XMLGetter implements Runnable {
 	private void xmlDebug(String str) {
@@ -150,7 +147,7 @@ class XMLGetter implements Runnable {
 			} else {
 				MyClient = new Socket(ip, 50901);
 			}
-			PrintWriter output = new PrintWriter(MyClient.getOutputStream(),
+			new PrintWriter(MyClient.getOutputStream(),
 					true);
 			BufferedReader input = new BufferedReader(new InputStreamReader(
 					MyClient.getInputStream()));
@@ -247,7 +244,6 @@ public class SensorNode extends MonitorNode {
 	private String nodeName;
 
 	private int nodeId;
-	private String ourIP;
 	private XMLGetter xmlGetter;
 
 	private DOTable DataObjectTable;
@@ -260,7 +256,6 @@ public class SensorNode extends MonitorNode {
 	private static boolean show_poor_metrics = true;
 	private static boolean show_classic_metrics = true;
 	private int ttl;
-	private boolean has_gotten_xml;
 	private boolean centerThisNode;
 
 	// The position as displayed
@@ -307,13 +302,11 @@ public class SensorNode extends MonitorNode {
 		current_pos = new Coordinate(displayed_pos.x, displayed_pos.y);
 		calculated_pos = new Coordinate(displayed_pos.x, displayed_pos.y);
 
-		has_gotten_xml = false;
 		centerThisNode = true;
 
 		this.nodeId = id;
 		this.nodeName = nodeName;
 		this.hostname = null;
-		ourIP = null;
 		show_do_do_links = false;
 		xmlGetter = new XMLGetter();
 
@@ -577,7 +570,6 @@ public class SensorNode extends MonitorNode {
 		updateTTL();
 	}
 
-	@SuppressWarnings({ "unchecked" })
 	public synchronized void handleEvent(String evt) {
 		// System.out.print(evt);
 		try {
@@ -833,7 +825,7 @@ public class SensorNode extends MonitorNode {
 				/ (0.5 - spacing) - 0.5) * 2.0);
 	}
 
-	@SuppressWarnings({ "unchecked" })
+	@SuppressWarnings({ "unchecked", "unused" })
 	public synchronized void doRender(DrawingSurface ds) {
 		int i;
 
@@ -1371,6 +1363,7 @@ public class SensorNode extends MonitorNode {
 		return interface_list;
 	}
 
+	@SuppressWarnings("unused")
 	public synchronized void parseXML(Node root) {
 		try {
 			int i;
@@ -1566,11 +1559,9 @@ public class SensorNode extends MonitorNode {
 			if (relations != null) {
 				parseDebug("Number of relations: " + relations.getLength());
 				for (i = 0; i < relations.getLength(); i++) {
-					float ratio = 0.0f;
-
 					String ratioStr = getTagContent(relations.item(i), "ratio");
 					if (ratioStr != null)
-						ratio = Float.parseFloat(ratioStr);
+						Float.parseFloat(ratioStr);
 
 					NodeList matching_attrs = getSubTags(relations.item(i),
 							"matching_attribute");
@@ -1583,7 +1574,6 @@ public class SensorNode extends MonitorNode {
 						int j, k;
 						String str_do1_num_attrs, str_do2_num_attrs;
 						int do1_num_attrs = 0;
-						int do2_num_attrs = 0;
 						String do1_rowid, do2_rowid;
 
 						for (j = 0; j < dObjs.getLength(); j++) {
@@ -1605,7 +1595,7 @@ public class SensorNode extends MonitorNode {
 											dObjs.item(k), "num_attrs");
 
 									if (str_do2_num_attrs != null)
-										do2_num_attrs = Integer
+										Integer
 												.parseInt(str_do2_num_attrs);
 
 									if (do2_rowid != null) {
@@ -1736,6 +1726,7 @@ public class SensorNode extends MonitorNode {
 		return ij;
 	}
 
+	@SuppressWarnings("unused")
 	private float getMinMetric(String I, String J) {
 		float ij, ji;
 
@@ -1949,7 +1940,6 @@ public class SensorNode extends MonitorNode {
 					}
 				}
 			}
-
 		}
 
 		return retval;
@@ -1974,7 +1964,6 @@ public class SensorNode extends MonitorNode {
 			if (xml != null) {
 				try {
 					parseXML(xml);
-					has_gotten_xml = true;
 				} catch (Exception e) {
 					System.out.println(e);
 					e.printStackTrace();
