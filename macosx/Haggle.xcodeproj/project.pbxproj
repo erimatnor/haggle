@@ -3,14 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		423AD9FD0EE8193100ED758E /* liblibhaggle.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D3CAD56B0E23E40E00E9B3D9 /* liblibhaggle.a */; };
 		423ADA110EE81C4E00ED758E /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D3CAD5850E23E61000E9B3D9 /* libxml2.dylib */; };
 		423ADA120EE81C5800ED758E /* libpthread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D3CAD5870E23E63800E9B3D9 /* libpthread.dylib */; };
-		423B096A0F4A277000D04E7B /* libssl.0.9.7.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 423B09690F4A277000D04E7B /* libssl.0.9.7.dylib */; };
 		425C159C0E79406400D9D1AB /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 425C159B0E79406400D9D1AB /* IOKit.framework */; };
 		42829F080E76FD3200AC9875 /* libhaggleutils.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D3CAD5590E23E37B00E9B3D9 /* libhaggleutils.a */; };
 		42BC121B0E902EDD00C7D7ED /* filedropMacOSX.c in Sources */ = {isa = PBXBuildFile; fileRef = 42BC121A0E902EDD00C7D7ED /* filedropMacOSX.c */; };
@@ -461,7 +460,6 @@
 				425C159C0E79406400D9D1AB /* IOKit.framework in Frameworks */,
 				D3F44FD30E83F497005981E6 /* libcpphaggle.a in Frameworks */,
 				D39264750F44F25E0014F6B6 /* libcrypto.dylib in Frameworks */,
-				423B096A0F4A277000D04E7B /* libssl.0.9.7.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1193,8 +1191,12 @@
 /* Begin PBXProject section */
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0410;
+			};
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "Haggle" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				en,
@@ -1413,7 +1415,6 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1447,7 +1448,7 @@
 				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Haggle;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = YES;
 			};
@@ -1457,7 +1458,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../src/utils",
@@ -1481,6 +1481,7 @@
 					"-DENABLE_BLUETOOTH",
 				);
 				PRODUCT_NAME = Haggle;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -1511,8 +1512,7 @@
 				OTHER_CFLAGS = "";
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1533,8 +1533,7 @@
 				OTHER_CFLAGS = "";
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -1544,7 +1543,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = ../src/libhaggle/include;
@@ -1556,8 +1554,8 @@
 					"-DDEBUG_LEAKS",
 					"-DOS_MACOSX",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = luckyMe;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1567,7 +1565,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_CFLAGS = (
@@ -1575,8 +1572,8 @@
 					"-DOS_MACOSX",
 				);
 				OTHER_CPLUSPLUSFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = webserver;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1588,7 +1585,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
@@ -1610,8 +1606,8 @@
 					"-DDEBUG",
 					"-DOS_MACOSX",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = filedrop;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1621,7 +1617,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = (
 					../src/hagglekernel,
@@ -1636,8 +1631,8 @@
 					"-g",
 					"-DOS_MACOSX",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = filedrop;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1649,7 +1644,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
@@ -1667,8 +1661,8 @@
 					"-DDEBUG_LEAKS",
 					"-DOS_MACOSX",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = webserver;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1678,7 +1672,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = (
 					../src/hagglekernel,
@@ -1694,8 +1687,8 @@
 					"-DOS_MACOSX",
 				);
 				OTHER_CPLUSPLUSFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = webserver;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1720,8 +1713,8 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = haggleutils;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1731,7 +1724,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				HEADER_SEARCH_PATHS = (
 					../src/utils,
 					/usr/include/libxml2/,
@@ -1742,8 +1734,8 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = haggleutils;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1769,8 +1761,8 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = libhaggle;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1780,7 +1772,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../src/utils",
 					"$(PROJECT_DIR)/../src/libhaggle/include",
@@ -1793,8 +1784,8 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = libhaggle;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1806,7 +1797,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
@@ -1819,8 +1809,8 @@
 					"-g",
 					"-DDEBUG",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = smtpproxy;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1830,7 +1820,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = (
 					src/libhaggle/include,
@@ -1839,8 +1828,8 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = smtpproxy;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1852,7 +1841,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
@@ -1866,8 +1854,8 @@
 					"-DDEBUG",
 				);
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = popproxy;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1877,7 +1865,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = (
 					src/utils,
@@ -1887,8 +1874,8 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = popproxy;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1900,7 +1887,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = (
@@ -1919,8 +1905,8 @@
 					"-DDEBUG_LEAKS",
 					"-DOS_MACOSX",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = haggleproxy;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1930,7 +1916,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = (
 					src/utils,
@@ -1944,8 +1929,8 @@
 					"-DOS_MACOSX",
 				);
 				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
 				PRODUCT_NAME = haggleproxy;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -1958,7 +1943,6 @@
 				COPY_PHASE_STRIP = NO;
 				EXECUTABLE_PREFIX = "";
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -1981,12 +1965,12 @@
 					"-DDEBUG",
 					"-DDEBUG_LEAKS",
 				);
-				PREBINDING = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_NAME = libcpphaggle;
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 			};
 			name = Debug;
@@ -1998,7 +1982,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				EXECUTABLE_PREFIX = "";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
@@ -2010,12 +1993,12 @@
 				LIBRARY_SEARCH_PATHS = ../src/utils;
 				OTHER_CFLAGS = "-DOS_MACOSX";
 				OTHER_CPLUSPLUSFLAGS = "-DOS_MACOSX";
-				PREBINDING = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_NAME = libcpphaggle;
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
+				SDKROOT = macosx;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
