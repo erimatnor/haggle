@@ -1,6 +1,10 @@
 AC_INIT([haggle], [0.4], [haggle-developer@googlegroups.com])
 AC_CANONICAL_SYSTEM
 
+# Use the silent-rules feature when possible.
+m4_ifndef([AM_SILENT_RULES], [m4_define([AM_SILENT_RULES],[])])
+AM_SILENT_RULES([yes])
+
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
@@ -528,7 +532,7 @@ AC_ARG_WITH(java-home,
 	    [JAVA_HOME=$withval],)
 
 dnl Default to some qualified path guessing...
-java_dirs="/usr /usr/local /usr/lib/jvm/java-5-sun /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java /System/Library/Frameworks/JavaVM.framework/Versions/Current /System/Library/Frameworks/JavaVM.framework /opt /mingw"
+java_dirs="/usr /usr/local /usr/lib/jvm/java-7-openjdk /usr/lib/jvm/java-7-openjdk-amd64 /usr/lib/jvm/java-7-openjdk-i386 /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-openjdk-amd64 /usr/lib/jvm/java-6-openjdk-i386 /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-5-sun /usr/lib/jvm/java /System/Library/Frameworks/JavaVM.framework/Versions/Current /System/Library/Frameworks/JavaVM.framework /opt /mingw"
 java_inc_dirs="include include/libgcj Headers"
 
 AC_CHECK_PROG(JAVA, javac, javac)

@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 /* Copyright 2008-2009 Uppsala University
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1316,6 +1317,12 @@ int ConnectivityLocalLinux::read_hci()
 
 	len = read(hcih.sock, buf, HCI_MAX_FRAME_SIZE);
 
+        if (len < 0) {
+                HAGGLE_ERR("Could not read HCI socket: %s\n",
+                           strerror(errno));
+                return len;
+        }
+
 	type = buf[0];
 
 	if (type != HCI_EVENT_PKT) {
@@ -1332,8 +1339,11 @@ int ConnectivityLocalLinux::read_hci()
                 
                 ret = hci_devinfo(sd->dev_id, &di);
 
-                // TODO: Should check return value
-                
+		if (ret < 0) {
+                        HAGGLE_ERR("hci_devinfo failed\n");
+                        return ret;
+		}
+
 		switch (sd->event) {
 		case HCI_DEV_REG:
 			HAGGLE_DBG("HCI dev %d registered\n", sd->dev_id);
