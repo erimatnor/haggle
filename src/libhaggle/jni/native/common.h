@@ -7,7 +7,7 @@
 #include <libhaggle/node.h>
 #include <jni.h>
 
-#if defined(OS_ANDROID)
+#if defined(ANDROID)
 #define JNI_ENV(env) (env)
 #else
 #define JNI_ENV(env) (void **)(env)

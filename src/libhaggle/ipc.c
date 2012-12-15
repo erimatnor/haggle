@@ -1504,7 +1504,8 @@ int haggle_event_loop_stop(haggle_handle_t hh)
  Returns less than 1 on error, or 0 or 1 on success.
  If the return value is -1 or 0 the data object should be freed, if the value is 1 or greater it should not be freed.
 */
-static int handle_event(struct haggle_handle *hh, haggle_event_type_t type, struct dataobject *dobj, metadata_t *app_m, metadata_t *event_m)
+static int handle_event(struct haggle_handle *hh, haggle_event_type_t type, 
+                        struct dataobject *dobj, metadata_t *app_m, metadata_t *event_m)
 {
 	haggle_event_t e;
 	int ret = 0;
@@ -1775,7 +1776,9 @@ int haggle_event_loop_run_async(haggle_handle_t hh)
 	return HAGGLE_NO_ERROR;
 }
 
-int haggle_event_loop_register_callbacks(haggle_handle_t hh, haggle_event_loop_start_t start, haggle_event_loop_stop_t stop, void *arg)
+int haggle_event_loop_register_callbacks(haggle_handle_t hh, 
+                                         haggle_event_loop_start_t start, 
+                                         haggle_event_loop_stop_t stop, void *arg)
 {
         if (!hh || (!start && !stop))
                 return -1;
