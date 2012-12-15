@@ -1,5 +1,7 @@
 package org.haggle.kernel;
 
+import java.lang.ref.WeakReference;
+
 import org.haggle.kernel.R;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -45,7 +47,7 @@ public class StatusView extends Activity {
 		
 		Log.d("Haggle::StatusView", "onCreate()");
 		
-		mHaggleEventHandler = new HaggleEventHandler();
+		mHaggleEventHandler = new HaggleEventHandler(mHaggleService);
 		mMessenger = new Messenger(mHaggleEventHandler);
 		
 		mConnection = new ServiceConnection() {
@@ -82,17 +84,17 @@ public class StatusView extends Activity {
 	    }
 	}
 
-	class HaggleEventHandler extends Handler {
+	static class HaggleEventHandler extends Handler {
+		private final WeakReference<Haggle> mService;
+		
+		HaggleEventHandler(Haggle haggle) {
+			mService = new WeakReference<Haggle>(haggle);
+		}
 		public void handleMessage(Message msg) {
-			//Log.d(LUCKY_VIEW_TAG, "Got a message type " + msg.what);
-			
-			if (mHaggleService == null) {
+			if (mService.get() == null) {
 				Log.d("Haggle", "handleMessage: mHaggleService is null");
 				return;
 			}
-			/*
-			 * Handle the message coming from LuckyService.
-			 */
 			switch (msg.what) {
 			default:
 				break;

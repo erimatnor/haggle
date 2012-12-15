@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.DataInputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,6 +38,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AbsSpinner;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Gallery;
@@ -625,6 +627,15 @@ public class PhotoView extends Activity implements OnClickListener {
     		Log.d(PhotoShare.LOG_TAG, "data updater done");
         }
     }
+
+    static class GalleryHandler extends Handler {
+    	final WeakReference<Gallery> mGallery;
+    	
+    	GalleryHandler(Gallery g) {
+    		mGallery = new WeakReference<Gallery>(g);
+    	}
+    }
+    
     class ImageAdapter extends BaseAdapter {
         int mGalleryItemBackground;
         public Context mContext;
@@ -691,12 +702,12 @@ public class PhotoView extends Activity implements OnClickListener {
         	notifyDataSetChanged();
         }
 
-        public final Handler handler = new Handler() {
+        public final GalleryHandler handler = new GalleryHandler(gallery) {
             public void handleMessage(Message msg) {
-                //progressDialog.setProgress(total);
-
+            	Gallery g = mGallery.get();
+            	
             	synchronized (this) {
-            		gallery.setSelection(dataObjects.size() - 1, true);
+            		g.setSelection(dataObjects.size() - 1, true);
             	}
             	notifyDataSetChanged();
             }
