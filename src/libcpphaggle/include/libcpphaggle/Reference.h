@@ -489,14 +489,14 @@ class ReferenceList : public List<Reference<T> >
         ReferenceList() {}
         ReferenceList(const Reference<T>& item) : List<Reference<T> >()
 	{
-		push_back(item);
+	         this->push_back(item);
 	}
         ReferenceList(const ReferenceList<T> & eoList) : List<Reference<T> >()
 	{
 		typename List<Reference<T> >::const_iterator it;
 		
                 for (it = eoList.begin(); it != eoList.end(); it++) {
-                        push_back(*it);
+                       this->push_back(*it);
                 }
         }
         ~ReferenceList() {}
