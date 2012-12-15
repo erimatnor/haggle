@@ -1,14 +1,14 @@
 # This target is the final Haggle executable
-bin_PROGRAMS:=haggle
-haggle_SOURCES:=main.cpp
-haggle_DEPENDENCIES:=$(top_srcdir)/config.h libhagglekernel.a $(top_builddir)/src/utils/libhaggleutils.a $(top_builddir)/src/libcpphaggle/libcpphaggle.a
-haggle_LDFLAGS :=libhagglekernel.a $(top_builddir)/src/utils/libhaggleutils.a $(top_builddir)/src/libcpphaggle/libcpphaggle.a -lm -lcrypto -lsqlite3 $(XML_LIBS)
-haggle_CXXFLAGS :=$(CXXFLAGS)
-haggle_CPPFLAGS :=$(XML_CPPFLAGS) -I$(top_srcdir)/src/utils -I$(top_srcdir)/src/libcpphaggle/include -I$(top_srcdir)/src/libhaggle/include
-haggle_LDADD:=
+bin_PROGRAMS =haggle
+haggle_SOURCES =main.cpp
+haggle_DEPENDENCIES =$(top_srcdir)/config.h libhagglekernel.a $(top_builddir)/src/utils/libhaggleutils.a $(top_builddir)/src/libcpphaggle/libcpphaggle.a
+haggle_LDFLAGS =libhagglekernel.a $(top_builddir)/src/utils/libhaggleutils.a $(top_builddir)/src/libcpphaggle/libcpphaggle.a -lm -lcrypto -lsqlite3 $(XML_LIBS)
+haggle_CXXFLAGS =$(CXXFLAGS)
+haggle_CPPFLAGS =$(XML_CPPFLAGS) -I$(top_srcdir)/src/utils -I$(top_srcdir)/src/libcpphaggle/include -I$(top_srcdir)/src/libhaggle/include
+haggle_LDADD =
 
 # This target is an intermediate library, that can be reused by the testsuite
-noinst_LIBRARIES:=libhagglekernel.a
+noinst_LIBRARIES=libhagglekernel.a
 libhagglekernel_a_SOURCES = \
 	Filter.cpp \
 	Event.cpp \
@@ -26,7 +26,6 @@ libhagglekernel_a_SOURCES = \
 	SQLDataStore.cpp \
 	Metadata.cpp \
 	XMLMetadata.cpp \
-	MetadataParser.cpp \
 	HaggleKernel.cpp \
 	ConnectivityInterfacePolicy.cpp \
 	Queue.cpp \
@@ -116,7 +115,6 @@ EXTRA_DIST= Attribute.h \
 	Manager.h \
 	ManagerModule.h \
 	Metadata.h \
-	MetadataParser.h \
 	Node.h \
 	NodeManager.h \
 	SecurityManager.h \
@@ -145,8 +143,8 @@ EXTRA_DIST= Attribute.h \
 	Doxyfile.in \
 	hagglesim
 
-libhagglekernel_a_CPPFLAGS:=$(haggle_CPPFLAGS)
-#libhagglekernel_a_LIBADD:=
+libhagglekernel_a_CPPFLAGS=$(haggle_CPPFLAGS)
+#libhagglekernel_a_LIBADD=
 
 if HAVE_EXCEPTION
 haggle_CXXFLAGS +=-DHAVE_EXCEPTION=1
@@ -192,7 +190,7 @@ endif # OS_LINUX
 
 # Objective C++ sources for Mac OS X APIs
 OBJCXX_SRC = ProtocolRFCOMMMacOSX.mm
-OBJCXX_SRC_CPP := $(OBJCXX_SRC:%.mm=%.cpp)
+OBJCXX_SRC_CPP = $(OBJCXX_SRC:%.mm=%.cpp)
 
 # Link the objective C++ source (.mm) to a .cpp file. Automake does
 # not seem to recognize Objective C++ files.
@@ -217,10 +215,10 @@ libhagglekernel_a_SOURCES += ConnectivityBluetooth.cpp ConnectivityBluetoothMacO
 noinst_LIBRARIES += libmacosxobjc.a
 haggle_DEPENDENCIES += libmacosxobjc.a
 
-libmacosxobjc_a_SOURCES := ProtocolRFCOMMMacOSX.cpp
+libmacosxobjc_a_SOURCES = ProtocolRFCOMMMacOSX.cpp
 libmacosxobjc_a_DEPENDENCIES=$(top_srcdir)/config.h
 
-libmacosxobjc_a_CPPFLAGS :=$(haggle_CPPFLAGS) -x objective-c++ 
+libmacosxobjc_a_CPPFLAGS =$(haggle_CPPFLAGS) -x objective-c++ 
 #libmacosxobjc_a_CXXFLAGS = 
 haggle_LDADD += libmacosxobjc.a
 haggle_LDFLAGS +=-framework IOBluetooth -framework Foundation
@@ -285,8 +283,6 @@ $(top_builddir)/bin/$(PROGRAMS): $(PROGRAMS)
 
 all-local: $(top_builddir)/bin/$(PROGRAMS)
 
-indent:
-	indent -kr -i8 $(wildcard *.cpp) $(wildcard *.h)
 
 clean-local:
 	rm -f *~

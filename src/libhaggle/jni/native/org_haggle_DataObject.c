@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 #include "org_haggle_DataObject.h"
 #include "javaclass.h"
 #include "common.h"

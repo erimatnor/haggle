@@ -1,3 +1,4 @@
+AUTOMAKE_OPTIONS = -Wno-portability
 SUBDIRS = java/org/haggle native .
 JARFILE = org.haggle.jar
 MANIFEST = Manifest.txt

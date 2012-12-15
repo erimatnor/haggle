@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 /* base64.h -- Encode binary data using printable characters.
    Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Simon Josefsson.

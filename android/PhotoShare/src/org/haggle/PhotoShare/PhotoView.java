@@ -10,6 +10,7 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -95,6 +96,7 @@ public class PhotoView extends Activity implements OnClickListener {
 	        dis.read(buf, 0, 9);	// expecting #AARRGGBB
 	        String color = new String(buf);
 	        neighlistHeader.setBackgroundColor(Color.parseColor(color));
+	        dis.close();
         } catch (Exception e) {
         	Log.d(PhotoShare.LOG_TAG, "set color failed: " + e);	
         }
@@ -148,38 +150,57 @@ public class PhotoView extends Activity implements OnClickListener {
     @Override
     public void onStart() {
     	super.onStart();
+    	final ProgressDialog dialog = new ProgressDialog(this, 
+				ProgressDialog.STYLE_HORIZONTAL);
+		dialog.setMessage("Connecting to Haggle...");
+		dialog.setIndeterminate(true);
     	
     	Log.d(PhotoShare.LOG_TAG, "PhotoView:onStart() freemem=" +  Runtime.getRuntime().freeMemory());	
     	
     	if (shouldRegisterWithHaggle) {
+    		dialog.show();
     		
-    		int ret = ps.initHaggle();
+    		new Thread(new Runnable() {
+				@Override
+				public void run() {
+					final int ret = ps.initHaggle();
 
-    		if (ret != PhotoShare.STATUS_OK) {
-    			String errorMsg = "Unknown error.";
+					dialog.dismiss();
+					
+		    		if (ret != PhotoShare.STATUS_OK) {
+		    			
+		    			Log.d(PhotoShare.LOG_TAG, "Registration failed, showing alert dialog");
+		    			
+		    			PhotoView.this.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								String errorMsg = "Unknown error.";
+				    			
+				    			if (ret == PhotoShare.STATUS_SPAWN_DAEMON_FAILED) {
+				    				errorMsg = "PhotoShare could not start Haggle daemon.";
+				    			} else if (ret == PhotoShare.STATUS_REGISTRATION_FAILED) {
+				    				errorMsg = "PhotoShare could not connect to Haggle.";
+				    			}
+				    			AlertDialog.Builder builder = new AlertDialog.Builder(PhotoView.this);
+								builder.setMessage(errorMsg)
+				    			.setCancelable(false)
+				    			.setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+				    				public void onClick(DialogInterface dialog, int id) {
+				    					dialog.cancel();
+				    					finish();
+				    				}
+				    			});
+				    			AlertDialog alert = builder.create();
+				    			alert.show();
+							}
+		    			});
+		    		} else {
+		    			Log.d(PhotoShare.LOG_TAG, "Registration with Haggle successful");
+		    	    	shouldRegisterWithHaggle = false;
+		    		}
+				}
     			
-    			if (ret == PhotoShare.STATUS_SPAWN_DAEMON_FAILED) {
-    				errorMsg = "PhotoShare could not start Haggle daemon.";
-    			} else if (ret == PhotoShare.STATUS_REGISTRATION_FAILED) {
-    				errorMsg = "PhotoShare could not connect to Haggle.";
-    			}
-    			Log.d(PhotoShare.LOG_TAG, "Registration failed, showing alert dialog");
-    			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    			builder.setMessage(errorMsg)
-    			.setCancelable(false)
-    			.setNegativeButton("Quit", new DialogInterface.OnClickListener() {
-    				public void onClick(DialogInterface dialog, int id) {
-    					dialog.cancel();
-    					finish();
-    				}
-    			});
-    			AlertDialog alert = builder.create();
-    			alert.show();
-
-    		}  else {
-    			Log.d(PhotoShare.LOG_TAG, "Registration with Haggle successful");
-    	    	shouldRegisterWithHaggle = false;
-    		}
+    		}).start();
     	}
     }
     

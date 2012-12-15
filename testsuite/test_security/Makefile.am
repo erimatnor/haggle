@@ -3,11 +3,11 @@
 HAGGLE_KERNEL_DIR=$(top_srcdir)/src/hagglekernel/
 UTILS_DIR=$(top_srcdir)/src/utils/
 LIBCPPHAGGLE_DIR=$(top_srcdir)/src/libcpphaggle/
-CPPFLAGS += -I$(HAGGLE_KERNEL_DIR) -I$(UTILS_DIR) -I$(LIBCPPHAGGLE_DIR)include/ -I.. $(XML_CPPFLAGS)
-LDFLAGS = $(XML_LIBS) -lcrypto
+AM_CPPFLAGS = -I$(HAGGLE_KERNEL_DIR) -I$(UTILS_DIR) -I$(LIBCPPHAGGLE_DIR)include/ -I.. $(XML_CPPFLAGS)
+AM_LDFLAGS = $(XML_LIBS) -lcrypto
 
 if OS_LINUX
-LDFLAGS += -lpthread
+AM_LDFLAGS += -lpthread
 endif
 
 bin_PROGRAMS=certificate
@@ -25,7 +25,7 @@ LDADD+=$(LIBCPPHAGGLE_DIR)libcpphaggle.a
 LDADD+=../libtesthlp.a
 
 if OS_MACOSX
-LDFLAGS += -framework IOKit -framework CoreFoundation -framework CoreServices
+AM_LDFLAGS += -framework IOKit -framework CoreFoundation -framework CoreServices
 endif
 
 test: testcertificate

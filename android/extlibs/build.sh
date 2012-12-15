@@ -24,6 +24,7 @@ BOARD_HAVE_BLUETOOTH=true
 GIT_PROTOCOL=http
 ANDROID_SOURCE_HOST=android.googlesource.com
 GIT_TAG=android-2.3.7_r1
+APP_ABI="armeabi armeabi-v7a"
 
 echo
 echo "Tips:"
@@ -37,7 +38,7 @@ echo
 
 read
 
-export NDK_PROJECT_PATH BOARD_HAVE_BLUETOOTH
+export NDK_PROJECT_PATH BOARD_HAVE_BLUETOOTH APP_ABI
 
 mkdir -p external
 
@@ -124,4 +125,4 @@ fi
 
 pushd
 
-$NDK_BUILD "$@"
+$NDK_BUILD APP_ABI="$APP_ABI" "$@" 

@@ -1,0 +1,13 @@
+<project name="PhotoShare">
+  <target name="-pre-build">
+    <copy file="../../src/libhaggle/jni/org.haggle.jar" todir="libs" overwrite="yes" failonerror="no"/>
+    
+    <fail message="libhaggle Java bindings not found. Make sure you compile the libhaggle Java bindings before building this app.">
+      <condition>
+	<not>
+	  <available file="libs/org.haggle.jar"/>
+	</not>
+      </condition>
+    </fail>
+  </target>
+</project>

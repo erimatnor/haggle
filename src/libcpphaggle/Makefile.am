@@ -22,15 +22,18 @@ EXTRA_DIST = \
 	include/libcpphaggle/Watch.h \
 	Android.mk
 
+
 if HAVE_EXCEPTION
-CXXFLAGS +=-DHAVE_EXCEPTION=1
+libcpphaggle_a_CXXFLAGS =-DHAVE_EXCEPTION=1
 else
-CXXFLAGS +=-DHAVE_EXCEPTION=0 -fno-exceptions -fno-non-call-exceptions
+libcpphaggle_a_CXXFLAGS =-DHAVE_EXCEPTION=0 -fno-exceptions -fno-non-call-exceptions
 endif
 
 libcpphaggle_a_LIBADD=$(top_srcdir)/src/utils/libhaggleutils.a
 
-CPPFLAGS += -I$(top_srcdir)/src/utils -Iinclude
+libcpphaggle_a_CPPFLAGS = \
+	-I$(top_srcdir)/src/utils \
+	-Iinclude
 
 clean-local:
 	rm -f *~

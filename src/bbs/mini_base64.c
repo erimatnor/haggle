@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include "mini_base64.h"
-#include "base64.h"
+#include <base64.h>
 
 data_buffer mini_base64_encode(char *data, size_t len)
 {

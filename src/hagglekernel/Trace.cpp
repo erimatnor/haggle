@@ -18,6 +18,8 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #if defined(OS_ANDROID)
 #include <android/log.h>
@@ -36,8 +38,8 @@ Trace::Trace(TraceType_t _type, bool _enabled) :
 Trace::~Trace()
 {
 	if (traceFile) {
-		fclose(traceFile);
-		traceFile = NULL;
+	    fclose(traceFile);
+	    traceFile = NULL;
 	}
 }
 
@@ -143,6 +145,11 @@ bool Trace::enableFileTrace(const string path)
 			fpath.c_str(), STRERROR(ERRNO));
 		return false;
 	}
+
+	if (chmod(fpath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1) {
+	    HAGGLE_ERR("chmod: %s\n", strerror(errno));
+	}
+
 	return true;
 }
 
@@ -152,7 +159,6 @@ bool Trace::disableFileTrace()
 		return false;
 
 	fclose(traceFile);
-
 	traceFile = NULL;
 
 	return true;
@@ -214,6 +220,11 @@ bool LogTrace::open(const string name)
 	} else {
 		fprintf(stderr,"Unable to open log file!\n");
 		return false;
+	}
+
+	if (chmod(filename.c_str(), 
+		  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1) {
+	    HAGGLE_ERR("chmod: %s\n", strerror(errno));
 	}
 
 	return true;

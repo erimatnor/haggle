@@ -39,6 +39,7 @@ public class StatusView extends Activity {
 				
 				mStopButton.setEnabled(false);
 				Toast.makeText(getBaseContext(), "Haggle stopped...", Toast.LENGTH_SHORT).show();
+				finish();
 			}
 		});
 		

@@ -443,7 +443,7 @@ bool create_path(const char *p)
 	}
 	
 	// Check to see if the directory above it exists
-	if (stat(prefix.c_str(), &sbuf) == 0) {
+	if (stat(prefix.c_str(), &sbuf) == -1) {
 		switch (errno) {
 			// Access violation - unable to write here:
 			case EACCES:
@@ -468,7 +468,7 @@ bool create_path(const char *p)
 				}
 			break;
 		}
-	}
+	} 
 	// The directory above this one now exists - create the desired directory:
 	if (mkdir(path.c_str(), 
 		// This means: 755.
@@ -476,6 +476,11 @@ bool create_path(const char *p)
 		// mkdir failed. Fail:
 		return false;
 	}
+#if defined(OS_ANDROID)
+	HAGGLE_DBG("setting perm to 755 for %s\n", path.c_str());
+	chmod(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+#endif
+
 #endif
 	// Success:
 	return true;

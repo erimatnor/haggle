@@ -230,6 +230,7 @@ static int write_pid_file(const pid_t pid)
 		HAGGLE_ERR("Could not create directory path \'%s\'\n", DEFAULT_DATASTORE_PATH);
 		return false;
 	}
+
         FILE *fp = fopen(pidfile.c_str(), "r");
 
 	if (fp) {
@@ -285,6 +286,10 @@ static int write_pid_file(const pid_t pid)
         size_t ret = fwrite(buf, strlen(buf), 1, fp);
         
         fclose(fp);
+
+	if (chmod(pidfile.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1) {
+	    HAGGLE_ERR("chmod: %s\n", strerror(errno));
+	}
 
         if (ret != 1)
                 return HAGGLE_PROCESS_CANNOT_WRITE_PID;

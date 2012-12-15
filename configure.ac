@@ -6,12 +6,18 @@ AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
+# Use the silent-rules feature when possible.
+m4_ifndef([AM_SILENT_RULES], [m4_define([AM_SILENT_RULES],[])])
+AM_SILENT_RULES([yes])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_CPP
+AM_PROG_AR
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
+AM_PROG_CC_C_O
 
 # Basic compiler flag configuration
 # Enforce no usage of runtime type identification (RTTI)
@@ -85,11 +91,15 @@ fi
 if test x$haggle_os_macosx = xtrue
 then
 	CPPFLAGS="${CPPFLAGS} -DOS_MACOSX"
+	CFLAGS="${CFLAGS} -Wno-deprecated-declarations"
+	CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations"
 fi
 
 if test x$haggle_os_iphoneos = xtrue
 then
 	CPPFLAGS="${CPPFLAGS} -DOS_IPHONEOS"
+	CFLAGS="${CFLAGS} -Wno-deprecated-declarations"
+	CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations"
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.

@@ -1,5 +1,4 @@
 #include "XMLMetadata.h"
-#include "MetadataParser.h"
 
 #include <string.h>
 
@@ -106,14 +105,9 @@ bool XMLMetadata::parseXML(xmlNodePtr xn)
                         
                 } 
         }
-#if defined(ENABLE_METADATAPARSER)
-        MetadataParser *mp = MetadataParser::getParser(name);
-
-        if (mp)
-                return mp->onParseMetadata(this);
-#endif
         return true;
 }
+
 bool XMLMetadata::addMetadata(Metadata *m)
 {
         return _addMetadata(m);

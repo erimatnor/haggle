@@ -3,10 +3,10 @@
 HAGGLE_KERNEL_DIR=$(top_srcdir)/src/hagglekernel/
 UTILS_DIR=$(top_srcdir)/src/utils/
 LIBCPPHAGGLE_DIR=$(top_srcdir)/src/libcpphaggle/
-CPPFLAGS += -I$(HAGGLE_KERNEL_DIR) -I$(UTILS_DIR) -I$(LIBCPPHAGGLE_DIR)include/ -I..
-LDFLAGS = -lxml2
+AM_CPPFLAGS = -I$(HAGGLE_KERNEL_DIR) -I$(UTILS_DIR) -I$(LIBCPPHAGGLE_DIR)include/ -I..
+AM_LDFLAGS = -lxml2
 if OS_LINUX
-LDFLAGS += -lpthread
+AM_LDFLAGS += -lpthread
 endif
 
 bin_PROGRAMS=createthread jointhread cancelthread stopthread stackmanagement cancelthreadsocket
@@ -33,7 +33,7 @@ LDADD+=$(LIBCPPHAGGLE_DIR)libcpphaggle.a
 LDADD+=../libtesthlp.a
 
 if OS_MACOSX
-LDFLAGS += -framework CoreServices
+AM_LDFLAGS += -framework CoreServices
 endif
 
 test: testcreate testjoin testcancel teststop teststackmanagement testcancelthreadsocket

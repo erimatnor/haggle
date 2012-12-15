@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 #include "org_haggle_Handle.h"
 #include "javaclass.h"
 
@@ -164,7 +165,7 @@ static void on_event_loop_start(void *arg)
    on platform. We use this define just to avoid compiler warnings.
  */
 	if (!data || data->is_async) {
-		if ((*jvm)->AttachCurrentThread(jvm, &env, NULL) != JNI_OK) {
+	    if ((*jvm)->AttachCurrentThread(jvm, JNI_ENV(&env), NULL) != JNI_OK) {
 			fprintf(stderr, "libhaggle_jni: Could not attach thread\n");
 			return;
 		}
@@ -748,10 +749,10 @@ JNIEXPORT jlong JNICALL Java_org_haggle_Handle_getDaemonPid(JNIEnv *env, jclass 
 	int ret = haggle_daemon_pid(&pid);
 
         /* Check if Haggle is running */
-        if (ret == 1)
+        if (ret == HAGGLE_DAEMON_RUNNING)
                 return (jlong)pid;
 
-        return (jlong)ret;
+        return (jlong)-1;
 }
 
 static jobject spawn_object;

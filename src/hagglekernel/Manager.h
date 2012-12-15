@@ -28,7 +28,6 @@ class Manager;
 
 #include "Event.h"
 #include "Metadata.h"
-#include "MetadataParser.h"
 #include "HaggleKernel.h"
 #include "ManagerModule.h"
 #include "HaggleKernel.h"
@@ -37,17 +36,7 @@ using namespace haggle;
 
 extern HaggleKernel *haggleKernel;
 
-/*
-  For some reason, Windows (mobile) does not handle multiple
-  inheritence properly. If 'Manager' derives from both EventHandler
-  and MetadataParser it seems the windows compiler cannot resolve
-  virtual functions that are overridden in the specific managers that
-  derive from the 'Manager' class..
- */
 class Manager : public EventHandler
-#if defined(ENABLE_METADATAPARSER)
-	, public MetadataParser
-#endif
 {
 protected:
 	typedef enum {

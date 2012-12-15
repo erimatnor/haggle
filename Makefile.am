@@ -1,4 +1,4 @@
-SUBDIRS :=
+SUBDIRS =
 ACLOCAL_AMFLAGS =-I m4 -I /usr/share/aclocal
 # Extra libraries should be compiled first
 if BUNDLED_SQLITE
@@ -30,7 +30,7 @@ docdir = doc
 
 if DOCS
 
-DOC_DIRS := \
+DOC_DIRS = \
 	src/hagglekernel \
 	src/libcpphaggle \
 	src/libhaggle
@@ -44,7 +44,7 @@ docs:
 	done
 endif
 
-tes%:
+test:
 	$(MAKE) -C testsuite $@
 
 clean-local:
