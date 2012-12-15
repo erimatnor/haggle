@@ -45,7 +45,8 @@ static callback_data_t *callback_list_get(haggle_handle_t hh, int type)
 }
 
 
-static callback_data_t *callback_list_insert(haggle_handle_t hh, int type, JNIEnv *env, jobject obj)
+static callback_data_t *callback_list_insert(haggle_handle_t hh, int type, 
+                                             JNIEnv *env, jobject obj)
 {
         callback_data_t *cd;
         jclass cls;
@@ -98,7 +99,9 @@ static int callback_list_erase_all_with_handle(haggle_handle_t hh)
         return n;
 }
 
-JNIEXPORT void JNICALL Java_org_haggle_Handle_setDataPath(JNIEnv *env, jclass cls, jstring path)
+JNIEXPORT void JNICALL Java_org_haggle_Handle_setDataPath(JNIEnv *env, 
+                                                          jclass cls, 
+                                                          jstring path)
 {
 	const char *path_str;
   
@@ -122,7 +125,9 @@ struct event_loop_data {
 	JNIEnv *thr_env;
 };
 
-static struct event_loop_data *event_loop_data_create(JNIEnv *env, int is_async, jobject obj)
+static struct event_loop_data *event_loop_data_create(JNIEnv *env, 
+                                                      int is_async, 
+                                                      jobject obj)
 {
 	struct event_loop_data *data;
 	jclass cls;
@@ -165,7 +170,8 @@ static void on_event_loop_start(void *arg)
    on platform. We use this define just to avoid compiler warnings.
  */
 	if (!data || data->is_async) {
-	    if ((*jvm)->AttachCurrentThread(jvm, JNI_ENV(&env), NULL) != JNI_OK) {
+
+                if ((*jvm)->AttachCurrentThread(jvm, JNI_ENV(&env), NULL) != JNI_OK) {
 			fprintf(stderr, "libhaggle_jni: Could not attach thread\n");
 			return;
 		}
